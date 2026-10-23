@@ -1,0 +1,1844 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
+<script>window.MSB_EMBED = true;</script>
+</head>
+<body>
+<title>Şehadet Atlası</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Yerleşim: tam ekran gece haritası, her şehit bir yıldız. Üstte künye ve görünümler, solda altta araçlar, sağda levha. Tek bir gece dünyası: bilinçli olarak yalnız koyu tema. */
+:root {
+  --night: #04060a;
+  --night-2: #0a0d13;
+  --ink: #ece4d3;
+  --dim: #9a8f7c;
+  --gold: #e0b968;
+  --ember: #e2674c;
+  --ash: #8e96a5;
+  --line: rgba(224, 185, 104, 0.22);
+  --line-2: rgba(224, 185, 104, 0.45);
+  --glass: rgba(8, 9, 12, 0.8);
+  --f-display: "Cinzel", "Trajan Pro", Georgia, serif;
+  --f-serif: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  --f-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { background: var(--night); color: var(--ink); font-family: var(--f-ui); font-size: 13.5px; line-height: 1.45; overflow: hidden; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--night); }
+#stage { position: fixed; inset: 0; background: radial-gradient(120% 90% at 55% 40%, var(--night-2) 0%, var(--night) 70%); }
+#stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+#gl { cursor: grab; touch-action: none; }
+#gl.drag { cursor: grabbing; }
+#ov { pointer-events: none; }
+.vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(120% 100% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.65) 100%); }
+:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 3px; }
+button, select, input { font: inherit; color: inherit; }
+
+/* künye */
+.top { position: fixed; top: 0; left: 0; right: 0; z-index: 5; display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; gap: 16px;
+  padding-block: calc(18px + env(safe-area-inset-top, 0px)) 28px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
+  background: linear-gradient(to bottom, rgba(3, 4, 6, 0.8), transparent); pointer-events: none; }
+.top > * { pointer-events: auto; }
+.brand .mark { font-family: var(--f-display); font-weight: 500; font-size: 17px; letter-spacing: 0.42em; color: var(--ink); white-space: nowrap; }
+.brand .rule { width: 56px; height: 1px; background: var(--gold); opacity: 0.7; margin: 9px 0 8px; }
+.brand .sub { font-size: 10.5px; letter-spacing: 0.16em; color: var(--dim); text-transform: uppercase; }
+.views { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(8, 9, 12, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.views button { border: 0; background: transparent; color: var(--dim); font-size: 11.5px; letter-spacing: 0.12em; text-transform: uppercase; padding: 8px 15px; border-radius: 999px; cursor: pointer; transition: color 0.2s, background 0.2s; white-space: nowrap; }
+.views button:hover { color: var(--ink); }
+.views button[aria-pressed="true"] { color: var(--night); background: var(--gold); }
+.brand { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: 14px; align-items: start; }
+.flag-slot { width: 45px; height: 30px; align-self: center; }
+.brand .mark { align-self: center; }
+/* çizgi ve alt satırlar bayrağın altından, sola yaslı başlar */
+.brand .rule, .brand .sub, .dedication { grid-column: 1 / -1; }
+.brand .sub a { color: var(--ink); text-decoration: none; border-bottom: 1px solid var(--line-2); }
+.brand .sub a:hover { color: var(--gold); border-color: var(--gold); }
+.dedication { margin-top: 6px; font-family: var(--f-serif); font-style: italic; font-size: 15px; color: #d7ccb6; letter-spacing: 0.02em; }
+#flag { position: fixed; z-index: 31; pointer-events: none; transition: left 1.5s cubic-bezier(0.65, 0, 0.25, 1), top 1.5s cubic-bezier(0.65, 0, 0.25, 1), width 1.5s cubic-bezier(0.65, 0, 0.25, 1), height 1.5s cubic-bezier(0.65, 0, 0.25, 1), opacity 0.6s; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.45)); }
+#flag.docked { z-index: 6; filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.5)); }
+.loading-text { position: fixed; inset: 0; z-index: 32; display: grid; place-items: center; text-align: center; pointer-events: none; transition: opacity 1s ease; padding-inline: 16px; }
+.loading-text .t { font-family: var(--f-display); font-size: 22px; letter-spacing: 0.5em; color: #fff; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.75); }
+.loading-text .s { margin-top: 14px; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #f3ead6; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); }
+.loading-text.done { opacity: 0; }
+.loading-text > div { transform: translateY(calc(min(22vw, 207px) + 52px)); }
+/* sağ alt köşe: Çanakkale Şehitlerine ve hakkında */
+.corner { position: fixed; z-index: 6; right: max(24px, env(safe-area-inset-right, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 8px; }
+.pill.round { width: 38px; height: 38px; padding: 0; justify-content: center; border-radius: 50%; text-decoration: none; }
+.round svg { display: block; }
+.round[aria-pressed="true"] { color: var(--gold); border-color: var(--line-2); }
+.music { position: relative; display: flex; align-items: center; }
+.music-tray { position: absolute; right: calc(100% + 8px); top: 50%; transform: translate(8px, -50%); white-space: nowrap; font-size: 12px; letter-spacing: 0.04em; color: var(--ink); text-decoration: none; padding: 9px 15px; border: 1px solid var(--line); border-radius: 999px; background: var(--glass); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); opacity: 0; pointer-events: none; transition: opacity 0.25s, transform 0.25s; }
+.music-tray span { color: var(--gold); }
+.music-tray:hover { border-color: var(--gold); }
+.music:hover .music-tray, .music:focus-within .music-tray, .music.open .music-tray { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
+#yt { position: fixed; width: 1px; height: 1px; left: -10px; bottom: -10px; opacity: 0; pointer-events: none; border: 0; }
+/* aranabilir harp listesi */
+.combo { position: relative; }
+.combo-btn b { font-weight: 500; color: var(--ink); max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.combo-pop { position: absolute; left: 0; bottom: calc(100% + 8px); width: min(340px, calc(100vw - 32px)); background: var(--glass); border: 1px solid var(--line); border-radius: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 8px; display: grid; gap: 6px; z-index: 7; }
+.combo-pop input { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; color: var(--ink); font-size: 12.5px; outline: none; }
+.combo-pop input:focus { border-color: var(--gold); }
+.combo-list { display: grid; max-height: 46vh; overflow-y: auto; }
+.combo-list button { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: baseline; text-align: left; background: none; border: 0; border-radius: 8px; padding: 7px 10px; cursor: pointer; }
+.combo-list button small { display: block; color: var(--dim); font-size: 11px; font-family: var(--f-data); }
+.combo-list button .n { font-family: var(--f-data); font-size: 11px; color: var(--gold); }
+.combo-list button[aria-selected="true"] b { color: var(--gold); }
+.combo-list button.active, .combo-list button:hover { background: rgba(224, 185, 104, 0.1); }
+.combo-list b { font-weight: 500; font-size: 12.5px; }
+.combo-list .none { color: var(--dim); font-size: 12px; padding: 8px 10px; }
+/* hakkında */
+.about h2 { font-size: 24px; }
+.verse { margin: 22px 0 4px; padding: 18px 8px 0; border-top: 1px solid var(--line); }
+.verse blockquote { margin: 0; font-family: var(--f-serif); font-style: italic; font-size: 19px; line-height: 1.55; color: var(--ink); text-wrap: balance; }
+.verse figcaption { margin-top: 10px; font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.about .lead { text-align: left; margin: 18px 0 0; }
+.about h3 { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin: 20px 0 8px; text-align: left; }
+.about ul { text-align: left; margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; }
+.about p.small { text-align: left; font-size: 12.5px; color: #cfc6b4; margin: 0 0 8px; }
+.about a { color: var(--gold); }
+
+/* araçlar */
+.tools { position: fixed; z-index: 6; left: max(24px, env(safe-area-inset-left, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: flex; flex-wrap: wrap; gap: 8px; align-items: center; max-width: calc(100% - 48px); }
+.pill { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; letter-spacing: 0.05em; color: var(--ink); padding: 8px 15px; border: 1px solid var(--line); border-radius: 999px; background: rgba(224, 185, 104, 0.06); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); cursor: pointer; transition: 0.18s; }
+.pill:hover { background: rgba(224, 185, 104, 0.14); border-color: var(--gold); }
+.pill.ghost { color: var(--dim); border-color: rgba(255, 255, 255, 0.09); background: rgba(255, 255, 255, 0.02); }
+.pill.ghost:hover { color: var(--ink); }
+.pill select { background: transparent; border: 0; color: var(--ink); font-size: 12px; cursor: pointer; max-width: 210px; padding: 0; }
+.pill select option { background: var(--night-2); color: var(--ink); }
+.pill input[type="checkbox"] { accent-color: var(--gold); margin: 0; }
+.search { position: relative; display: flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; background: rgba(8, 9, 12, 0.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.search input { background: none; border: 0; outline: none; color: var(--ink); font-size: 12.5px; padding: 8px 6px 8px 15px; width: 190px; }
+.search input::placeholder { color: var(--dim); }
+.search-go { background: none; border: 0; color: var(--gold); padding: 0 13px 0 4px; font-size: 15px; cursor: pointer; }
+.results .all { border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0; }
+.results .all b { color: var(--gold); }
+.results { position: absolute; left: 0; bottom: calc(100% + 8px); width: min(360px, calc(100vw - 48px)); max-height: 52vh; overflow-y: auto; background: var(--glass); border: 1px solid var(--line); border-radius: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 6px; display: grid; }
+.results button { text-align: left; background: none; border: 0; border-radius: 8px; padding: 7px 10px; cursor: pointer; display: grid; gap: 1px; }
+.results button:hover, .results button:focus-visible { background: rgba(224, 185, 104, 0.1); }
+.results b { font-family: var(--f-display); font-weight: 500; font-size: 13px; letter-spacing: 0.06em; }
+.results small { color: var(--dim); font-size: 11.5px; }
+.results .none { color: var(--dim); padding: 8px 10px; font-size: 12px; }
+
+
+/* levha (sağ panel) */
+.plaque { position: fixed; z-index: 6; right: max(24px, env(safe-area-inset-right, 0px)); top: calc(110px + env(safe-area-inset-top, 0px)); bottom: calc(72px + env(safe-area-inset-bottom, 0px)); width: 372px; display: flex; flex-direction: column; background: var(--glass); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55); }
+.plaque-x { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; }
+.plaque-x:hover { color: var(--ink); border-color: var(--gold); }
+.pbody { overflow-y: auto; padding: 22px 22px 26px; display: grid; gap: 14px; align-content: start; min-height: 0; }
+.eyebrow { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+/* Cinzel küçük harfleri noktasız küçük büyük harf çizer; Türkçe kuralla (lang="tr") tam büyük harfe çevir */
+.ptitle, .stop b, .names b, .tip b, .card h2, .results b, .unit-head { text-transform: uppercase; }
+.ptitle { font-family: var(--f-display); font-weight: 500; font-size: 20px; letter-spacing: 0.08em; line-height: 1.2; margin: 0; text-wrap: balance; padding-right: 30px; }
+.pmeta { color: var(--dim); font-size: 12px; letter-spacing: 0.04em; }
+.pmeta b { color: var(--gold); font-weight: 500; font-family: var(--f-data); }
+.lead { font-family: var(--f-serif); font-size: 16px; line-height: 1.45; color: #ddd3bf; margin: 0; }
+.sec { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); margin: 6px 0 -4px; display: flex; align-items: center; gap: 10px; }
+.sec::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.foes { display: flex; flex-wrap: wrap; gap: 6px; }
+.foe { font-size: 11.5px; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--ink); }
+.bars { display: grid; gap: 4px; }
+.bar { display: grid; grid-template-columns: minmax(0, 1fr) 56px; gap: 10px; align-items: center; font-size: 12px; }
+.bar .lbl { position: relative; padding: 3px 0 5px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; letter-spacing: 0.03em; }
+.bar .lbl i { position: absolute; left: 0; bottom: 0; height: 1.5px; background: var(--gold); opacity: 0.75; }
+.bar .n { font-family: var(--f-data); font-size: 11.5px; text-align: right; color: var(--gold); font-variant-numeric: tabular-nums; }
+.yh { display: grid; gap: 5px; }
+.yh .cols { display: flex; align-items: flex-end; gap: 2px; height: 58px; border-bottom: 1px solid var(--line); }
+.yh .cols div { flex: 1; min-width: 2px; background: linear-gradient(to top, rgba(224, 185, 104, 0.35), var(--gold)); min-height: 1px; }
+.yh .axis { display: flex; justify-content: space-between; font: 10.5px var(--f-data); color: var(--dim); }
+.acts { display: flex; flex-wrap: wrap; gap: 8px; }
+.acts .pill { font-size: 11.5px; padding: 7px 13px; }
+.pill.gold { background: var(--gold); color: var(--night); border-color: var(--gold); }
+.pill.gold:hover { background: #ebc97e; }
+.units { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 5px; }
+.unit { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; align-items: center; text-align: left; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.02); border-radius: 8px; padding: 6px 9px; cursor: pointer; font-size: 12.5px; }
+.unit:hover { border-color: var(--gold); }
+.unit small { display: block; color: var(--dim); font-size: 10.5px; letter-spacing: 0.03em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.unit .n { font-family: var(--f-data); font-size: 11px; color: var(--gold); }
+.lvls { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; width: max-content; max-width: 100%; }
+.lvls button { border: 0; background: transparent; color: var(--dim); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; padding: 6px 12px; border-radius: 999px; cursor: pointer; }
+.lvls button[aria-pressed="true"] { background: rgba(224, 185, 104, 0.18); color: var(--ink); }
+.field { display: flex; align-items: center; gap: 10px; }
+.field input { flex: 1; min-width: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); border-radius: 999px; padding: 7px 13px; color: var(--ink); font-size: 12.5px; outline: none; }
+.field input:focus { border-color: var(--gold); }
+.stops { display: grid; }
+.stop { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: baseline; padding-block: 8px; border: 0; border-top: 1px solid var(--line); background: none; text-align: left; color: inherit; width: 100%; }
+button.stop { cursor: pointer; }
+button.stop:hover b { color: var(--gold); }
+.stop .no { font-family: var(--f-display); color: var(--gold); font-size: 15px; }
+.stop b { font-family: var(--f-display); font-weight: 500; letter-spacing: 0.05em; font-size: 13px; transition: color 0.15s; }
+.stop small { display: block; color: var(--dim); font-family: var(--f-data); font-size: 11px; }
+.stop .n { font-family: var(--f-data); color: var(--gold); font-size: 11.5px; }
+.names { display: grid; }
+.names button { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 2px; align-items: baseline; text-align: left; background: none; border: 0; border-top: 1px solid rgba(224, 185, 104, 0.1); padding: 8px 2px; cursor: pointer; }
+.names button:hover b { color: var(--gold); }
+.names b { font-family: var(--f-display); font-weight: 500; font-size: 12.5px; letter-spacing: 0.06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.15s; }
+.names .y { font-family: var(--f-data); font-size: 11px; color: var(--gold); }
+.names small { grid-column: 1 / -1; color: var(--dim); font-size: 11.5px; line-height: 1.45; overflow-wrap: anywhere; }
+.names small i { font-family: var(--f-serif); font-size: 13px; color: #cfc6b4; }
+.names small .r { color: #cfc6b4; }
+.more { justify-self: start; }
+.note { font-size: 11px; color: var(--dim); border-top: 1px solid var(--line); padding-top: 12px; line-height: 1.5; }
+.note p { margin: 0 0 6px; }
+.note a { color: var(--ink); }
+.approx-tag { display: inline-block; vertical-align: middle; margin-left: 8px; font: 10px var(--f-ui); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ash); border: 1px dashed var(--ash); border-radius: 999px; padding: 2px 8px; }
+.xcross { background: none; border: 0; color: var(--gold); cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 0; }
+
+/* yıldız ipucu */
+.tip { position: fixed; z-index: 8; pointer-events: none; background: rgba(8, 9, 12, 0.92); border: 1px solid var(--line); border-radius: 8px; padding: 7px 11px; font-size: 12.5px; color: var(--ink); opacity: 0; transition: opacity 0.13s; max-width: 260px; line-height: 1.35; backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); }
+.tip b { font-family: var(--f-display); font-weight: 500; letter-spacing: 0.06em; }
+.tip .g { color: var(--gold); font-size: 11px; margin-top: 2px; }
+
+/* anıt kartı */
+.card-wrap { position: fixed; inset: 0; z-index: 20; display: grid; place-items: center; background: rgba(2, 3, 5, 0.62); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); padding-block: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.card { position: relative; width: min(460px, 100%); max-height: calc(100% - 20px); overflow-y: auto; background: linear-gradient(180deg, #0e1117, #07090d); border: 1px solid var(--line-2); border-radius: 4px; padding: 34px 32px 26px; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7); text-align: center;
+  /* iç çerçeve: outline kaydırılan içerikle birlikte kaymaz */
+  outline: 1px solid var(--line); outline-offset: -8px; }
+.card .star { color: var(--gold); font-size: 14px; letter-spacing: 0.6em; text-indent: 0.6em; }
+.card h2 { font-family: var(--f-display); font-weight: 500; font-size: 24px; letter-spacing: 0.1em; margin: 12px 0 4px; line-height: 1.2; text-wrap: balance; }
+.card .baba { font-family: var(--f-serif); font-style: italic; font-size: 17px; color: #d7ccb6; }
+.card .rank { margin-top: 10px; font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); }
+.card dl { margin: 22px 0 18px; display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 9px 16px; text-align: left; border-top: 1px solid var(--line); padding-top: 18px; }
+.card dt { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); padding-top: 2px; }
+.card dd { margin: 0; font-size: 13px; overflow-wrap: anywhere; }
+.card dd small { color: var(--dim); font-family: var(--f-data); font-size: 11px; }
+.card .epitaph { font-family: var(--f-serif); font-style: italic; color: var(--dim); font-size: 15px; margin: 0 0 18px; }
+.card .acts { justify-content: center; }
+.card-x { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; }
+
+.loading { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: var(--night); transition: opacity 1.2s ease; text-align: center; padding-inline: 16px; }
+.loading .t { font-family: var(--f-display); font-size: 20px; letter-spacing: 0.5em; color: var(--ink); }
+.loading .s { margin-top: 14px; font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--dim); }
+.loading.done { opacity: 0; pointer-events: none; }
+
+@media (max-width: 900px) {
+  .top { grid-template-columns: 1fr auto; padding-block: calc(14px + env(safe-area-inset-top, 0px)) 18px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); row-gap: 12px; }
+  .views { grid-column: 1 / -1; grid-row: 2; justify-self: start; overflow-x: auto; max-width: 100%; }
+  .views button { padding: 7px 11px; font-size: 10.5px; }
+  .brand .mark { font-size: 14px; letter-spacing: 0.3em; }
+  .brand .sub { display: none; }
+  .brand .rule { display: none; }
+  .tools { left: 0; right: 0; max-width: none; bottom: calc(12px + env(safe-area-inset-bottom, 0px)); flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+  .tools::-webkit-scrollbar { display: none; }
+  .tools > * { flex: none; }
+  .search { position: static; }
+  .search input { width: 128px; }
+  .results { left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(100% + 8px); }
+  .pill select { max-width: 150px; }
+  .plaque { left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); width: auto; top: auto; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); max-height: 46vh; }
+  .pbody { padding: 18px 18px 22px; }
+  .corner { right: max(16px, env(safe-area-inset-right, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); bottom: auto; }
+  .pill.round { width: 34px; height: 34px; }
+  .dedication { font-size: 13.5px; }
+  .flag-slot { width: 36px; height: 24px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+
+<div id="stage"><canvas id="gl" aria-label="Her şehidin bir yıldızla gösterildiği harita"></canvas><canvas id="ov" aria-hidden="true"></canvas></div>
+<div class="vignette"></div>
+
+<header class="top">
+  <div class="brand">
+    <span class="flag-slot" id="flag-slot" aria-hidden="true"></span>
+    <div class="mark">ŞEHADET ATLASI</div>
+    <div class="rule"></div>
+    <div class="sub">1853 – 1928 · <a href="https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi" target="_blank" rel="noopener">MSB Şehit Bilgi Kapısı</a> kayıtları</div>
+    <div class="dedication">Aziz şehitlerimizin hatırasına</div>
+  </div>
+  <nav class="views" role="group" aria-label="Görünüm">
+    <button id="v-memleket" aria-pressed="true">Memleket</button>
+    <button id="v-sehadet" aria-pressed="false">Şehadet Yeri</button>
+    <button id="v-cephe" aria-pressed="false">Cephe</button>
+    <button id="v-birlik" aria-pressed="false">Birlik</button>
+  </nav>
+  <div aria-hidden="true"></div>
+</header>
+
+<div class="tools">
+  <div class="search" role="search">
+    <input id="q" type="search" placeholder="Şehit ara…" aria-label="Şehit ara" autocomplete="off">
+    <button class="search-go" id="q-go" aria-label="Aramayı süzgeç olarak ekle">⌕</button>
+    <div class="results" id="results" hidden></div>
+  </div>
+  <div class="combo" id="harp-combo">
+    <button class="pill ghost combo-btn" id="harp-btn" aria-haspopup="listbox" aria-expanded="false" aria-controls="harp-pop">Harp <b id="harp-val">Tümü</b> <span aria-hidden="true">▾</span></button>
+    <div class="combo-pop" id="harp-pop" hidden>
+      <input id="harp-q" type="search" placeholder="Harp ara…" aria-label="Harp ara" autocomplete="off">
+      <div class="combo-list" id="harp-list" role="listbox" aria-label="Harpler"></div>
+    </div>
+  </div>
+  <button class="pill gold" id="cross-chip" hidden></button>
+  <button class="pill gold" id="text-chip" hidden></button>
+  <label class="pill ghost" for="f-approx"><input id="f-approx" type="checkbox" checked> Yeri belirsizler</label>
+  <button class="pill ghost" id="b-summary">Sayılar</button>
+  <button class="pill ghost" id="b-reset">Haritayı ortala</button>
+</div>
+
+<aside class="plaque" id="plaque" hidden aria-label="Levha">
+  <button class="plaque-x" id="plaque-x" aria-label="Levhayı kapat">✕</button>
+  <div class="pbody" id="pbody"></div>
+</aside>
+
+<div class="tip" id="tip"></div>
+
+<div class="card-wrap" id="card" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="card-name">
+    <button class="card-x" id="card-x" aria-label="Kapat">✕</button>
+    <div id="card-body"></div>
+  </div>
+</div>
+
+<div class="corner">
+  <div class="music" id="music">
+    <a class="music-tray" id="music-yt" href="https://www.youtube.com/watch?v=YZl7GVcEo68" target="_blank" rel="noopener"><span>Çanakkale Şehitlerine</span> · YouTube'da dinle ↗</a>
+    <button class="pill ghost round" id="b-music" aria-pressed="false" aria-label="Çanakkale Şehitlerine · sesi kapat" title="Çanakkale Şehitlerine"></button>
+  </div>
+  <button class="pill ghost round" id="b-about" aria-label="Bu atlas hakkında" title="Hakkında"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.6 5.8a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2.9-1.2 1.7v.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="12.6" r=".9" fill="currentColor"/></svg></button>
+</div>
+
+<div class="card-wrap" id="about" hidden>
+  <div class="card about" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <button class="card-x" id="about-x" aria-label="Kapat">✕</button>
+    <div class="star">✦ ✦ ✦</div>
+    <h2 id="about-title">Şehadet Atlası</h2>
+    <div class="baba">Aziz şehitlerimizin hatırasına</div>
+    <figure class="verse">
+      <blockquote>Tüllenen mağribi, akşamları sarsam yarana…<br>Yine bir şey yapabildim diyemem hâtırana.</blockquote>
+      <figcaption>Mehmet Âkif Ersoy · Çanakkale Şehitlerine</figcaption>
+    </figure>
+    <p class="lead">1853'ten 1928'e uzanan yetmiş beş yıl boyunca, Kırım'dan Kurtuluş Savaşı'na, bu toprakların savunmasında canını veren 110.561 şehidimizin her biri bu haritada bir yıldızdır. Her ışık bir isimdir: bir köyden, bir kasabadan yola çıkıp Seddülbahir'de, Sarıkamış'ta, Kûtü'l-Amâre'de, Gazze'de, Sakarya'da toprağa düşmüş bir hayat.</p>
+    <p class="lead">Atlas, onların nereden geldiğini ve nerede kaldığını aynı haritada göstermek için hazırlanmıştır. Bir memleketin ışıkları şehadet yerlerine uçarken, rakamların ardındaki insanları hatırlamak dileğiyle.</p>
+    <h3>Nasıl gezilir</h3>
+    <ul>
+      <li><b>Memleket</b>: yıldızlar şehitlerin doğduğu yerde. Bir memlekete dokununca şehit düştükleri yerlere oklar çizilir.</li>
+      <li><b>Şehadet Yeri</b>: aynı yıldızlar şehit düştükleri yerde.</li>
+      <li><b>Cephe</b>: kayıtlardan tanınan muharebeler; kimlere karşı ve hangi tarihlerde savaşıldığı.</li>
+      <li><b>Birlik</b>: kolordu, fırka ve alayların konuşu ve cepheden cepheye güzergâhı.</li>
+      <li>Yakınlaşıp bir yıldıza ya da listeden bir isme dokununca o şehidin künyesi açılır.</li>
+    </ul>
+    <h3>Veriler</h3>
+    <p class="small">Bütün şehit kayıtları T.C. Millî Savunma Bakanlığı'nın <a href="https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi" target="_blank" rel="noopener">MSB Şehit Bilgi Kapısı</a>'ndan alınmıştır. İsim, baba adı, memleket, rütbe, birlik, şehadet yeri ve tarihi kayıttaki haliyle gösterilmektedir.</p>
+    <p class="small">Haritadaki konumlar bu kayıtlardan çıkarılmıştır: memleketler il ve ilçe merkezlerine, şehadet yerleri bilinen muharebe ve yer adlarına eşlenmiştir. Yeri tam belirlenemeyenler gri yıldızlarla cephe çevresinde gösterilmektedir. Tarihlerin çoğu Rumi takvimdedir; yanında yaklaşık Miladi karşılığı verilir. Cephe ve birlik açıklamaları genel tarih kaynaklarından derlenmiştir.</p>
+    <p class="small">Bu çalışma resmî bir MSB yayını değildir. Bir kayıtta eksik ya da hata görürseniz asıl kaynak MSB Şehit Bilgi Kapısı'dır.</p>
+    <p class="epitaph">Ruhları şad olsun.</p>
+  </div>
+</div>
+
+<iframe id="yt" title="Çanakkale Şehitlerine" tabindex="-1" aria-hidden="true" allow="autoplay; encrypted-media" hidden></iframe>
+<canvas id="flag" aria-hidden="true"></canvas>
+<div class="loading" id="loading"></div>
+<div class="loading-text" id="loading-text"><div><div class="t">ŞEHADET ATLASI</div><div class="s" id="loading-s">İsimler yükleniyor</div></div></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(async function () {
+  document.documentElement.lang = "tr";
+  const $ = (id) => document.getElementById(id);
+  const fmt = new Intl.NumberFormat("tr-TR");
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const trUp = (s) => s.toLocaleUpperCase("tr-TR");
+  const title = (s) => s.toLocaleLowerCase("tr-TR").replace(/(^|[\s(/-])(\S)/g, (m, a, b) => a + b.toLocaleUpperCase("tr-TR"));
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  // ---------- dalgalanan bayrak: yüklenirken büyük, sonra künyenin soluna yerleşir ----------
+  // Kumaş, three.js ile 3B bir yüzeyde dalgalanır: gönder tarafı sabit, dalgalar uca doğru büyür;
+  // ışık yüzeyin eğiminden hesaplanır, kıvrımlarda saten parlaması ve ince dokuma görünür.
+  const flagCv = $("flag");
+  const FW = 1800, FH = 1200, fsrc = document.createElement("canvas");
+  fsrc.width = FW; fsrc.height = FH;
+  {
+    // Türk Bayrağı Kanunu oranları (1200×800 ölçeğinde çizilip büyütülür)
+    const g = fsrc.getContext("2d"), k = FW / 1200;
+    g.fillStyle = "#E30A17"; g.fillRect(0, 0, FW, FH);
+    g.fillStyle = "#fff"; g.beginPath(); g.arc(425 * k, 400 * k, 200 * k, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#E30A17"; g.beginPath(); g.arc(475 * k, 400 * k, 160 * k, 0, Math.PI * 2); g.fill();
+    g.fillStyle = "#fff"; g.beginPath();
+    [[583.334, 400], [764.235, 458.779], [652.431, 304.894], [652.431, 495.106], [764.235, 341.221]].forEach(([x, y], j) => (j ? g.lineTo(x * k, y * k) : g.moveTo(x * k, y * k)));
+    g.closePath(); g.fill();
+    // dokuma: çok ince atkı ve çözgü iplikleri
+    g.globalAlpha = 0.05;
+    for (let x = 0; x < FW; x += 3) { g.fillStyle = x % 6 ? "#000" : "#fff"; g.fillRect(x, 0, 1, FH); }
+    for (let y = 0; y < FH; y += 3) { g.fillStyle = y % 6 ? "#000" : "#fff"; g.fillRect(0, y, FW, 1); }
+    g.globalAlpha = 1;
+  }
+  const FDPR = Math.min(window.devicePixelRatio || 1, 2);
+  function placeFlag(rect) {
+    Object.assign(flagCv.style, { left: rect.left + "px", top: rect.top + "px", width: rect.width + "px", height: rect.height + "px" });
+  }
+  const bigFlagRect = () => { const w = Math.min(innerWidth * 0.66, 620), h = (w * 2) / 3; return { left: (innerWidth - w) / 2, top: (innerHeight - h) / 2, width: w, height: h }; };
+  placeFlag(bigFlagRect());
+  let flagRender = null, flagSize = null;
+  try {
+    const fr = new THREE.WebGLRenderer({ canvas: flagCv, alpha: true, antialias: true, premultipliedAlpha: false });
+    fr.setPixelRatio(FDPR);
+    fr.setClearColor(0x000000, 0);
+    const scene = new THREE.Scene();
+    const cam = new THREE.PerspectiveCamera(26, 1.5, 0.1, 20);
+    cam.position.set(0.1, 0.0, 2.62);
+    cam.lookAt(0, 0, 0);
+    const tex = new THREE.CanvasTexture(fsrc);
+    tex.anisotropy = fr.capabilities.getMaxAnisotropy();
+    tex.minFilter = THREE.LinearMipmapLinearFilter;
+    const fu = { uTime: { value: 0 }, uTex: { value: tex } };
+    const mat = new THREE.ShaderMaterial({
+      uniforms: fu, side: THREE.DoubleSide, transparent: true,
+      vertexShader: `
+        uniform float uTime; varying vec2 vUv; varying vec3 vN; varying vec3 vPos; varying float vFold;
+        float waveZ(vec2 p) {
+          float u = p.x + 0.75;                               // gönderden uzaklık (0..1.5)
+          float a = pow(clamp(u / 1.5, 0.0, 1.0), 1.25);      // gönderde sabit, uca doğru serbest
+          float t = uTime;
+          float z = 0.11 * sin(u * 4.6 - t * 3.3 + p.y * 0.8)
+                  + 0.050 * sin(u * 8.9 - t * 5.2 - p.y * 2.1 + 1.3)
+                  + 0.018 * sin(u * 15.0 - t * 7.4 + p.y * 3.7 + 0.4)
+                  + 0.012 * sin(p.y * 6.0 - t * 2.1 + u * 3.0);
+          return z * a;
+        }
+        void main() {
+          vUv = uv;
+          vec3 p = position;
+          float z = waveZ(p.xy);
+          float e = 0.004;
+          float dx = (waveZ(p.xy + vec2(e, 0.0)) - waveZ(p.xy - vec2(e, 0.0))) / (2.0 * e);
+          float dy = (waveZ(p.xy + vec2(0.0, e)) - waveZ(p.xy - vec2(0.0, e))) / (2.0 * e);
+          float u = (p.x + 0.75) / 1.5;
+          p.z += z;
+          p.x -= abs(z) * 0.18 * u;                          // kıvrımda kumaş biraz toplanır
+          p.y -= 0.035 * u * u;                              // uç hafifçe sarkar
+          vN = normalize(normalMatrix * normalize(vec3(-dx, -dy, 1.0)));
+          vFold = z;
+          vec4 mv = modelViewMatrix * vec4(p, 1.0);
+          vPos = mv.xyz;
+          gl_Position = projectionMatrix * mv;
+        }`,
+      fragmentShader: `
+        uniform sampler2D uTex; varying vec2 vUv; varying vec3 vN; varying vec3 vPos; varying float vFold;
+        void main() {
+          vec3 base = texture2D(uTex, vUv).rgb;
+          vec3 N = normalize(vN);
+          if (!gl_FrontFacing) N = -N;
+          vec3 V = normalize(-vPos);
+          vec3 L1 = normalize(vec3(-0.45, 0.55, 0.85));     // ana ışık: sol üstten
+          vec3 L2 = normalize(vec3(0.6, -0.2, 0.6));         // dolgu ışığı
+          float diff = max(dot(N, L1), 0.0) * 0.78 + max(dot(N, L2), 0.0) * 0.22;
+          float wrap = 0.3 + 0.95 * diff;
+          vec3 H = normalize(L1 + V);
+          float sheen = pow(max(dot(N, H), 0.0), 38.0) * 0.32 + pow(1.0 - max(dot(N, V), 0.0), 3.0) * 0.08;
+          float ao = 1.0 - smoothstep(0.0, 0.11, -vFold) * 0.22; // kıvrım içi gölge
+          vec3 col = base * wrap * ao + vec3(1.0, 0.92, 0.9) * sheen;
+          // gönder kenarı: dikiş payı
+          col *= mix(0.82, 1.0, smoothstep(0.0, 0.012, vUv.x));
+          gl_FragColor = vec4(col, 1.0);
+        }`,
+    });
+    const mesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5, 1, 150, 100), mat);
+    mesh.rotation.y = -0.06;
+    mesh.position.x = -0.02;
+    scene.add(mesh);
+    flagSize = (w, h) => { fr.setSize(w, h, false); cam.aspect = w / h; cam.updateProjectionMatrix(); };
+    flagSize(bigFlagRect().width, bigFlagRect().height);
+    flagRender = (now) => { fu.uTime.value = reduceMotion ? 0.6 : now / 1000; fr.render(scene, cam); };
+  } catch (e) { flagRender = null; }
+  if (!flagRender) {
+    // WebGL yoksa: düz, dalgasız bayrak
+    flagCv.width = 600; flagCv.height = 400;
+    flagCv.getContext("2d").drawImage(fsrc, 0, 0, 600, 400);
+  }
+  function drawFlag(now) {
+    if (flagRender) { flagRender(now); requestAnimationFrame(drawFlag); }
+  }
+  requestAnimationFrame(drawFlag);
+  function dockFlag() {
+    const r = $("flag-slot").getBoundingClientRect();
+    flagCv.classList.add("docked");
+    placeFlag({ left: r.left, top: r.top, width: r.width, height: r.height });
+    // küçüldükten sonra çözünürlüğü yuvaya indir
+    setTimeout(() => { if (flagSize) flagSize(r.width, r.height); }, 1600);
+  }
+  addEventListener("resize", () => {
+    if (flagCv.classList.contains("docked")) {
+      flagCv.style.transition = "none"; const r = $("flag-slot").getBoundingClientRect();
+      placeFlag({ left: r.left, top: r.top, width: r.width, height: r.height }); if (flagSize) flagSize(r.width, r.height);
+    } else { const r = bigFlagRect(); placeFlag(r); if (flagSize) flagSize(r.width, r.height); }
+  });
+
+  let D, B;
+  try {
+    [D, B] = await Promise.all([fetch("data.json").then((r) => r.json()), fetch("basemap.json").then((r) => r.json())]);
+  } catch (e) {
+    $("loading-s").textContent = "Veri dosyaları yüklenemedi. Sayfayı data.json ve basemap.json ile aynı klasörden açın.";
+    return;
+  }
+  const C = D.cols, N = D.n, dict = D.dicts;
+  for (const k of ["ad", "baba", "lakap", "dogum", "tarih"]) C[k] = C[k].split("\n");
+
+  // ---------- projeksiyon: dünya koordinatı = (boylam, Mercator enlemi), derece ----------
+  const mercY = (lat) => (Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) * 180) / Math.PI;
+  const W = (lat, lon) => [lon, mercY(lat)];
+
+  // Rumi tarihin Miladi karşılığı (yerleşimde hesaplanan ay değerinden): 1334 öncesinde ay numarası Mart'tan sayılır
+  const AY_ADI = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+  function miladi(i) {
+    const t = C.tarih[i], ym = C.ym[i];
+    const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(t || "");
+    if (!m || !ym || +m[3] < 1250 || +m[3] > 1345) return "";
+    return (+m[2] >= 1 && +m[2] <= 12 ? AY_ADI[ym % 12] + " " : "") + Math.floor(ym / 12);
+  }
+  // İpuçlarında gösterilen Miladi tarih (kayıt Rumi de olsa Miladi de olsa): "Ağustos 1915" ya da yalnız yıl
+  function miladiKisa(i) {
+    const ym = C.ym[i];
+    if (!ym) return "";
+    const m = /^\d{0,2}[\/.]?(\d{1,2})[\/.]+\d{4}$/.exec((C.tarih[i] || "").trim());
+    return (m && +m[1] >= 1 && +m[1] <= 12 ? AY_ADI[ym % 12] + " " : "") + Math.floor(ym / 12);
+  }
+
+  // ---------- cepheler ----------
+  const THEATERS = [
+    { id: "ÇANAKKALE", name: "Çanakkale Cephesi", years: "1915–1916", c: [40.15, 26.3],
+      foes: ["Birleşik Krallık (Avustralya, Yeni Zelanda ve Hint birlikleriyle)", "Fransa (Senegal birlikleriyle)"],
+      note: "İtilaf donanmasının Boğaz'ı geçme girişimi 18 Mart 1915'te durduruldu. 25 Nisan'da Seddülbahir ve Arıburnu'na, Ağustos'ta Anafartalar'a çıkarma yapıldı. İtilaf kuvvetleri yarımadayı Ocak 1916'da tahliye etti." },
+    { id: "ŞARK", alias: ["KAFKAS"], name: "Kafkas Cephesi", years: "1914–1918", c: [40.2, 42.0],
+      foes: ["Rusya İmparatorluğu", "Ermeni gönüllü birlikleri", "1918'de Ermenistan ve Gürcistan"],
+      note: "Sarıkamış Harekâtı (Aralık 1914–Ocak 1915) ağır kayıpla sonuçlandı. Rusya 1916'da Erzurum, Trabzon ve Erzincan'ı aldı. Rus İhtilali'nin ardından Osmanlı ordusu 1918'de Kars, Batum ve Bakü'ye ilerledi." },
+    { id: "IRAK", name: "Irak Cephesi", years: "1914–1918", c: [32.8, 44.8],
+      foes: ["Birleşik Krallık (Britanya Hint Ordusu)"],
+      note: "İngilizler Kasım 1914'te Basra'ya çıktı. Selmanpak'ta (Kasım 1915) durduruldular; Kûtü'l-Amâre'de kuşatılan Townshend kuvvetleri Nisan 1916'da teslim oldu. Bağdat Mart 1917'de düştü." },
+    { id: "FİLİSTİN", name: "Kanal, Filistin ve Suriye Cephesi", years: "1915–1918", c: [31.6, 34.8],
+      foes: ["Birleşik Krallık (Mısır Seferi Kuvvetleri, Avustralya ve Yeni Zelanda atlı birlikleri)", "Fransa", "Şerif Hüseyin'e bağlı Arap kuvvetleri"],
+      note: "Süveyş Kanalı harekâtları (1915, 1916) sonuç vermedi. 1917 başındaki Gazze muharebeleri kazanıldı, cephe Kasım 1917'de çöktü. Kudüs Aralık 1917'de, Şam Ekim 1918'de düştü." },
+    { id: "HİCAZ", alias: ["HİCAZ-YEMEN"], name: "Hicaz ve Yemen Cephesi", years: "1916–1919", c: [23.0, 40.0],
+      foes: ["Şerif Hüseyin'in Arap kuvvetleri", "Birleşik Krallık"],
+      note: "Haziran 1916'da başlayan Arap İsyanı'na karşı Fahreddin Paşa Medine'yi Ocak 1919'a kadar savundu. Yemen'de Aden çevresinde İngilizlerle çatışıldı." },
+    { id: "GALİÇYA", name: "Galiçya Cephesi", years: "1916–1917", c: [49.4, 24.7],
+      foes: ["Rusya İmparatorluğu"],
+      note: "Avusturya-Macaristan'a destek için gönderilen 15. Kolordu (19. ve 20. Fırkalar) bugünkü Ukrayna'da, Zlota Lipa hattında Brusilov taarruzuna karşı savaştı." },
+    { id: "ROMANYA", name: "Romanya ve Dobruca Cephesi", years: "1916–1917", c: [44.4, 26.8],
+      foes: ["Romanya Krallığı", "Rusya İmparatorluğu"],
+      note: "6. Kolordu, Bulgar ve Alman kuvvetleriyle birlikte Dobruca'da ve Bükreş yönünde savaştı." },
+    { id: "MAKEDONYA", name: "Makedonya Cephesi", years: "1916–1917", c: [41.1, 22.4],
+      foes: ["Fransa", "Birleşik Krallık", "Sırbistan", "Rusya İmparatorluğu"],
+      note: "20. Kolordu, Bulgar ordusunun yanında Selanik cephesinin Karasu (Struma) kesiminde savaştı." },
+    { id: "BATI", name: "Batı Cephesi", years: "1919–1922", c: [39.2, 30.3],
+      foes: ["Yunanistan Krallığı"],
+      note: "Birinci ve İkinci İnönü (1921), Sakarya Meydan Muharebesi (Ağustos–Eylül 1921) ve Büyük Taarruz (Ağustos 1922) bu cephededir." },
+    { id: "GÜNEY", name: "Güney Cephesi", years: "1919–1921", c: [37.3, 37.0],
+      foes: ["Fransa", "Fransız komutasındaki Ermeni Lejyonu"],
+      note: "Maraş, Antep, Urfa ve Adana çevresinde Fransız işgaline karşı verilen mücadele. Ekim 1921'deki Ankara Antlaşması ile sona erdi." },
+    { id: "DOĞU", name: "Doğu Cephesi", years: "1920", c: [40.6, 43.1],
+      foes: ["Ermenistan Cumhuriyeti"],
+      note: "Kâzım Karabekir Paşa komutasındaki ordu Sarıkamış, Kars ve Gümrü'yü aldı. Aralık 1920'deki Gümrü Antlaşması ile sona erdi." },
+    { id: "BALKAN", harp: true, name: "Balkan Savaşları", years: "1912–1913", c: [41.5, 25.5],
+      foes: ["Bulgaristan", "Sırbistan", "Yunanistan", "Karadağ"],
+      note: "Birinci Balkan Savaşı'nda Kırkkilise, Lüleburgaz ve Çatalca muharebeleri ile Edirne, Yanya ve İşkodra kuşatmaları yaşandı; Rumeli'nin büyük kısmı kaybedildi. Edirne İkinci Balkan Savaşı'nda geri alındı." },
+    { id: "TRABLUSGARP", harp: true, name: "Trablusgarp Savaşı", years: "1911–1912", c: [32.5, 15.5],
+      foes: ["İtalya Krallığı"],
+      note: "Gönüllü Osmanlı subayları ve yerel kuvvetler Trablusgarp ve Bingazi'de İtalyan işgaline karşı savaştı. Uşi Antlaşması ile sona erdi." },
+    { id: "OSMANLI-RUS", harp: true, name: "93 Harbi", years: "1877–1878", c: [42.8, 26.0],
+      foes: ["Rusya İmparatorluğu", "Romanya", "Sırbistan", "Karadağ"],
+      note: "Tuna ve Kafkas cephelerinde savaşıldı. Plevne ve Şıpka savunmaları ile Kars kuşatması öne çıkar. Ayastefanos ve Berlin antlaşmaları ile sona erdi." },
+    { id: "KIRIM", harp: true, name: "Kırım Savaşı", years: "1853–1856", c: [44.6, 33.6],
+      foes: ["Rusya İmparatorluğu"],
+      note: "Osmanlı Devleti İngiltere, Fransa ve Sardinya ile birlikte Tuna boyunda, Kafkasya'da ve Kırım'da Rusya'ya karşı savaştı. Paris Antlaşması ile sona erdi." },
+    { id: "OSMANLI-YUNAN", harp: true, name: "Osmanlı-Yunan Savaşı", years: "1897", c: [39.4, 22.3],
+      foes: ["Yunanistan Krallığı"],
+      note: "Teselya'da Velestin ve Dömeke muharebeleri kazanıldı; savaş otuz gün sürdü." },
+  ];
+  const thByCephe = new Map(), thByHarp = new Map();
+  THEATERS.forEach((t, n) => { (t.harp ? thByHarp : thByCephe).set(t.id, n); (t.alias || []).forEach((a) => thByCephe.set(a, n)); });
+  const cepheTh = dict.cephe.map((c) => { const k = trUp(c).replace(" CEPHESİ", "").trim(); return thByCephe.has(k) ? thByCephe.get(k) : -1; });
+  const harpTh = dict.harp.map((h) => { const k = h.split(" ")[0]; return thByHarp.has(k) ? thByHarp.get(k) : -1; });
+  // Muharebeler: [ad, cephe kimliği, başlangıç ay, bitiş ay, enlem, boylam, not]
+  const BAT = D.battles.map((b, k) => ({ k, name: b[0], th: thByCephe.has(b[1]) ? thByCephe.get(b[1]) : thByHarp.get(b[1]), b0: b[2], b1: b[3], w: [b[5], mercY(b[4])], note: b[6] }));
+  const TH = new Int16Array(N);
+  for (let i = 0; i < N; i++) TH[i] = cepheTh[C.cephe[i]] >= 0 ? cepheTh[C.cephe[i]] : harpTh[C.harp[i]];
+
+  // ---------- yerleşim: her şehide memleketinde ve şehadet yerinde bir yıldız konumu ----------
+  // Aynı yerdeki şehitler ayçiçeği düzeninde dizilir; disk alanı şehit sayısıyla büyür.
+  const SPACING = 0.0042; // derece, memleket
+  // Şehadet yerleri daha sıkı dizilir: Seddülbahir gibi binlerce şehitli yerler yarımadayı örtmesin
+  const SPACING_S = 0.0024;
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
+  const placeW = new Map();
+  const mKey = new Array(N), sKey = new Array(N);
+  const M = new Float32Array(N * 2), S2 = new Float32Array(N * 2);
+  const hasM = new Uint8Array(N), hasS = new Uint8Array(N), approxS = new Uint8Array(N);
+  function keyW(k) {
+    if (placeW.has(k)) return placeW.get(k);
+    const n = +k.slice(1);
+    let w;
+    if (k[0] === "i") { const p = D.ilPts[n]; w = W(p[1], p[2]); }
+    else if (k[0] === "c") { const p = D.ilcePts[n]; w = W(p[2], p[3]); }
+    else if (k[0] === "b") w = BAT[n].w;
+    else if (k[0] === "g") return GAR[n].w;
+    else { const p = D.yerPts[n]; w = W(p[1], p[2]); }
+    placeW.set(k, w);
+    return w;
+  }
+  {
+    const gm = new Map(), gs = new Map();
+    const push = (m, k, i) => { let a = m.get(k); if (!a) m.set(k, (a = [])); a.push(i); };
+    for (let i = 0; i < N; i++) {
+      if (C.il[i] >= 0) { const k = C.ilce[i] >= 0 ? "c" + C.ilce[i] : "i" + C.il[i]; mKey[i] = k; push(gm, k, i); }
+      if (C.yer[i] >= 0) { const k = "y" + C.yer[i]; sKey[i] = k; push(gs, k, i); }
+    }
+    const lay = (groups, out, has, isS) => {
+      for (const [k, list] of groups) {
+        list.sort((a, b) => C.ym[a] - C.ym[b]);
+        const [cx, cy] = keyW(k);
+        const yp = isS ? D.yerPts[+k.slice(1)] : null;
+        const approx = isS && !yp[3];
+        const sig = approx ? (yp[0].startsWith("ÇANAKKALE") ? 0.12 : 0.7) : 0;
+        list.forEach((i, j) => {
+          let x, y;
+          if (approx) { x = cx + gauss() * sig; y = cy + gauss() * sig; approxS[i] = 1; }
+          else {
+            const r = (isS ? SPACING_S : SPACING) * Math.sqrt(j + 0.5) * (0.9 + 0.2 * rnd());
+            const a = j * 2.399963 + rnd() * 0.25;
+            x = cx + r * Math.cos(a); y = cy + r * Math.sin(a);
+          }
+          out[i * 2] = x; out[i * 2 + 1] = y; has[i] = 1;
+        });
+      }
+    };
+    lay(gm, M, hasM, false);
+    lay(gs, S2, hasS, true);
+    // bir konumu eksik olan yıldız olduğu yerde kalır ve söner
+    for (let i = 0; i < N; i++) {
+      if (!hasM[i] && hasS[i]) { M[i * 2] = S2[i * 2]; M[i * 2 + 1] = S2[i * 2 + 1]; }
+      if (!hasS[i] && hasM[i]) { S2[i * 2] = M[i * 2]; S2[i * 2 + 1] = M[i * 2 + 1]; }
+    }
+  }
+
+  // ---------- WebGL sahnesi ----------
+  const glc = $("gl"), ovc = $("ov"), ov = ovc.getContext("2d");
+  const renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: true, alpha: true });
+  const DPR = Math.min(window.devicePixelRatio || 1, 2);
+  renderer.setPixelRatio(DPR);
+  renderer.setClearColor(0x000000, 0);
+  const scene = new THREE.Scene();
+  const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -10, 10);
+  camera.position.z = 5;
+
+  // Kara: çok hafif dolgu; kıyı ve sınırlar: ince altın çizgi
+  const landMat = new THREE.MeshBasicMaterial({ color: 0x0d1016, transparent: true, opacity: 0.95, depthWrite: false, depthTest: false });
+  const coastPts = [], borderPts = [];
+  const clampLat = (lat) => Math.max(-85, Math.min(85, lat));
+  const ringW = (ring) => ring.map(([lon, lat]) => new THREE.Vector2(lon, mercY(clampLat(lat))));
+  // altlık 5°–62°D / 8°–57°K kutusunda ayrıntılı, dışında kaba veriden birleştirildi; kutu kenarı kıyı değildir
+  const onCut = (a, b) => [5, 62].some((v) => Math.abs(a[0] - v) < 1e-6 && Math.abs(b[0] - v) < 1e-6) || [8, 57].some((v) => Math.abs(a[1] - v) < 1e-6 && Math.abs(b[1] - v) < 1e-6);
+  const pushLine = (arr, ring, coast) => { for (let k = 1; k < ring.length; k++) { const a = ring[k - 1], b = ring[k]; if (coast && onCut(a, b)) continue; arr.push(a[0], mercY(clampLat(a[1])), 0, b[0], mercY(clampLat(b[1])), 0); } };
+  const geoms = (g) => (g.features ? g.features.map((f) => f.geometry) : g.geometries || [g]).filter(Boolean);
+  B.land.forEach((fc) => geoms(fc).forEach((gm) => {
+    const polys = gm.type === "Polygon" ? [gm.coordinates] : gm.coordinates;
+    polys.forEach((poly) => {
+      try {
+        const shape = new THREE.Shape(ringW(poly[0]));
+        poly.slice(1).forEach((h) => shape.holes.push(new THREE.Path(ringW(h))));
+        const mesh = new THREE.Mesh(new THREE.ShapeGeometry(shape), landMat);
+        mesh.renderOrder = 0;
+        scene.add(mesh);
+      } catch (e) { /* üçgenlenemeyen halka: yalnız kıyı çizgisi kalır */ }
+      poly.forEach((ring) => pushLine(coastPts, ring, true));
+    });
+  }));
+  B.borders.forEach((fc) => geoms(fc).forEach((gm) => {
+    const lines = gm.type === "LineString" ? [gm.coordinates] : gm.coordinates;
+    lines.forEach((l) => pushLine(borderPts, l));
+  }));
+  const lineGeo = (arr) => { const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3)); return g; };
+  const coast = new THREE.LineSegments(lineGeo(coastPts), new THREE.LineBasicMaterial({ color: 0xe0b968, transparent: true, opacity: 0.28, depthTest: false }));
+  const border = new THREE.LineSegments(lineGeo(borderPts), new THREE.LineBasicMaterial({ color: 0xe0b968, transparent: true, opacity: 0.11, depthTest: false }));
+  coast.renderOrder = 1; border.renderOrder = 1;
+  scene.add(coast, border);
+
+  // Yıldızlar
+  const geo = new THREE.BufferGeometry();
+  const seeds = new Float32Array(N), aVis = new Float32Array(N).fill(1), aHi = new Float32Array(N);
+  for (let i = 0; i < N; i++) seeds[i] = rnd();
+  const flags = new Float32Array(N * 3);
+  for (let i = 0; i < N; i++) { flags[i * 3] = hasM[i]; flags[i * 3 + 1] = hasS[i]; flags[i * 3 + 2] = approxS[i]; }
+  geo.setAttribute("position", new THREE.BufferAttribute(new Float32Array(N * 3), 3));
+  geo.setAttribute("aM", new THREE.BufferAttribute(M, 2));
+  geo.setAttribute("aS", new THREE.BufferAttribute(S2, 2));
+  geo.setAttribute("aSeed", new THREE.BufferAttribute(seeds, 1));
+  geo.setAttribute("aFlags", new THREE.BufferAttribute(flags, 3));
+  const visAttr = new THREE.BufferAttribute(aVis, 1), hiAttr = new THREE.BufferAttribute(aHi, 1);
+  geo.setAttribute("aVis", visAttr);
+  geo.setAttribute("aHi", hiAttr);
+  geo.boundingSphere = new THREE.Sphere(new THREE.Vector3(30, 40, 0), 1e4);
+  const U = {
+    uT: { value: 0 }, uTHi: { value: 0 }, uSel: { value: 0 }, uScale: { value: 40 }, uTime: { value: 0 }, uDpr: { value: DPR }, uApprox: { value: 1 },
+    uGold: { value: new THREE.Color(0xf0c06a) }, uEmber: { value: new THREE.Color(0xff6a4a) }, uAsh: { value: new THREE.Color(0x8e96a5) },
+  };
+  // Yıldızlar yüksek hassasiyetli bir ara tampona yoğunluk olarak toplanır, sonra ton eşlenir:
+  // böylece kalabalık yerler beyaza doymaz, altın kalır; yalnız en yoğun merkezler kremleşir.
+  const canFloat = renderer.capabilities.isWebGL2 && !!renderer.extensions.get("EXT_color_buffer_float");
+  U.uDirect = { value: canFloat ? 0 : 1 };
+  const starMat = new THREE.ShaderMaterial({
+    uniforms: U, transparent: true, depthTest: false, depthWrite: false,
+    blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor,
+    vertexShader: `
+      attribute vec2 aM; attribute vec2 aS; attribute float aSeed; attribute vec3 aFlags; attribute float aVis; attribute float aHi;
+      uniform float uT, uTHi, uSel, uScale, uTime, uDpr, uApprox, uDirect; uniform vec3 uGold, uEmber, uAsh;
+      varying vec3 vCol; varying float vA;
+      void main() {
+        float hi = aHi * uSel;
+        float T = hi > 0.5 ? uTHi : uT;
+        // yıldızlar aynı anda değil, dalga halinde kalkar
+        float t = clamp(T * 1.7 - aSeed * 0.7, 0.0, 1.0);
+        float e = t * t * (3.0 - 2.0 * t);
+        vec2 d = aS - aM;
+        vec2 p = mix(aM, aS, e) + vec2(-d.y, d.x) * sin(3.14159 * e) * 0.22;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(p, 0.0, 1.0);
+        float spacingPx = 0.0074 * uScale;
+        float approxMix = aFlags.z * e;
+        float a = mix(aFlags.x, aFlags.y * mix(1.0, step(0.01, uApprox), aFlags.z), e) * aVis;
+        a *= mix(1.0, 0.3 * uApprox, approxMix);
+        // doğrudan çizimde (yedek yol) yoğun yerler doymasın diye uzakta sönükleştir
+        if (uDirect > 0.5) a *= clamp(0.06 + spacingPx * 0.3, 0.06, 1.0);
+        a *= 0.72 + 0.28 * sin(uTime * (0.6 + aSeed * 1.4) + aSeed * 40.0);
+        // seçimde yeri kesin yıldızlar parlar; yeri belirsiz bulut vurgulanmaz, işaretleri örtmesin
+        if (uSel > 0.5) a *= mix(0.13, mix(1.15, 0.35, approxMix), aHi);
+        vA = a;
+        vec3 col = mix(uGold, uEmber, e);
+        col = mix(col, uAsh, approxMix);
+        col = mix(col, vec3(1.0, 0.93, 0.8), hi * 0.3 * (1.0 - approxMix));
+        vCol = col;
+        gl_PointSize = clamp(spacingPx * 1.05, 1.3, 9.0) * (0.7 + 0.6 * aSeed) * (1.0 + hi * 0.5) * uDpr * 2.2;
+        if (a < 0.003) gl_PointSize = 0.0;
+      }`,
+    fragmentShader: `
+      varying vec3 vCol; varying float vA;
+      void main() {
+        float d = length(gl_PointCoord - 0.5) * 2.0;
+        if (d > 1.0) discard;
+        float w = (exp(-d * d * 14.0) + exp(-d * d * 3.0) * 0.35) * vA;
+        gl_FragColor = vec4(vCol * w, w);
+      }`,
+  });
+  const stars = new THREE.Points(geo, starMat);
+  const starScene = new THREE.Scene();
+  starScene.add(stars);
+  const rt = canFloat ? new THREE.WebGLRenderTarget(1, 1, { type: THREE.HalfFloatType, format: THREE.RGBAFormat, depthBuffer: false }) : null;
+  const quadCam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
+  const quadScene = new THREE.Scene();
+  const quadMat = new THREE.ShaderMaterial({
+    uniforms: { tAcc: { value: rt ? rt.texture : null }, uExposure: { value: 0.75 }, uPx: { value: new THREE.Vector2(1, 1) } },
+    transparent: true, depthTest: false, depthWrite: false,
+    blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor,
+    vertexShader: "varying vec2 vUv; void main() { vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }",
+    fragmentShader: `
+      uniform sampler2D tAcc; uniform float uExposure; uniform vec2 uPx; varying vec2 vUv;
+      void main() {
+        vec4 acc = texture2D(tAcc, vUv);
+        // hale: çevredeki yoğunluğu üç halkada örnekle
+        vec4 g = vec4(0.0);
+        for (int r = 1; r <= 3; r++) {
+          float rad = float(r * r) * 4.0;
+          for (int k = 0; k < 8; k++) {
+            float a = float(k) * 0.785398 + float(r) * 0.4;
+            g += texture2D(tAcc, vUv + vec2(cos(a), sin(a)) * rad * uPx) / float(r);
+          }
+        }
+        g /= 14.7;
+        float L = acc.a;
+        vec3 hue = L > 0.0005 ? acc.rgb / L : vec3(0.0);
+        float b = 1.0 - exp(-L * uExposure);
+        vec3 col = mix(hue, vec3(1.0, 0.95, 0.86), smoothstep(6.0, 60.0, L) * 0.7) * b;
+        float gb = (1.0 - exp(-g.a * 0.35)) * 0.55;
+        vec3 gcol = g.a > 0.0005 ? g.rgb / g.a : vec3(0.0);
+        col += gcol * gb * (1.0 - b);
+        float alpha = clamp(max(b, gb), 0.0, 1.0);
+        gl_FragColor = vec4(col, alpha);
+      }`,
+  });
+  quadScene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), quadMat));
+  if (!rt) { stars.material.blending = THREE.AdditiveBlending; scene.add(stars); }
+
+  // ---------- kamera ----------
+  const V = { cx: 33, cy: mercY(39.5), s: 40 };
+  let vw = 0, vh = 0;
+  function resize() {
+    vw = innerWidth; vh = innerHeight;
+    renderer.setSize(vw, vh, false);
+    if (rt) { rt.setSize(Math.round(vw * DPR), Math.round(vh * DPR)); quadMat.uniforms.uPx.value.set(1 / (vw * DPR), 1 / (vh * DPR)); }
+    ovc.width = vw * DPR; ovc.height = vh * DPR;
+    applyView();
+  }
+  function applyView() {
+    camera.left = V.cx - vw / 2 / V.s; camera.right = V.cx + vw / 2 / V.s;
+    camera.top = V.cy + vh / 2 / V.s; camera.bottom = V.cy - vh / 2 / V.s;
+    camera.updateProjectionMatrix();
+    U.uScale.value = V.s;
+  }
+  const toScreen = (x, y) => [(x - V.cx) * V.s + vw / 2, vh / 2 - (y - V.cy) * V.s];
+  const toWorld = (sx, sy) => [(sx - vw / 2) / V.s + V.cx, (vh / 2 - sy) / V.s + V.cy];
+  const S_MIN = 9, S_MAX = 9000;
+  function homeView() {
+    const narrow = vw < 900;
+    return { cx: narrow ? 33 : 34.5, cy: mercY(narrow ? 38.5 : 39.8), s: Math.max(S_MIN, Math.min(vw / (narrow ? 22 : 36), vh / 19)) };
+  }
+  let flight = null;
+  function flyTo(target, ms = 1100) {
+    if (reduceMotion) { Object.assign(V, target); applyView(); return; }
+    flight = { from: { ...V }, to: target, t0: performance.now(), ms };
+  }
+  // noktaları levha ve künyenin dışında kalan alana sığdır
+  function fitWorld(pts, pad = 0.18, onlyOut = false, maxS = 2200) {
+    if (!pts.length) return;
+    let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+    pts.forEach(([x, y]) => { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); });
+    const plaqueOpen = !$("plaque").hidden;
+    const right = plaqueOpen && vw >= 900 ? 410 : 20, bottom = plaqueOpen && vw < 900 ? vh * 0.5 : 70, top = 110;
+    const vis = (x, y) => { const [sx, sy] = toScreen(x, y); return sx > 30 && sx < vw - right && sy > top && sy < vh - bottom; };
+    if (onlyOut && pts.every(([x, y]) => vis(x, y))) return;
+    const aw = vw - right - 40, ah = vh - top - bottom;
+    const w = Math.max(x1 - x0, 0.3) * (1 + pad * 2), h = Math.max(y1 - y0, 0.3) * (1 + pad * 2);
+    let s = Math.min(aw / w, ah / h, maxS);
+    if (onlyOut) s = Math.min(s, V.s);
+    s = Math.max(S_MIN, s);
+    // ekranda kullanılabilir alanın ortası, dünya merkezine gelsin
+    const midSx = (20 + vw - right) / 2, midSy = (top + vh - bottom) / 2;
+    flyTo({ cx: (x0 + x1) / 2 - (midSx - vw / 2) / s, cy: (y0 + y1) / 2 + (midSy - vh / 2) / s, s });
+  }
+
+  // ---------- etkileşim: sürükle, tekerlek, iki parmak ----------
+  const pointers = new Map();
+  let dragMoved = 0, pinch0 = null, lastHover = 0;
+  glc.addEventListener("pointerdown", (e) => {
+    glc.setPointerCapture(e.pointerId);
+    pointers.set(e.pointerId, [e.clientX, e.clientY]);
+    dragMoved = 0; flight = null;
+    if (pointers.size === 2) { const [a, b] = [...pointers.values()]; pinch0 = { d: Math.hypot(a[0] - b[0], a[1] - b[1]), s: V.s, w: toWorld((a[0] + b[0]) / 2, (a[1] + b[1]) / 2) }; }
+    glc.classList.add("drag");
+  });
+  glc.addEventListener("pointermove", (e) => {
+    if (!pointers.has(e.pointerId)) { hover(e.clientX, e.clientY); return; }
+    const prev = pointers.get(e.pointerId);
+    pointers.set(e.pointerId, [e.clientX, e.clientY]);
+    if (pointers.size === 2 && pinch0) {
+      const [a, b] = [...pointers.values()];
+      const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+      V.s = Math.max(S_MIN, Math.min(S_MAX, (pinch0.s * d) / pinch0.d));
+      const mx = (a[0] + b[0]) / 2, my = (a[1] + b[1]) / 2;
+      V.cx = pinch0.w[0] - (mx - vw / 2) / V.s; V.cy = pinch0.w[1] + (my - vh / 2) / V.s;
+      dragMoved += 10;
+    } else {
+      const dx = e.clientX - prev[0], dy = e.clientY - prev[1];
+      dragMoved += Math.abs(dx) + Math.abs(dy);
+      V.cx -= dx / V.s; V.cy += dy / V.s;
+    }
+    applyView();
+  });
+  const endPointer = (e) => {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+    if (pointers.size < 2) pinch0 = null;
+    if (!pointers.size) { glc.classList.remove("drag"); if (dragMoved < 6) click(e.clientX, e.clientY); }
+  };
+  glc.addEventListener("pointerup", endPointer);
+  glc.addEventListener("pointercancel", (e) => { pointers.delete(e.pointerId); pinch0 = null; glc.classList.remove("drag"); });
+  glc.addEventListener("pointerleave", () => { $("tip").style.opacity = 0; });
+  glc.addEventListener("wheel", (e) => {
+    e.preventDefault(); flight = null;
+    const w = toWorld(e.clientX, e.clientY);
+    V.s = Math.max(S_MIN, Math.min(S_MAX, V.s * Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0016))));
+    V.cx = w[0] - (e.clientX - vw / 2) / V.s; V.cy = w[1] + (e.clientY - vh / 2) / V.s;
+    applyView();
+  }, { passive: false });
+  addEventListener("resize", resize);
+
+  // ---------- durum ----------
+  const S = { text: "", view: "memleket", harp: "", approx: true, sel: null, unit: null, unitLvl: "firka", unitMode: "nerede", unitQ: "", shown: 120, summary: false, cross: null };
+  let idx = [];
+  const VIEWS = ["memleket", "sehadet", "cephe", "birlik"];
+  const layoutOf = () => (S.view === "memleket" || (S.view === "birlik" && S.unit && S.unitMode === "nereli") ? 0 : 1);
+  let tAnim = null, hiAnim = null;
+  function animateT(target, uniform = U.uT, ms = 2400) {
+    if (reduceMotion) { uniform.value = target; return; }
+    const a = { u: uniform, from: uniform.value, to: target, t0: performance.now(), ms };
+    if (uniform === U.uT) tAnim = a; else hiAnim = a;
+  }
+
+  // Harp seçimi: aranabilir liste
+  const harpCount = new Map();
+  for (let i = 0; i < N; i++) harpCount.set(C.harp[i], (harpCount.get(C.harp[i]) || 0) + 1);
+  const HARPS = [{ v: "", name: "Tümü", years: "1853 – 1928", n: N }].concat(dict.harp.map((h, i) => [h, i]).filter(([h]) => h)
+    .sort((a, b) => (a[0].match(/\d{4}/) || [0])[0] - (b[0].match(/\d{4}/) || [0])[0])
+    .map(([h, i]) => ({ v: String(i), name: title(h.replace(/\s*\(.*\)\s*/, "")), years: (h.match(/\((.*)\)/) || ["", ""])[1].replace(/\/93 HARB[İI]/i, ""), n: harpCount.get(i) || 0 })));
+  let harpActive = 0;
+  function renderHarps() {
+    const q = trUp($("harp-q").value.trim());
+    const list = HARPS.filter((h) => !q || trUp(h.name + " " + h.years).includes(q));
+    harpActive = Math.min(harpActive, Math.max(0, list.length - 1));
+    $("harp-list").innerHTML = list.length ? list.map((h, k) => `<button role="option" data-harp="${h.v}" aria-selected="${S.harp === h.v}" class="${k === harpActive ? "active" : ""}"><span><b>${esc(h.name)}</b><small>${esc(h.years)}</small></span><span class="n">${fmt.format(h.n)}</span></button>`).join("") : '<div class="none">Bu adla bir harp bulunmamaktadır.</div>';
+  }
+  function openHarps(open) {
+    $("harp-pop").hidden = !open;
+    $("harp-btn").setAttribute("aria-expanded", open);
+    if (open) { $("harp-q").value = ""; harpActive = 0; renderHarps(); $("harp-q").focus(); }
+  }
+  function setHarp(v) {
+    S.harp = v;
+    $("harp-val").textContent = (HARPS.find((h) => h.v === v) || HARPS[0]).name;
+    openHarps(false);
+    filter(); if (S.sel && !selectionRecs().length) S.sel = null; updateHighlight(); if (!$("plaque").hidden) renderPlaque();
+    if (v) fitVisible(); else flyTo(homeView());
+  }
+
+  function keyMatch(i, k) {
+    const n = +k.slice(1);
+    switch (k[0]) {
+      case "i": return C.il[i] === n;
+      case "c": return C.ilce[i] === n;
+      case "y": return C.yer[i] === n;
+      case "t": return TH[i] === n;
+      case "b": return C.muh[i] === n;
+      case "g": return GAR[n].units.some((u) => inUnit(i, u));
+    }
+    return false;
+  }
+  function placeName(k) {
+    const n = +k.slice(1);
+    if (k[0] === "i") return title(D.ilPts[n][0]);
+    if (k[0] === "c") return title(D.ilcePts[n][1]) + ", " + title(D.ilPts[D.ilcePts[n][0]][0]);
+    if (k[0] === "t") return THEATERS[n].name;
+    if (k[0] === "b") return BAT[n].name;
+    if (k[0] === "g") return "Konuş: " + GAR[n].name;
+    const p = D.yerPts[n];
+    return p[3] ? title(p[0]) : title(p[0].replace(/\s*\(yer belirsiz\)\s*$/i, "")) + " · yeri belirsiz";
+  }
+  const placeExact = (k) => k[0] !== "y" || !!D.yerPts[+k.slice(1)][3];
+  const AYK = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+  const batDate = (b) => { const a = `${AYK[b.b0 % 12]} ${Math.floor(b.b0 / 12)}`, z = `${AYK[b.b1 % 12]} ${Math.floor(b.b1 / 12)}`; return a === z ? a : Math.floor(b.b0 / 12) === Math.floor(b.b1 / 12) ? `${AYK[b.b0 % 12]}–${z}` : `${a} – ${z}`; };
+  const ilName = (i) => (C.il[i] >= 0 ? title(D.ilPts[C.il[i]][0]) : "—");
+
+  // Serbest metin araması: isim, baba adı, lakap, memleket, şehadet yeri, rütbe, harp, cephe, birlik
+  const UP = (arr) => arr.map((x) => trUp(x || ""));
+  const memU = UP(dict.memleket), hamU = UP(dict.ham), rutU = UP(dict.rutbe), harpU = UP(dict.harp), cepU = UP(dict.cephe), birU = UP(dict.birlik), sinU = UP(dict.sinif);
+  const textMatch = (i, q) => C.ad[i].includes(q) || C.baba[i].includes(q) || C.lakap[i].includes(q) || memU[C.memleket[i]].includes(q) ||
+    hamU[C.ham[i]].includes(q) || rutU[C.rutbe[i]].includes(q) || sinU[C.sinif[i]].includes(q) || harpU[C.harp[i]].includes(q) || cepU[C.cephe[i]].includes(q) || birU[C.birlik[i]].includes(q);
+  function filter() {
+    const h = S.harp === "" ? -1 : +S.harp, tq = S.text ? trUp(S.text) : "";
+    idx = [];
+    for (let i = 0; i < N; i++) {
+      const ok = (h < 0 || C.harp[i] === h) && (!S.cross || keyMatch(i, S.cross.k)) && (!tq || textMatch(i, tq));
+      aVis[i] = ok ? 1 : 0;
+      if (ok) idx.push(i);
+    }
+    visAttr.needsUpdate = true;
+    computePlaces();
+    const chip = $("cross-chip");
+    chip.hidden = !S.cross;
+    if (S.cross) chip.textContent = `${S.cross.name} · ${fmt.format(idx.length)} şehit ✕`;
+    $("text-chip").hidden = !S.text;
+    if (S.text) $("text-chip").textContent = `“${S.text}” · ${fmt.format(idx.length)} şehit ✕`;
+    computeGarrisons();
+  }
+
+  // tıklanabilir yerler ve görünür sayıları
+  let placesM = [], placesS = [], placesIl = [], theaterInfo = [];
+  const IL_ZOOM = 140; // bu ölçeğin altında memleketler il düzeyinde seçilir ve etiketlenir
+  function computePlaces() {
+    const cm = new Map(), cs = new Map(), ct = new Map();
+    for (const i of idx) {
+      if (mKey[i]) cm.set(mKey[i], (cm.get(mKey[i]) || 0) + 1);
+      if (sKey[i]) cs.set(sKey[i], (cs.get(sKey[i]) || 0) + 1);
+      if (TH[i] >= 0) ct.set(TH[i], (ct.get(TH[i]) || 0) + 1);
+    }
+    const mk = (m, sp) => [...m.entries()].map(([k, n]) => { const w = keyW(k); return { k, n, x: w[0], y: w[1], r: placeExact(k) ? sp * Math.sqrt(n) * 1.05 : 0.3 }; }).sort((a, b) => b.n - a.n);
+    placesM = mk(cm, SPACING); placesS = mk(cs, SPACING_S);
+    // il düzeyi: yıldızlarının ağırlık merkezi
+    const il = new Map();
+    for (const i of idx) {
+      if (C.il[i] < 0) continue;
+      let a = il.get(C.il[i]);
+      if (!a) il.set(C.il[i], (a = { n: 0, x: 0, y: 0 }));
+      a.n++; a.x += M[i * 2]; a.y += M[i * 2 + 1];
+    }
+    placesIl = [...il.entries()].map(([n, a]) => ({ k: "i" + n, n: a.n, x: a.x / a.n, y: a.y / a.n, r: SPACING * Math.sqrt(a.n) * 1.6 })).sort((a, b) => b.n - a.n);
+    theaterInfo = theaterShapes(ct);
+  }
+  // Cephe: muharebelerinin görünür şehit sayıları; etiket en büyük muharebenin üstünde
+  let batInfo = [];
+  function theaterShapes(ct) {
+    const bc = new Map();
+    for (const i of idx) if (C.muh[i] >= 0) bc.set(C.muh[i], (bc.get(C.muh[i]) || 0) + 1);
+    batInfo = BAT.map((b) => ({ ...b, n: bc.get(b.k) || 0 }));
+    return THEATERS.map((t, n) => {
+      const bs = batInfo.filter((b) => b.th === n && b.n).sort((a, b) => b.n - a.n);
+      return { battles: bs, c: bs.length ? bs[0].w : W(t.c[0], t.c[1]), n: ct.get(n) || 0 };
+    });
+  }
+
+  // ---------- birlikler ----------
+  const LVL = { kolordu: "Kolordu", firka: "Fırka", alay: "Alay" };
+  const harpShort = (h) => title((dict.harp[h] || "").replace(/\s*\(.*\)\s*/, "")) || "Harp belirtilmemiş";
+  const unitName = (u) => `${u.num}. ${LVL[u.lvl]}`;
+  const inUnit = (i, u) => C[u.lvl][i] === u.num && C.harp[i] === u.harp;
+  // Kaynaklardan derlenen konuş ve intikaller
+  const UNITSRC = new Map((D.units || []).map((u) => [`${u.l}|${u.n}|${u.h}`, u]));
+  const unitKeyOf = (u) => `${u.lvl}|${u.num}|${u.harp}`;
+  const ymParse = (t) => { const m = /^(\d{4})(?:-(\d{1,2}))?/.exec(t || ""); return m ? +m[1] * 12 + (m[2] ? +m[2] - 1 : 0) : 0; };
+  const ymShow = (t) => { const m = /^(\d{4})(?:-(\d{1,2}))?/.exec(t || ""); return m ? (m[2] ? AYK2[+m[2] - 1] + " " : "") + m[1] : ""; };
+  const AYK2 = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+  const CEPHE_ADI = { ÇANAKKALE: "Çanakkale", KAFKAS: "Kafkas", IRAK: "Irak", FİLİSTİN: "Filistin", HİCAZ: "Hicaz", GALİÇYA: "Galiçya", ROMANYA: "Romanya", MAKEDONYA: "Makedonya", BATI: "Batı", GÜNEY: "Güney", DOĞU: "Doğu", TRAKYA: "Trakya", İSTANBUL: "İstanbul", DİĞER: "" };
+  // Güzergâh: kaynakta intikal varsa konuştan başlayıp onları izler; yoksa konuş + şehit kayıtlarından çıkan cepheler
+  function unitRoute(u) {
+    const src = UNITSRC.get(unitKeyOf(u));
+    const pts = [];
+    if (src && src.konus) pts.push({ w: W(src.konus.lat, src.konus.lon), name: "Konuş: " + src.konus.yer.replace(/\s*\(.*?\)/g, "").split(",")[0], sub: "", home: true });
+    if (src && src.int && src.int.length) {
+      src.int.slice().sort((a, b) => ymParse(a.baslangic) - ymParse(b.baslangic)).forEach((it) => {
+        const span = [ymShow(it.baslangic), ymShow(it.bitis)].filter(Boolean).join(" – ");
+        const w = W(it.lat, it.lon), prev = pts[pts.length - 1];
+        // konuşla ya da bir öncekiyle aynı noktadaki intikali ayrı durak olarak çizme
+        if (prev && Math.hypot(prev.w[0] - w[0], prev.w[1] - w[1]) < 0.2) { if (!prev.home) prev.sub = [prev.sub, span].filter(Boolean).join(", "); return; }
+        pts.push({ w, name: (it.yer || CEPHE_ADI[it.cephe] || it.cephe).replace(/\s*\(.*?\)/g, ""), sub: span, src: true });
+      });
+      return { pts, fromSrc: true, src };
+    }
+    unitStops(u).forEach((s) => pts.push({ w: s.w, name: s.bat ? s.bat.name : THEATERS[s.t].name, sub: yearSpan(s) }));
+    return { pts, fromSrc: false, src };
+  }
+  // Konuşlar: kaynakta konuş yeri olan birlikler, aynı şehirdekiler tek işarette
+  let GAR = [];
+  function computeGarrisons() {
+    const by = new Map();
+    for (const u of D.units || []) {
+      if (!u.konus || (S.harp !== "" && u.h !== +S.harp)) continue;
+      const key = u.konus.lat.toFixed(1) + "," + u.konus.lon.toFixed(1);
+      let g = by.get(key);
+      if (!g) by.set(key, (g = { w: W(u.konus.lat, u.konus.lon), name: u.konus.yer.replace(/\s*\(.*?\)/g, "").split(",")[0].trim(), units: [] }));
+      g.units.push({ lvl: u.l, num: u.n, harp: u.h });
+    }
+    GAR = [...by.values()].sort((a, b) => b.units.length - a.units.length);
+  }
+  const parseUnit = (k) => { const [lvl, num, harp] = k.split("|"); return { lvl, num: +num, harp: +harp }; };
+  function unitCounts(recs, lvl) {
+    const m = new Map();
+    for (const i of recs) { const num = C[lvl][i]; if (num) { const k = `${lvl}|${num}|${C.harp[i]}`; m.set(k, (m.get(k) || 0) + 1); } }
+    return m;
+  }
+  // Birliğin şehit verdiği cepheler, tarih sırasıyla
+  // Birliğin şehit verdiği cepheler, tarih sırasıyla; konum: o cephede en çok şehit verdiği muharebe
+  function unitStops(u) {
+    const by = new Map();
+    for (const i of idx) {
+      if (!inUnit(i, u) || TH[i] < 0) continue;
+      let s = by.get(TH[i]);
+      if (!s) by.set(TH[i], (s = { t: TH[i], n: 0, ym: [], bat: new Map() }));
+      s.n++;
+      if (C.ym[i]) s.ym.push(C.ym[i]);
+      if (C.muh[i] >= 0) s.bat.set(C.muh[i], (s.bat.get(C.muh[i]) || 0) + 1);
+    }
+    const total = [...by.values()].reduce((a, s) => a + s.n, 0);
+    return [...by.values()].filter((s) => s.n >= Math.max(3, total * 0.012)).map((s) => {
+      s.ym.sort((a, b) => a - b);
+      const q = (f) => (s.ym.length ? s.ym[Math.floor((s.ym.length - 1) * f)] : 0);
+      const top = [...s.bat.entries()].sort((a, b) => b[1] - a[1])[0];
+      const bat = top ? BAT[top[0]] : null;
+      return { t: s.t, n: s.n, mid: q(0.5) || 1e9, from: q(0.1), to: q(0.9), bat, w: bat ? bat.w : (theaterInfo[s.t] ? theaterInfo[s.t].c : W(...THEATERS[s.t].c)) };
+    }).sort((a, b) => a.mid - b.mid);
+  }
+  const AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+  const ymText = (a, b) => { if (!a) return ""; const f = (x) => `${AYLAR[x % 12]} ${Math.floor(x / 12)}`; return a === b || !b ? f(a) : `${f(a)} – ${f(b)}`; };
+  const yearSpan = (s) => { const a = Math.floor(s.from / 12), b = Math.floor(s.to / 12); return a ? (b && b !== a ? `${a}–${b}` : `${a}`) : ""; };
+
+  // ---------- seçim ve oklar ----------
+  let flowsCache = null, selT0 = 0;
+  function selectionRecs() {
+    if (S.view === "birlik" && S.unit && !S.sel) return idx.filter((i) => inUnit(i, S.unit));
+    if (!S.sel) return [];
+    return idx.filter((i) => keyMatch(i, S.sel) && (!(S.view === "birlik" && S.unit) || inUnit(i, S.unit)));
+  }
+  function updateHighlight() {
+    aHi.fill(0);
+    const recs = selectionRecs();
+    for (const i of recs) aHi[i] = 1;
+    hiAttr.needsUpdate = true;
+    U.uSel.value = recs.length ? 1 : 0;
+    U.uTHi.value = U.uT.value; hiAnim = null;
+    flowsCache = buildFlows(recs);
+    selT0 = performance.now();
+  }
+  function buildFlows(recs) {
+    if (!recs.length) return null;
+    const out = { list: [], target: null, route: null };
+    if (S.view === "birlik" && S.unit && !S.sel) {
+      const stops = unitStops(S.unit);
+      if (S.unitMode === "nerede") { out.route = unitRoute(S.unit).pts; return out; }
+      if (!stops.length) return null;
+      const main = stops.slice().sort((a, b) => b.n - a.n)[0];
+      out.target = { w: main.w, name: THEATERS[main.t].name };
+      const m = new Map();
+      for (const i of recs) if (C.il[i] >= 0) m.set(C.il[i], (m.get(C.il[i]) || 0) + 1);
+      out.list = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 50).map(([il, n]) => ({ a: keyW("i" + il), b: main.w, n, name: title(D.ilPts[il][0]), src: true }));
+      return out;
+    }
+    const k = S.sel;
+    if (k[0] === "t") return null; // cephe seçiliyken muharebeler gösterilir; oklar muharebe seçilince
+    const outgoing = S.view === "memleket" || (S.view === "birlik" && S.unitMode === "nereli") || k[0] === "g";
+    const tw = k[0] === "t" ? theaterInfo[+k.slice(1)].c : keyW(k);
+    out.target = { w: tw, name: placeName(k) };
+    const m = new Map();
+    for (const i of recs) {
+      const key = outgoing ? (C.yer[i] >= 0 ? "y" + C.yer[i] : null) : (C.il[i] >= 0 ? "i" + C.il[i] : null);
+      if (key && key !== k) m.set(key, (m.get(key) || 0) + 1);
+    }
+    out.list = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 50).map(([key, n]) => outgoing
+      ? { a: tw, b: keyW(key), n, name: placeName(key), exact: placeExact(key) }
+      : { a: keyW(key), b: tw, n, name: placeName(key), src: true, exact: true });
+    return out;
+  }
+
+  // ---------- kaplama: etiketler, oklar, cephe bölgeleri ----------
+  const GOLD = "224,185,104", CREAM = "236,228,211", EMBER = "226,103,76";
+  const HAIR = String.fromCharCode(8202);
+  function bez(a, b, t, bend = 0.2) {
+    const dx = b[0] - a[0], dy = b[1] - a[1];
+    const cx = (a[0] + b[0]) / 2 - dy * bend, cy = (a[1] + b[1]) / 2 + dx * bend, u = 1 - t;
+    return [u * u * a[0] + 2 * u * t * cx + t * t * b[0], u * u * a[1] + 2 * u * t * cy + t * t * b[1]];
+  }
+  const labelBoxes = [];
+  function placeLabel(text, sub, x, y, opts = {}) {
+    const font = opts.font || "500 10.5px 'IBM Plex Sans', sans-serif";
+    ov.font = font;
+    const t = text.toLocaleUpperCase("tr-TR").split("").join(HAIR);
+    const tw = ov.measureText(t).width;
+    ov.font = "400 10px 'IBM Plex Mono', monospace";
+    const sw = sub ? ov.measureText(sub).width + 7 : 0;
+    const hits = (bx) => labelBoxes.some((b) => !(bx[2] < b[0] || bx[0] > b[2] || bx[3] < b[1] || bx[1] > b[3]));
+    let box = [x - 3, y - 11, x + tw + sw + 3, y + 4];
+    if (!opts.force && hits(box)) {
+      // sağda yer yoksa noktanın soluna yaz
+      if (opts.alt === undefined) return false;
+      x = opts.alt - tw - sw; box = [x - 3, y - 11, x + tw + sw + 3, y + 4];
+      if (x < 4 || hits(box)) return false;
+    }
+    labelBoxes.push(box);
+    ov.shadowColor = "rgba(0,0,0,0.95)"; ov.shadowBlur = 6;
+    ov.font = font; ov.fillStyle = opts.color || `rgba(${CREAM},0.85)`;
+    ov.fillText(t, x, y);
+    if (sub) { ov.font = "400 10px 'IBM Plex Mono', monospace"; ov.fillStyle = `rgba(${GOLD},0.95)`; ov.fillText(sub, x + tw + 7, y); }
+    ov.shadowBlur = 0;
+    return true;
+  }
+  let pulse = null;
+  function drawOverlay(now) {
+    ov.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ov.clearRect(0, 0, vw, vh);
+    labelBoxes.length = 0;
+    if (!$("plaque").hidden && vw >= 900) labelBoxes.push([vw - 410, 0, vw, vh]);
+    labelBoxes.push([0, 0, vw, 96]);
+    if (V.s > 22 && V.s < 500) {
+      ov.textAlign = "center";
+      ov.font = "400 9.5px 'IBM Plex Sans', sans-serif";
+      ov.fillStyle = "rgba(154,143,124,0.4)";
+      for (const [n, lat, lon] of B.labels) {
+        const [sx, sy] = toScreen(lon, mercY(lat));
+        if (sx < -60 || sx > vw + 60 || sy < 110 || sy > vh + 20) continue;
+        ov.fillText(n.replace(" Cumhuriyeti", "").toLocaleUpperCase("tr-TR").split("").join(HAIR + HAIR), sx, sy);
+      }
+      ov.textAlign = "left";
+    }
+    if (S.view === "cephe") drawTheaters(now);
+    if (S.view === "birlik" && !S.unit) drawGarrisons();
+    if (flowsCache) drawFlows(now);
+    else if (S.view !== "cephe" && !(S.view === "birlik" && !S.unit)) drawPlaceLabels();
+    if (pulse && now > pulse.t0 && now - pulse.t0 < 6000) {
+      const [sx, sy] = toScreen(pulse.x, pulse.y);
+      const k = ((now - pulse.t0) % 1600) / 1600;
+      ov.strokeStyle = `rgba(${CREAM},${0.9 * (1 - k)})`; ov.lineWidth = 1.5;
+      ov.beginPath(); ov.arc(sx, sy, 6 + k * 26, 0, Math.PI * 2); ov.stroke();
+    }
+  }
+  function drawPlaceLabels() {
+    const list = layoutOf() === 0 ? (V.s < IL_ZOOM ? placesIl : placesM) : placesS;
+    let shown = 0;
+    for (const p of list) {
+      if (shown > 24) break;
+      if (!placeExact(p.k)) continue;
+      if (p.n < 12 && V.s < 300) break;
+      const [sx, sy] = toScreen(p.x, p.y);
+      if (sx < 0 || sx > vw || sy < 100 || sy > vh - 60) continue;
+      if (placeLabel(placeName(p.k), fmt.format(p.n), sx + Math.max(5, p.r * V.s) + 4, sy + 4, { alt: sx - Math.max(5, p.r * V.s) - 4 })) shown++;
+    }
+  }
+  // Çapraz kılıç işareti
+  function sabres(x, y, r, alpha, hot) {
+    ov.save();
+    ov.translate(x, y);
+    ov.fillStyle = `rgba(4,6,10,${0.7 * alpha})`; ov.beginPath(); ov.arc(0, 0, r + 3, 0, Math.PI * 2); ov.fill();
+    ov.strokeStyle = `rgba(${GOLD},${(hot ? 0.95 : 0.5) * alpha})`; ov.lineWidth = 1; ov.beginPath(); ov.arc(0, 0, r + 3, 0, Math.PI * 2); ov.stroke();
+    ov.strokeStyle = `rgba(${hot ? CREAM : GOLD},${alpha})`; ov.lineCap = "round"; ov.lineWidth = Math.max(1.2, r / 6);
+    for (const s of [1, -1]) {
+      ov.beginPath(); ov.moveTo(-r * 0.62 * s, r * 0.62); ov.quadraticCurveTo(0, -r * 0.05, r * 0.66 * s, -r * 0.7); ov.stroke();
+      ov.beginPath(); ov.moveTo(-r * 0.62 * s - r * 0.22, r * 0.62 - r * 0.22 * s * s); ov.lineTo(-r * 0.62 * s + r * 0.22, r * 0.62 + r * 0.22 * s * s - r * 0.44); ov.stroke();
+    }
+    ov.restore();
+  }
+  const batR = (n) => Math.min(16, 5 + Math.sqrt(n) * 0.16);
+  function drawTheaters(now) {
+    const selT = S.sel && S.sel[0] === "t" ? +S.sel.slice(1) : -1;
+    const selB = S.sel && S.sel[0] === "b" ? +S.sel.slice(1) : -1;
+    const focusT = selB >= 0 ? BAT[selB].th : selT;
+    const list = batInfo.filter((b) => b.n).sort((a, b) => b.n - a.n);
+    for (const b of list.slice().reverse()) {
+      const [sx, sy] = toScreen(...b.w);
+      if (sx < -30 || sx > vw + 30 || sy < -30 || sy > vh + 30) continue;
+      const inF = focusT < 0 || b.th === focusT;
+      sabres(sx, sy, batR(b.n), inF ? 1 : 0.28, b.k === selB || (selT >= 0 && b.th === selT));
+    }
+    // muharebe adları: odaktaki cephenin tümü, yoksa büyükten küçüğe çakışmadan
+    for (const b of list) {
+      if (focusT >= 0 && b.th !== focusT) continue;
+      const [sx, sy] = toScreen(...b.w);
+      if (sx < 0 || sx > vw || sy < 100 || sy > vh - 50) continue;
+      if (focusT < 0 && !S.harp && !S.text && b.n < 40 && V.s < 120) continue;
+      placeLabel(b.name, focusT >= 0 ? batDate(b) : fmt.format(b.n), sx + batR(b.n) + 7, sy + 4, { force: b.k === selB, alt: sx - batR(b.n) - 7 });
+    }
+    // cephe adları, odak yokken
+    if (focusT < 0) {
+      theaterInfo.forEach((t, n) => {
+        if (!t.n || !t.battles.length) return;
+        // birden çok bölgeye yayılan harplerin (Kırım, 93 Harbi) adı tek bir muharebenin üstüne yazılmaz
+        const xs = t.battles.map((b) => b.w[0]), ys = t.battles.map((b) => b.w[1]);
+        if (Math.max(...xs) - Math.min(...xs) > 7 || Math.max(...ys) - Math.min(...ys) > 7) return;
+        const [sx, sy] = toScreen(...t.c);
+        if (sx < 30 || sx > vw - 60 || sy < 110 || sy > vh - 60) return;
+        placeLabel(THEATERS[n].name, fmt.format(t.n), sx - 20, sy - batR(t.battles[0].n) - 12, { font: "500 12.5px 'Cinzel', Georgia, serif", color: `rgba(${CREAM},0.95)` });
+      });
+    }
+  }
+  function castle(x, y, n, hot, alpha) {
+    ov.save(); ov.globalAlpha = alpha;
+    ov.fillStyle = "rgba(4,6,10,0.92)"; ov.strokeStyle = `rgba(${GOLD},${hot ? 1 : 0.75})`; ov.lineWidth = 1.2;
+    ov.beginPath(); ov.rect(x - 9, y - 7, 18, 14); ov.fill(); ov.stroke();
+    ov.fillStyle = `rgba(${hot ? CREAM : GOLD},1)`;
+    for (const dx of [-7, -1.5, 4]) ov.fillRect(x + dx, y - 11, 3, 4);
+    ov.fillRect(x - 2, y - 1, 4, 8);
+    if (n > 1) { ov.font = "500 9.5px 'IBM Plex Mono', monospace"; ov.fillStyle = `rgba(${GOLD},1)`; ov.fillText(String(n), x + 11, y - 6); }
+    ov.restore();
+  }
+  function drawGarrisons() {
+    const sel = S.sel && S.sel[0] === "g" ? +S.sel.slice(1) : -1;
+    GAR.forEach((g, n) => {
+      const [sx, sy] = toScreen(...g.w);
+      if (sx < -20 || sx > vw + 20 || sy < -20 || sy > vh + 20) return;
+      castle(sx, sy, g.units.length, n === sel, sel < 0 || n === sel ? 1 : 0.35);
+    });
+    GAR.forEach((g, n) => {
+      if (sel >= 0) return; // seçiliyken adı okların hedef etiketinde yazar
+      const [sx, sy] = toScreen(...g.w);
+      placeLabel(g.name, g.units.length > 1 ? g.units.length + " birlik" : unitName(g.units[0]), sx + 14, sy + 4, { force: n === sel, alt: sx - 14 });
+    });
+  }
+  function nearestGarrison(sx, sy, tol) {
+    let best = -1, bd = tol;
+    GAR.forEach((g, n) => { const [x, y] = toScreen(...g.w), d = Math.hypot(x - sx, y - sy); if (d < bd) { bd = d; best = n; } });
+    return best;
+  }
+  function nearestBattle(sx, sy, tol) {
+    let best = null, bd = Infinity;
+    for (const b of batInfo) {
+      if (!b.n) continue;
+      const [x, y] = toScreen(...b.w), d = Math.hypot(x - sx, y - sy) - batR(b.n);
+      if (d < bd) { bd = d; best = b; }
+    }
+    return best && bd < tol ? best : null;
+  }
+  function drawFlows(now) {
+    const f = flowsCache, el = (now - selT0) / 1000;
+    if (f.route) { drawRoute(f.route, el, now); return; }
+    const max = f.list.length ? f.list[0].n : 1;
+    const T = f.target ? toScreen(...f.target.w) : null;
+    if (T) labelBoxes.push([T[0] - 4, T[1] - 26, T[0] + 260, T[1] - 4]);
+    f.list.slice().reverse().forEach((fl, revRank) => {
+      const rank = f.list.length - 1 - revRank;
+      const a = toScreen(...fl.a), b = toScreen(...fl.b);
+      if (Math.hypot(a[0] - b[0], a[1] - b[1]) < 3) return;
+      const k = Math.sqrt(fl.n / max);
+      const p = reduceMotion ? 1 : Math.max(0, Math.min(1, (el - rank * 0.04) / 0.9));
+      const e = 1 - Math.pow(1 - p, 3);
+      const segs = 36, pts = [];
+      for (let j = 0; j <= segs * e; j++) pts.push(bez(a, b, j / segs));
+      if (pts.length < 2) return;
+      const col = fl.src ? GOLD : EMBER;
+      ov.lineCap = "round";
+      ov.strokeStyle = `rgba(${col},${0.22 + 0.55 * k})`; ov.lineWidth = 0.8 + 4.5 * k;
+      if (fl.exact === false) ov.setLineDash([5, 5]);
+      ov.beginPath(); pts.forEach(([x, y], j) => (j ? ov.lineTo(x, y) : ov.moveTo(x, y))); ov.stroke();
+      ov.setLineDash([]);
+      if (e >= 1) {
+        for (let q = 0; q < 2; q++) {
+          const tt = (((reduceMotion ? 0 : now) / 1000) * (0.28 + 0.1 * k) + q / 2 + rank * 0.137) % 1;
+          const [x, y] = bez(a, b, tt);
+          ov.fillStyle = `rgba(${CREAM},${0.5 + 0.5 * k})`;
+          ov.beginPath(); ov.arc(x, y, 1.2 + 1.6 * k, 0, Math.PI * 2); ov.fill();
+        }
+        const [x1, y1] = bez(a, b, 0.84), [x2, y2] = bez(a, b, 0.87);
+        const ang = Math.atan2(y2 - y1, x2 - x1), sz = 4 + 4 * k;
+        ov.fillStyle = `rgba(${col},${0.5 + 0.45 * k})`;
+        ov.beginPath(); ov.moveTo(x2 + Math.cos(ang) * sz, y2 + Math.sin(ang) * sz);
+        ov.lineTo(x2 + Math.cos(ang + 2.5) * sz, y2 + Math.sin(ang + 2.5) * sz); ov.lineTo(x2 + Math.cos(ang - 2.5) * sz, y2 + Math.sin(ang - 2.5) * sz); ov.fill();
+      }
+      const end = fl.src ? a : b;
+      ov.fillStyle = `rgba(${col},0.95)`; ov.beginPath(); ov.arc(end[0], end[1], 1.8 + 2 * k, 0, Math.PI * 2); ov.fill();
+      if (rank < 9 && p > 0.6) placeLabel(fl.name, fmt.format(fl.n), end[0] + 7, end[1] + 4);
+    });
+    if (T) {
+      const k = ((reduceMotion ? 0 : now) % 2200) / 2200;
+      ov.strokeStyle = `rgba(${CREAM},${0.8 * (1 - k)})`; ov.lineWidth = 1.5;
+      ov.beginPath(); ov.arc(T[0], T[1], 8 + k * 22, 0, Math.PI * 2); ov.stroke();
+      ov.fillStyle = `rgba(${CREAM},1)`; ov.beginPath(); ov.arc(T[0], T[1], 3.5, 0, Math.PI * 2); ov.fill();
+      placeLabel(f.target.name, "", T[0] + 10, T[1] - 10, { font: "500 13px 'Cinzel', Georgia, serif", color: `rgba(${CREAM},1)`, force: true });
+    }
+  }
+  function drawRoute(stops, el, now) {
+    stops.forEach((s, k) => {
+      const b = toScreen(...s.w);
+      if (k > 0) {
+        const a = toScreen(...stops[k - 1].w);
+        const p = reduceMotion ? 1 : Math.max(0, Math.min(1, (el - (k - 1) * 0.6) / 0.7));
+        const e = 1 - Math.pow(1 - p, 3), pts = [];
+        if (Math.hypot(a[0] - b[0], a[1] - b[1]) > 4) {
+          for (let j = 0; j <= 40 * e; j++) pts.push(bez(a, b, j / 40, 0.25));
+          if (pts.length > 1) {
+            ov.strokeStyle = `rgba(${CREAM},0.85)`; ov.lineWidth = 2.2; ov.lineCap = "round";
+            ov.beginPath(); pts.forEach(([x, y], j) => (j ? ov.lineTo(x, y) : ov.moveTo(x, y))); ov.stroke();
+            if (e >= 1) {
+              const tt = (((reduceMotion ? 0 : now) / 1000) * 0.25 + k * 0.3) % 1, [x, y] = bez(a, b, tt, 0.25);
+              ov.fillStyle = `rgba(${GOLD},1)`; ov.beginPath(); ov.arc(x, y, 2.6, 0, Math.PI * 2); ov.fill();
+              const [x1, y1] = bez(a, b, 0.8, 0.25), [x2, y2] = bez(a, b, 0.83, 0.25), ang = Math.atan2(y2 - y1, x2 - x1);
+              ov.fillStyle = `rgba(${CREAM},0.9)`;
+              ov.beginPath(); ov.moveTo(x2 + Math.cos(ang) * 9, y2 + Math.sin(ang) * 9); ov.lineTo(x2 + Math.cos(ang + 2.5) * 9, y2 + Math.sin(ang + 2.5) * 9); ov.lineTo(x2 + Math.cos(ang - 2.5) * 9, y2 + Math.sin(ang - 2.5) * 9); ov.fill();
+            }
+          }
+        }
+      }
+      if (!(reduceMotion || k === 0 || el > (k - 1) * 0.6 + 0.7)) return;
+      ov.fillStyle = "rgba(4,6,10,0.92)"; ov.strokeStyle = `rgba(${GOLD},1)`; ov.lineWidth = 1.3;
+      if (s.home) {
+        // konuş: kale burcu işareti
+        ov.beginPath(); ov.rect(b[0] - 10, b[1] - 8, 20, 16); ov.fill(); ov.stroke();
+        ov.fillStyle = `rgba(${GOLD},1)`;
+        for (const dx of [-7, -1, 5]) ov.fillRect(b[0] + dx, b[1] - 12, 3, 4);
+        ov.fillRect(b[0] - 2, b[1] - 1, 4, 9);
+      } else {
+        ov.beginPath(); ov.arc(b[0], b[1], 11, 0, Math.PI * 2); ov.fill(); ov.stroke();
+        ov.fillStyle = `rgba(${GOLD},1)`; ov.font = "600 12px 'Cinzel', Georgia, serif"; ov.textAlign = "center";
+        ov.fillText(String(stops[0].home ? k : k + 1), b[0], b[1] + 4.5); ov.textAlign = "left";
+      }
+      placeLabel(s.name, s.sub ? String(s.sub) : "", b[0] + 16, b[1] + 4, { font: "500 12px 'Cinzel', Georgia, serif", color: `rgba(${CREAM},1)`, force: k === stops.length - 1 });
+    });
+  }
+
+  // ---------- seçme ----------
+  function nearestPlace(wx, wy, list, tolPx) {
+    let best = null, bd = Infinity;
+    for (const p of list) {
+      if (!placeExact(p.k) && !S.approx) continue;
+      const d = Math.hypot(p.x - wx, p.y - wy) - p.r;
+      if (d < bd) { bd = d; best = p; }
+    }
+    return best && bd * V.s < tolPx ? best : null;
+  }
+  function nearestStar(sx, sy, tolPx) {
+    const [wx, wy] = toWorld(sx, sy), L0 = layoutOf() ? S2 : M, has = layoutOf() ? hasS : hasM, tol = tolPx / V.s;
+    let best = -1, bd = tol * tol;
+    for (const i of idx) {
+      if (!has[i] || (U.uSel.value && !aHi[i])) continue;
+      const dx = L0[i * 2] - wx, dy = L0[i * 2 + 1] - wy, d = dx * dx + dy * dy;
+      if (d < bd) { bd = d; best = i; }
+    }
+    return best;
+  }
+  function click(sx, sy) {
+    const [wx, wy] = toWorld(sx, sy);
+    if (V.s > 700) { const i = nearestStar(sx, sy, 7); if (i >= 0) { openCard(i); return; } }
+    if (S.view === "cephe") {
+      const b = nearestBattle(sx, sy, 8);
+      if (b) select("b" + b.k); else if (S.sel) clearSel();
+      return;
+    }
+    if (S.view === "birlik" && !S.unit) {
+      const g = nearestGarrison(sx, sy, 14);
+      if (g >= 0) { select("g" + g); return; }
+    }
+    const p = nearestPlace(wx, wy, layoutOf() ? placesS : V.s < IL_ZOOM ? placesIl : placesM, 10);
+    if (p) select(p.k); else if (S.sel) clearSel();
+  }
+  function hover(sx, sy) {
+    const now = performance.now();
+    if (now - lastHover < 40) return;
+    lastHover = now;
+    const tip = $("tip"), [wx, wy] = toWorld(sx, sy);
+    let html = null;
+    if (V.s > 700) {
+      const i = nearestStar(sx, sy, 7);
+      if (i >= 0) html = `<b>${esc(title(C.ad[i]))}</b>${C.baba[i] ? ` <span style="color:var(--dim)">· ${esc(title(C.baba[i]))} oğlu</span>` : ""}<div class="g">${esc(ilName(i))}${miladiKisa(i) ? " · " + miladiKisa(i) : ""}</div>`;
+    }
+    if (!html && S.view === "birlik" && !S.unit) {
+      const g = nearestGarrison(sx, sy, 14);
+      if (g >= 0) html = `<b>Konuş: ${esc(GAR[g].name)}</b><div class="g">${GAR[g].units.map(unitName).join(", ")}</div>`;
+    }
+    if (!html && S.view === "cephe") {
+      const b = nearestBattle(sx, sy, 8);
+      if (b) html = `<b>${esc(b.name)}</b><div class="g">${batDate(b)} · ${fmt.format(b.n)} şehit</div>`;
+    } else if (!html) {
+      const p = nearestPlace(wx, wy, layoutOf() ? placesS : V.s < IL_ZOOM ? placesIl : placesM, 6);
+      if (p) html = `<b>${esc(placeName(p.k))}</b><div class="g">${fmt.format(p.n)} şehit</div>`;
+    }
+    if (html) { tip.innerHTML = html; tip.style.left = Math.min(vw - 270, sx + 14) + "px"; tip.style.top = sy + 14 + "px"; tip.style.opacity = 1; glc.style.cursor = "pointer"; }
+    else { tip.style.opacity = 0; glc.style.cursor = ""; }
+  }
+
+  function select(k) {
+    S.sel = k; S.shown = 120;
+    updateHighlight();
+    openPlaque();
+    const f = flowsCache;
+    if (k[0] === "t") { const bs = theaterInfo[+k.slice(1)].battles; if (bs.length) fitWorld(bs.map((b) => b.w), 0.3, false, 600); }
+    else if (f && f.list.length) fitWorld([f.target.w, ...f.list.slice(0, 30).flatMap((x) => [x.a, x.b])], 0.08, true);
+  }
+  function clearSel() {
+    S.sel = null;
+    updateHighlight();
+    if (S.view === "birlik" || S.view === "cephe" || S.summary) renderPlaque(); else closePlaque();
+  }
+  function selectUnit(u) {
+    S.unit = u; S.sel = null; S.shown = 120;
+    if (S.view !== "birlik") setView("birlik", true);
+    animateT(layoutOf());
+    updateHighlight();
+    openPlaque();
+    const L0 = layoutOf(), pts = [];
+    let j = 0;
+    for (const i of idx) if (inUnit(i, u) && (L0 ? hasS[i] && !approxS[i] : hasM[i]) && j++ % 7 === 0) pts.push(L0 ? [S2[i * 2], S2[i * 2 + 1]] : [M[i * 2], M[i * 2 + 1]]);
+    unitStops(u).forEach((s) => pts.push(s.w));
+    fitWorld(pts, 0.12);
+  }
+  function setView(v, keepUnit) {
+    S.view = v; S.sel = null;
+    if (!keepUnit && v !== "birlik") S.unit = null;
+    VIEWS.forEach((x) => $("v-" + x).setAttribute("aria-pressed", x === v));
+    animateT(layoutOf());
+    U.uApprox.value = S.approx ? (v === "cephe" ? 0.2 : 1) : 0;
+    updateHighlight();
+    if (v === "birlik" || v === "cephe" || S.summary) openPlaque(); else closePlaque();
+  }
+
+  // ---------- levha ----------
+  function openPlaque() { $("plaque").hidden = false; renderPlaque(); $("pbody").scrollTop = 0; }
+  function closePlaque() { $("plaque").hidden = true; S.summary = false; }
+  function bars(counts, labeler, limit) {
+    const arr = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+    const max = arr.length ? arr[0][1] : 1;
+    return '<div class="bars">' + arr.map(([k, n]) => `<div class="bar"><div class="lbl"><i style="width:${(n / max) * 100}%"></i>${esc(labeler(k))}</div><div class="n">${fmt.format(n)}</div></div>`).join("") + "</div>";
+  }
+  function yearHist(recs) {
+    const m = new Map();
+    for (const i of recs) { const y = C.ym[i] ? Math.floor(C.ym[i] / 12) : 0; if (y) m.set(y, (m.get(y) || 0) + 1); }
+    if (!m.size) return "";
+    const ys = [...m.keys()].sort((a, b) => a - b);
+    let lo = ys[0], hi = ys[ys.length - 1], acc = 0;
+    const tot = [...m.values()].reduce((a, b) => a + b, 0);
+    for (const y of ys) { acc += m.get(y); if (acc >= tot * 0.005) { lo = y; break; } }
+    acc = 0;
+    for (const y of ys.slice().reverse()) { acc += m.get(y); if (acc >= tot * 0.005) { hi = y; break; } }
+    if (hi - lo > 40) lo = hi - 40;
+    let max = 1; for (let y = lo; y <= hi; y++) max = Math.max(max, m.get(y) || 0);
+    const cols = [];
+    for (let y = lo; y <= hi; y++) { const n = m.get(y) || 0; cols.push(`<div style="height:${(n / max) * 100}%" title="${y}: ${fmt.format(n)} şehit"></div>`); }
+    const peak = [...m.entries()].sort((a, b) => b[1] - a[1])[0];
+    return `<div class="sec">Şehadet yılları</div><div class="yh"><div class="cols">${cols.join("")}</div><div class="axis"><span>${lo}</span><span>en çok ${peak[0]} · ${fmt.format(peak[1])}</span><span>${hi}</span></div></div>`;
+  }
+  function unitButtons(counts, limit, showHarp) {
+    const arr = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+    if (!arr.length) return '<p class="pmeta">Bu kademede birlik bilgisi kayıtlı değildir.</p>';
+    return '<div class="units">' + arr.map(([k, n]) => { const u = parseUnit(k); return `<button class="unit" data-unit="${k}"><span>${esc(unitName(u))}${showHarp ? `<small>${esc(harpShort(u.harp))}</small>` : ""}</span><span class="n">${fmt.format(n)}</span></button>`; }).join("") + "</div>";
+  }
+  // İsim listesinde adın altındaki künye satırı: baba adı, lakap, rütbe, memleket
+  function recDetail(i) {
+    const rutbe = dict.rutbe[C.rutbe[i]];
+    const mem = (dict.memleket[C.memleket[i]] || "").split("/").filter(Boolean).map(title).join(", ");
+    return [
+      C.baba[i] && `${esc(title(C.baba[i]))} oğlu`,
+      C.lakap[i] && `<i>${esc(title(C.lakap[i]))}</i>`,
+      rutbe && `<span class="r">${esc(title(rutbe))}</span>`,
+      mem && esc(mem),
+    ].filter(Boolean).join(" · ");
+  }
+  function names(recs) {
+    return `<div class="sec">İsimler</div><div class="names">${recs.slice(0, S.shown).map((i) =>
+      `<button data-rec="${i}"><b>${esc(title(C.ad[i]))}</b><span class="y">${C.ym[i] ? Math.floor(C.ym[i] / 12) : ""}</span><small>${recDetail(i)}</small></button>`).join("")}</div>
+      ${recs.length > S.shown ? `<button class="pill ghost more" data-more>${fmt.format(Math.min(200, recs.length - S.shown))} isim daha</button>` : ""}`;
+  }
+
+  function renderPlaque() {
+    const b = $("pbody");
+    const keepFocus = document.activeElement && document.activeElement.id === "f-unit";
+    if (S.sel && S.sel[0] === "t") b.innerHTML = theaterHtml(+S.sel.slice(1));
+    else if (S.sel && S.sel[0] === "b") b.innerHTML = battleHtml(+S.sel.slice(1));
+    else if (S.sel && S.sel[0] === "g") b.innerHTML = garrisonHtml(+S.sel.slice(1));
+    else if (S.sel) b.innerHTML = placeHtml();
+    else if (S.view === "birlik" && S.unit) b.innerHTML = unitHtml();
+    else if (S.view === "birlik") b.innerHTML = unitPickerHtml();
+    else if (S.view === "cephe") b.innerHTML = theaterListHtml();
+    else b.innerHTML = summaryHtml();
+    if (keepFocus) { const el = $("f-unit"); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+  }
+  function summaryHtml() {
+    const L0 = layoutOf(), list = L0 ? placesS : placesIl, byHarp = new Map();
+    for (const i of idx) byHarp.set(C.harp[i], (byHarp.get(C.harp[i]) || 0) + 1);
+    return `<div class="eyebrow">${L0 ? "Şehadet yerleri" : "Memleketler"}</div>
+      <h2 class="ptitle">${fmt.format(idx.length)} şehit</h2>
+      <div class="sec">${L0 ? "En çok şehit verilen yerler" : "En çok şehit veren memleketler"}</div>
+      ${bars(new Map(list.filter((p) => placeExact(p.k)).slice(0, 14).map((p) => [p.k, p.n])), placeName, 14)}
+      <div class="sec">Harplere göre</div>${bars(byHarp, harpShort, 10)}
+      ${yearHist(idx)}`;
+  }
+  const SABRE = '<svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true" style="vertical-align:-2px"><path d="M2.5 11.5 Q7 6.8 11.6 2.4 M11.5 11.5 Q7 6.8 2.4 2.4 M1.6 9.4 4.6 12.4 M12.4 9.4 9.4 12.4" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  function theaterListHtml() {
+    const rows = theaterInfo.map((t, n) => [n, t.n]).filter(([, c]) => c).sort((a, b) => b[1] - a[1]);
+    return `<div class="eyebrow">Cepheler</div><h2 class="ptitle">Harp alanları</h2>
+      <p class="lead">Kılıç işaretleri, kayıtlardaki şehadet yerlerinden tanınan muharebelerdir; büyüklüğü o muharebeye bağlanan şehit sayısını gösterir. Bir muharebeye ya da aşağıdan bir cepheye dokunun.</p>
+      <div class="stops">${rows.map(([n, c]) => `<button class="stop" data-th="${n}"><span class="no">${SABRE}</span><span><b>${esc(THEATERS[n].name)}</b><small>${THEATERS[n].years} · ${theaterInfo[n].battles.length} muharebe</small></span><span class="n">${fmt.format(c)}</span></button>`).join("")}</div>`;
+  }
+  function unitBlock(recs) {
+    return `<div class="sec">Kolordular</div>${unitButtons(unitCounts(recs, "kolordu"), 6)}
+      <div class="sec">Fırkalar</div>${unitButtons(unitCounts(recs, "firka"), 10)}
+      <div class="sec">Alaylar</div>${unitButtons(unitCounts(recs, "alay"), 10)}`;
+  }
+  function memBars(recs) {
+    const mem = new Map();
+    for (const i of recs) if (C.il[i] >= 0) mem.set("i" + C.il[i], (mem.get("i" + C.il[i]) || 0) + 1);
+    return `<div class="sec">Memleketleri</div>${bars(mem, placeName, 10)}`;
+  }
+  function theaterHtml(t) {
+    const th = THEATERS[t], recs = selectionRecs();
+    const bs = theaterInfo[t].battles.slice().sort((a, b) => a.b0 - b.b0);
+    const inBat = recs.filter((i) => C.muh[i] >= 0).length;
+    return `<div class="eyebrow">Cephe · ${th.years}</div><h2 class="ptitle">${esc(th.name)}</h2>
+      <div class="pmeta"><b>${fmt.format(recs.length)}</b> şehit · ${fmt.format(inBat)} kayıt bir muharebeye bağlı</div>
+      <div class="sec">Kimlere karşı</div><div class="foes">${th.foes.map((f) => `<span class="foe">${esc(f)}</span>`).join("")}</div>
+      <p class="lead">${esc(th.note)}</p>
+      <div class="sec">Muharebeler</div>
+      <div class="stops">${bs.map((b) => `<button class="stop" data-bat="${b.k}"><span class="no">${SABRE}</span><span><b>${esc(b.name)}</b><small>${batDate(b)}</small></span><span class="n">${fmt.format(b.n)}</span></button>`).join("") || '<p class="pmeta">Bu cephede tanınan muharebe bulunmamaktadır.</p>'}</div>
+      <div class="acts"><button class="pill" data-cross="memleket">Memleketlerini göster</button><button class="pill ghost" data-x="sel">Cephelere dön</button></div>
+      ${yearHist(recs)}${unitBlock(recs)}${memBars(recs)}${names(recs)}`;
+  }
+  function battleHtml(k) {
+    const b = batInfo[k], th = THEATERS[b.th], recs = selectionRecs();
+    return `<div class="eyebrow">${esc(th.name)} · ${batDate(b)}</div><h2 class="ptitle">${esc(b.name)}</h2>
+      <div class="pmeta"><b>${fmt.format(recs.length)}</b> şehit</div>
+      <p class="lead">${esc(b.note)}</p>
+      <div class="sec">Kimlere karşı</div><div class="foes">${th.foes.map((f) => `<span class="foe">${esc(f)}</span>`).join("")}</div>
+      <div class="acts"><button class="pill" data-th="${b.th}">${esc(th.name)}</button><button class="pill ghost" data-x="sel">Kapat</button></div>
+      ${yearHist(recs)}${unitBlock(recs)}${memBars(recs)}${names(recs)}`;
+  }
+  function placeHtml() {
+    const k = S.sel, recs = selectionRecs();
+    const outgoing = layoutOf() === 0;
+    const other = new Map();
+    for (const i of recs) { const key = outgoing ? (C.yer[i] >= 0 ? "y" + C.yer[i] : null) : (C.il[i] >= 0 ? "i" + C.il[i] : null); if (key) other.set(key, (other.get(key) || 0) + 1); }
+    const flown = Math.abs(U.uTHi.value - U.uT.value) > 0.5 || (hiAnim && hiAnim.to !== U.uT.value);
+    const flyBtn = outgoing
+      ? `<button class="pill gold" data-fly>${flown ? "Memleketlerine geri getir" : "Şehadet yerlerine uğurla"}</button>`
+      : `<button class="pill gold" data-fly>${flown ? "Şehadet yerine geri götür" : "Memleketlerine götür"}</button>`;
+    const unitsHere = S.view === "birlik" && !S.unit ? `<div class="sec">Burada şehit düşen ${LVL[S.unitLvl].toLocaleLowerCase("tr-TR")}lar</div>${unitButtons(unitCounts(recs, S.unitLvl), 10, true)}` : "";
+    return `<div class="eyebrow">${outgoing ? "Memleket" : "Şehadet yeri"}${S.view === "birlik" && S.unit ? " · " + esc(unitName(S.unit)) : ""}</div>
+      <h2 class="ptitle">${esc(placeName(k))}${placeExact(k) ? "" : '<span class="approx-tag">yaklaşık</span>'}</h2>
+      <div class="pmeta"><b>${fmt.format(recs.length)}</b> şehit</div>
+      <div class="acts">${flyBtn}<button class="pill ghost" data-x="sel">Kapat</button></div>
+      ${unitsHere}
+      <div class="sec">${outgoing ? "Şehit düştükleri yerler" : "Memleketleri"}</div>${bars(other, placeName, 8)}
+      ${yearHist(recs)}${names(recs)}`;
+  }
+  function unitPickerHtml() {
+    const q = S.unitQ.trim();
+    let counts = unitCounts(idx, S.unitLvl);
+    if (q) counts = new Map([...counts].filter(([k]) => String(parseUnit(k).num).startsWith(q)));
+    return `<div class="eyebrow">Birlikler</div><h2 class="ptitle">Hangi birlik, nerede?</h2>
+      <p class="lead">Kale işaretleri birliklerin seferberlikteki konuş yerleridir; dokununca oradaki birlikler süzülür. Aşağıdan bir birlik seçerseniz cepheden cepheye güzergâhı çizilir.</p>
+      <div class="lvls" role="group" aria-label="Kademe">${Object.entries(LVL).map(([k, v]) => `<button data-lvl="${k}" aria-pressed="${S.unitLvl === k}">${v}</button>`).join("")}</div>
+      <div class="field"><input id="f-unit" type="search" inputmode="numeric" placeholder="Numara, ör. 19" value="${esc(q)}" autocomplete="off" aria-label="Birlik numarası"></div>
+      <div class="sec">En çok şehit veren ${LVL[S.unitLvl].toLocaleLowerCase("tr-TR")}lar</div>
+      ${unitButtons(counts, 60, true)}`;
+  }
+  function garrisonHtml(n) {
+    const g = GAR[n], recs = selectionRecs();
+    const cnt = new Map(g.units.map((u) => [`${u.lvl}|${u.num}|${u.harp}`, 0]));
+    for (const i of recs) for (const u of g.units) if (inUnit(i, u)) { const k = `${u.lvl}|${u.num}|${u.harp}`; cnt.set(k, cnt.get(k) + 1); }
+    return `<div class="eyebrow">Konuş yeri</div><h2 class="ptitle">${esc(g.name)}</h2>
+      <div class="pmeta"><b>${g.units.length}</b> birlik · <b>${fmt.format(recs.length)}</b> şehit</div>
+      <p class="lead">Kaynaklara göre seferberlikte burada konuşlu birlikler. Oklar, bu birliklerin şehitlerinin düştüğü yerleri gösterir.</p>
+      <div class="sec">Birlikler</div>${unitButtons(cnt, 40, true)}
+      <div class="acts"><button class="pill ghost" data-x="sel">Konuşlara dön</button></div>
+      ${yearHist(recs)}${memBars(recs)}${names(recs)}`;
+  }
+  // "Sivas (Sivas)" gibi eski adı bugünküyle aynı olan parantezleri gizle
+  const yerAdi = (y) => (y || "").replace(/\s*\(([^)]+)\)/g, (m, a) => (trUp(y).startsWith(trUp(a)) ? "" : m));
+  function unitSourceHtml(u) {
+    const src = UNITSRC.get(unitKeyOf(u));
+    if (!src) return `<div class="sec">Konuş ve intikaller</div><p class="pmeta">Bu birlik için kaynaklarda konuş bilgisi bulunmamaktadır. Haritadaki güzergâh, şehit kayıtlarındaki tarih ve yerlerden çıkarılmıştır.</p>`;
+    const links = (src.src || []).slice(0, 4).map((l, k) => { let h = l; try { h = new URL(l).hostname.replace("www.", ""); } catch (e) {} return `<a href="${esc(l)}" target="_blank" rel="noopener">${esc(h)}</a>`; }).join(" · ");
+    const bagli = (src.bagli || []).map((b) => `${esc(b.ust)}${b.baslangic ? ` <small>${ymShow(b.baslangic)}${b.bitis ? "–" + ymShow(b.bitis) : ""}</small>` : ""}`).join(" · ");
+    return `<div class="sec">Konuş ve intikaller · kaynaklara göre</div>
+      ${src.konus ? `<div class="stop"><span class="no">⌂</span><span><b>${esc(yerAdi(src.konus.yer))}</b><small>konuş yeri${src.konus.kesinlik && src.konus.kesinlik !== "şehir" ? " · yaklaşık" : ""}</small></span><span class="n"></span></div>` : `<p class="pmeta">Konuş yeri kaynaklarda bulunamamıştır.</p>`}
+      ${(src.int || []).slice().sort((a, b) => ymParse(a.baslangic) - ymParse(b.baslangic)).map((it, k) => `<div class="stop"><span class="no">${k + 1}</span><span><b>${esc(it.yer || CEPHE_ADI[it.cephe] || it.cephe)}</b><small>${[ymShow(it.baslangic), ymShow(it.bitis)].filter(Boolean).join(" – ")}${it.not ? " · " + esc(it.not) : ""}</small></span><span class="n"></span></div>`).join("")}
+      ${bagli ? `<p class="pmeta">Bağlı olduğu: ${bagli}</p>` : ""}
+      ${src.not ? `<p class="pmeta">${esc(src.not)}</p>` : ""}
+      ${(src.int || []).length && (dict.harp[u.harp] || "").includes("1914") ? `<p class="pmeta">Bu tarihler kesin değildir.</p>` : ""}
+      ${links ? `<p class="pmeta">Kaynaklar: ${links}</p>` : ""}`;
+  }
+  function unitHtml() {
+    const u = S.unit, recs = selectionRecs(), stops = unitStops(u);
+    const mem = new Map(), places = new Map();
+    for (const i of recs) { if (C.il[i] >= 0) mem.set("i" + C.il[i], (mem.get("i" + C.il[i]) || 0) + 1); const y = C.yer[i]; if (y >= 0 && D.yerPts[y][3]) places.set("y" + y, (places.get("y" + y) || 0) + 1); }
+    const sub = u.lvl === "kolordu" ? "firka" : u.lvl === "firka" ? "alay" : null;
+    return `<div class="eyebrow">${esc(harpShort(u.harp))}</div><h2 class="ptitle">${esc(unitName(u))}</h2>
+      <div class="pmeta"><b>${fmt.format(recs.length)}</b> şehit</div>
+      <div class="lvls" role="group" aria-label="Birlik haritası"><button data-mode="nerede" aria-pressed="${S.unitMode === "nerede"}">Nerede savaştı</button><button data-mode="nereli" aria-pressed="${S.unitMode === "nereli"}">Nereli</button></div>
+      ${unitSourceHtml(u)}
+      <div class="sec">Şehit kayıtlarına göre cepheler</div>
+      <div class="stops">${stops.map((s, k) => `<div class="stop"><span class="no">${k + 1}</span><span><b>${esc(THEATERS[s.t].name)}</b><small>${s.bat ? esc(s.bat.name) + " · " : ""}${ymText(s.from, s.to)}</small></span><span class="n">${fmt.format(s.n)}</span></div>`).join("") || '<p class="pmeta">Cephe bilgisi bulunmamaktadır.</p>'}</div>
+      <div class="acts"><button class="pill ghost" data-x="unit">Birlik listesine dön</button></div>
+      ${yearHist(recs)}
+      ${sub ? `<div class="sec">Bağlı ${LVL[sub].toLocaleLowerCase("tr-TR")}lar</div>${unitButtons(unitCounts(recs, sub), 10)}` : ""}
+      <div class="sec">Memleketleri</div>${bars(mem, placeName, 10)}
+      <div class="sec">Şehit düştükleri yerler</div>${bars(places, placeName, 8)}
+      ${names(recs)}`;
+  }
+
+  // ---------- anıt kartı ----------
+  function openCard(i) {
+    const rutbe = [dict.rutbe[C.rutbe[i]], dict.sinif[C.sinif[i]]].filter(Boolean).map(title).join(" · ");
+    const t = C.tarih[i], mi = miladi(i);
+    const row = (k, v) => (v ? `<dt>${k}</dt><dd>${v}</dd>` : "");
+    const birlik = ["kolordu", "firka", "alay"].filter((l) => C[l][i]).map((l) => `${C[l][i]}. ${LVL[l]}`).join(" · ");
+    $("card-body").innerHTML = `<div class="star">✦ ✦ ✦</div>
+      <h2 id="card-name">${esc(title(C.ad[i]))}</h2>
+      ${C.baba[i] ? `<div class="baba">${esc(title(C.baba[i]))} oğlu</div>` : ""}
+      ${C.lakap[i] ? `<div class="baba">${esc(title(C.lakap[i]))}</div>` : ""}
+      ${rutbe ? `<div class="rank">${esc(rutbe)}</div>` : ""}
+      <dl>
+        ${row("Memleket", esc(title(dict.memleket[C.memleket[i]] || "").replace(/\//g, " · ")))}
+        ${row("Doğum", esc(C.dogum[i]))}
+        ${row("Harp", esc(title(dict.harp[C.harp[i]] || "")))}
+        ${row("Cephe", esc(title(dict.cephe[C.cephe[i]] || "")))}
+        ${row("Şehadet yeri", esc(title(dict.ham[C.ham[i]] || "")))}
+        ${row("Şehadet tarihi", t ? `${esc(t)} ${mi ? `<small>Rumi · ≈ ${mi}</small>` : ""}` : "")}
+        ${row("Birlik", esc(birlik))}
+      </dl>
+      <p class="epitaph">Aziz hatırası önünde saygıyla.</p>
+      <div class="acts"><button class="pill" data-show="${i}">Haritada göster</button>${hasS[i] && !approxS[i] && layoutOf() === 0 ? `<button class="pill ghost" data-showplace="${i}">Şehadet yerine git</button>` : ""}</div>`;
+    $("card").hidden = false;
+    $("card-x").focus();
+  }
+  function closeCard() { $("card").hidden = true; }
+  function showStar(i, layout) {
+    let delay = 0;
+    if (layout !== undefined && layout !== layoutOf()) { setView(layout ? "sehadet" : "memleket"); delay = 1400; }
+    const L0 = layoutOf() ? S2 : M;
+    const x = L0[i * 2], y = L0[i * 2 + 1];
+    pulse = { x, y, t0: performance.now() + delay };
+    const right = !$("plaque").hidden && vw >= 900 ? 410 : 0;
+    flyTo({ cx: x + right / 2 / 1400, cy: y, s: 1400 }, 1600);
+  }
+
+  // ---------- arama: yazdıkça önizleme, Enter ile süzgeç ----------
+  let qt;
+  function previewSearch() {
+    const raw = $("q").value.trim(), q = trUp(raw), box = $("results");
+    if (q.length < 2) { box.hidden = true; return; }
+    const out = []; let n = 0;
+    for (const i of idx) { if (textMatch(i, q)) { n++; if (out.length < 30) out.push(i); } }
+    box.innerHTML = (n ? `<button class="all" data-textfilter="1"><b>“${esc(raw)}” geçen tüm kayıtları süz</b><small>${fmt.format(n)} şehit · Enter</small></button>` : "") +
+      (out.length ? out.map((i) => `<button data-rec="${i}"><b>${esc(title(C.ad[i]))}</b><small>${recDetail(i)}</small></button>`).join("") : '<div class="none">Bu aramayla eşleşen kayıt bulunmamaktadır.</div>');
+    box.hidden = false;
+  }
+  function applyText() {
+    const raw = $("q").value.trim();
+    if (raw.length < 2) return;
+    S.text = raw; $("q").value = ""; $("results").hidden = true;
+    filter(); if (S.sel && !selectionRecs().length) S.sel = null; updateHighlight(); if (!$("plaque").hidden) renderPlaque();
+    fitVisible();
+  }
+  $("q").addEventListener("input", () => { clearTimeout(qt); qt = setTimeout(previewSearch, 180); });
+  $("q").addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { $("results").hidden = true; e.target.blur(); }
+    else if (e.key === "Enter") { e.preventDefault(); applyText(); }
+  });
+  $("q-go").onclick = applyText;
+  $("text-chip").onclick = () => { S.text = ""; filter(); updateHighlight(); if (!$("plaque").hidden) renderPlaque(); flyTo(homeView()); };
+  // süzgeçten sonra haritayı görünen kayıtlara sığdır
+  function fitVisible() {
+    let pts;
+    if (S.view === "cephe") pts = batInfo.filter((b) => b.n).map((b) => b.w);
+    else {
+      // şehit sayısıyla ağırlıklı %2–%98 aralığı: uçtaki tek tük yerler görünümü bozmasın
+      const ps = (layoutOf() ? placesS : placesM).filter((p) => placeExact(p.k));
+      const tot = ps.reduce((a, p) => a + p.n, 0);
+      const q = (arr, f) => { let acc = 0; for (const [v, n] of arr) { acc += n; if (acc >= tot * f) return v; } return arr.length ? arr[arr.length - 1][0] : 0; };
+      const xs = ps.map((p) => [p.x, p.n]).sort((a, b) => a[0] - b[0]), ys = ps.map((p) => [p.y, p.n]).sort((a, b) => a[0] - b[0]);
+      const x0 = q(xs, 0.02), x1 = q(xs, 0.98), y0 = q(ys, 0.02), y1 = q(ys, 0.98);
+      pts = ps.filter((p) => p.x >= x0 && p.x <= x1 && p.y >= y0 && p.y <= y1).slice(0, 400).map((p) => [p.x, p.y]);
+    }
+    if (pts.length) fitWorld(pts, 0.12, false, 900);
+  }
+
+  // ---------- olaylar ----------
+  VIEWS.forEach((v) => { $("v-" + v).onclick = () => { setView(v); }; });
+  $("harp-btn").onclick = () => openHarps($("harp-pop").hidden);
+  $("harp-q").addEventListener("input", () => { harpActive = 0; renderHarps(); });
+  $("harp-q").addEventListener("keydown", (e) => {
+    const opts = [...$("harp-list").querySelectorAll("button")];
+    if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); harpActive = (harpActive + (e.key === "ArrowDown" ? 1 : -1) + opts.length) % Math.max(1, opts.length); renderHarps(); const a = $("harp-list").querySelector(".active"); if (a) a.scrollIntoView({ block: "nearest" }); }
+    else if (e.key === "Enter") { e.preventDefault(); if (opts[harpActive]) setHarp(opts[harpActive].dataset.harp); }
+    else if (e.key === "Escape") { openHarps(false); $("harp-btn").focus(); }
+  });
+  $("cross-chip").onclick = () => { S.cross = null; filter(); updateHighlight(); if (!$("plaque").hidden) renderPlaque(); };
+
+  // ---------- hakkında ----------
+  $("b-about").onclick = () => { $("about").hidden = false; $("about-x").focus(); };
+  $("about-x").onclick = () => { $("about").hidden = true; $("b-about").focus(); };
+  $("about").addEventListener("click", (e) => { if (e.target === $("about")) $("about").hidden = true; });
+
+  // ---------- Çanakkale Şehitlerine: gizli YouTube oynatıcısı; tarayıcılar sesi ilk dokunuştan sonra açmaya izin verir ----------
+  const YT_ID = "YZl7GVcEo68";
+  const ICON_ON = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6h2.2L8 3.3v9.4L4.7 10H2.5z" fill="currentColor"/><path d="M10.3 5.6a3.2 3.2 0 0 1 0 4.8M12 3.9a5.6 5.6 0 0 1 0 8.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
+  const ICON_OFF = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6h2.2L8 3.3v9.4L4.7 10H2.5z" fill="currentColor" opacity=".55"/><path d="M10.3 5.6a3.2 3.2 0 0 1 0 4.8M12 3.9a5.6 5.6 0 0 1 0 8.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".55"/><path d="M2 14 14.2 1.8" stroke="var(--night)" stroke-width="3.2" stroke-linecap="round"/><path d="M2 14 14.2 1.8" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round"/></svg>';
+  const music = $("b-music"), musicBox = $("music");
+  let trayTimer;
+  // Şeridi kısa süre açık tut: kullanıcı isterse YouTube'a geçebilsin
+  const showTray = () => { musicBox.classList.add("open"); clearTimeout(trayTimer); trayTimer = setTimeout(() => musicBox.classList.remove("open"), 4000); };
+  if (window.MSB_EMBED) {
+    // GitHub Pages sürümü: sessiz başlar, ilk etkileşimde ses açılır; buton sesi kapatır ya da açar
+    const yt = $("yt");
+    yt.src = `https://www.youtube.com/embed/${YT_ID}?autoplay=1&mute=1&loop=1&playlist=${YT_ID}&controls=0&enablejsapi=1&playsinline=1`;
+    yt.hidden = false;
+    const cmd = (func) => { try { yt.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*"); } catch (e) {} };
+    let paused = false, started = false;
+    const paint = () => {
+      music.innerHTML = paused ? ICON_OFF : ICON_ON;
+      music.setAttribute("aria-pressed", String(!paused));
+      music.setAttribute("aria-label", paused ? "Çanakkale Şehitlerine · sesi aç" : "Çanakkale Şehitlerine · sesi kapat");
+    };
+    paint();
+    const start = (e) => { if (started || (e && e.target && e.target.closest && e.target.closest("#music"))) return; started = true; if (!paused) { cmd("unMute"); cmd("playVideo"); } };
+    ["pointerdown", "keydown"].forEach((ev) => addEventListener(ev, start, { capture: true }));
+    music.onclick = (e) => {
+      e.stopPropagation(); started = true; paused = !paused;
+      if (paused) cmd("pauseVideo"); else { cmd("unMute"); cmd("playVideo"); }
+      paint(); showTray();
+    };
+    $("music-yt").addEventListener("click", () => { if (!paused) { paused = true; cmd("pauseVideo"); paint(); } });
+  } else {
+    // Bu görüntüleyici gömülü video oynatmaya izin vermiyor: buton yalnız YouTube şeridini açar
+    music.innerHTML = ICON_ON;
+    music.setAttribute("aria-label", "Çanakkale Şehitlerine · YouTube'da dinle");
+    music.onclick = (e) => { e.stopPropagation(); showTray(); $("music-yt").focus(); };
+  }
+  $("f-approx").onchange = (e) => { S.approx = e.target.checked; U.uApprox.value = S.approx ? (S.view === "cephe" ? 0.2 : 1) : 0; };
+  $("b-reset").onclick = () => flyTo(homeView());
+  $("b-summary").onclick = () => { S.summary = true; if (S.sel) { S.sel = null; updateHighlight(); } openPlaque(); };
+  $("plaque-x").onclick = () => {
+    if (S.sel) clearSel();
+    else if (S.unit) { S.unit = null; animateT(layoutOf()); updateHighlight(); renderPlaque(); }
+    else closePlaque();
+  };
+  $("card-x").onclick = closeCard;
+  $("card").addEventListener("click", (e) => { if (e.target === $("card")) closeCard(); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape") { if (!$("card").hidden) closeCard(); if (!$("about").hidden) $("about").hidden = true; } });
+  $("pbody").addEventListener("input", (e) => {
+    if (e.target.id !== "f-unit") return;
+    clearTimeout(qt);
+    qt = setTimeout(() => { S.unitQ = e.target.value.replace(/\D/g, ""); renderPlaque(); }, 200);
+  });
+  document.addEventListener("click", (e) => {
+    const t = e.target.closest("button");
+    if (!e.target.closest(".combo")) openHarps(false);
+    if (!t) { if (!e.target.closest(".search")) $("results").hidden = true; return; }
+    const d = t.dataset;
+    if (d.harp !== undefined) { setHarp(d.harp); return; }
+    if (d.textfilter !== undefined) { applyText(); return; }
+    if (d.rec !== undefined) { openCard(+d.rec); $("results").hidden = true; }
+    else if (d.show !== undefined) { closeCard(); showStar(+d.show); }
+    else if (d.showplace !== undefined) { closeCard(); showStar(+d.showplace, 1); }
+    else if (d.x === "sel") clearSel();
+    else if (d.x === "unit") { S.unit = null; S.sel = null; animateT(layoutOf()); updateHighlight(); renderPlaque(); }
+    else if (d.more !== undefined) { S.shown += 200; renderPlaque(); }
+    else if (d.unit) selectUnit(parseUnit(d.unit));
+    else if (d.lvl) { S.unitLvl = d.lvl; renderPlaque(); }
+    else if (d.mode) { S.unitMode = d.mode; selectUnit(S.unit); }
+    else if (d.th !== undefined) { if (S.view !== "cephe") setView("cephe"); select("t" + d.th); }
+    else if (d.bat !== undefined) { if (S.view !== "cephe") setView("cephe"); select("b" + d.bat); }
+    else if (d.fly !== undefined) {
+      const back = Math.abs(U.uTHi.value - U.uT.value) > 0.5;
+      animateT(back ? U.uT.value : 1 - U.uT.value, U.uTHi, 2600);
+      setTimeout(renderPlaque, 30);
+    }
+    else if (d.cross) {
+      S.cross = { k: S.sel, name: placeName(S.sel) };
+      filter(); setView(d.cross);
+      fitWorld(placesIl.slice(0, 40).map((p) => [p.x, p.y]), 0.1);
+    }
+  });
+
+  // ---------- döngü ----------
+  function frame(now) {
+    if (flight) {
+      const k = Math.min(1, (now - flight.t0) / flight.ms), e = k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+      V.s = Math.exp(Math.log(flight.from.s) + (Math.log(flight.to.s) - Math.log(flight.from.s)) * e);
+      V.cx = flight.from.cx + (flight.to.cx - flight.from.cx) * e; V.cy = flight.from.cy + (flight.to.cy - flight.from.cy) * e;
+      applyView();
+      if (k >= 1) flight = null;
+    }
+    for (const a of [tAnim, hiAnim]) {
+      if (!a) continue;
+      const k = Math.min(1, (now - a.t0) / a.ms);
+      a.u.value = a.from + (a.to - a.from) * k;
+      if (k >= 1) { if (a === tAnim) tAnim = null; else hiAnim = null; }
+    }
+    // seçimdeki yıldızlar ayrıca uçurulmadıysa genel geçişi izler
+    if (!hiAnim && (!U.uSel.value || Math.abs(U.uTHi.value - U.uT.value) < 0.5 || tAnim)) { if (!hiAnim && tAnim) U.uTHi.value = U.uT.value; }
+    if (!U.uSel.value) U.uTHi.value = U.uT.value;
+    U.uTime.value = reduceMotion ? 0 : now / 1000;
+    if (rt) {
+      renderer.setRenderTarget(rt); renderer.setClearColor(0x000000, 0); renderer.clear();
+      renderer.render(starScene, camera);
+      renderer.setRenderTarget(null);
+      renderer.autoClear = true; renderer.render(scene, camera);
+      renderer.autoClear = false; renderer.render(quadScene, quadCam); renderer.autoClear = true;
+    } else renderer.render(scene, camera);
+    drawOverlay(now);
+    requestAnimationFrame(frame);
+  }
+
+  resize();
+  Object.assign(V, homeView()); applyView();
+  filter();
+  updateHighlight();
+  requestAnimationFrame(frame);
+  setTimeout(() => {
+    $("loading").classList.add("done"); $("loading-text").classList.add("done");
+    dockFlag();
+    setTimeout(() => { $("loading").hidden = true; $("loading-text").hidden = true; }, 1600);
+  }, reduceMotion ? 0 : 900);
+})();
+</script>
+
+</body>
+</html>
