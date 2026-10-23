@@ -395,7 +395,7 @@ button.stop:hover b { color: var(--gold); }
   </div>
 </div>
 
-<audio id="canakkale" loop preload="none"><source src="canakkale-sehitlerine.mp4" type="audio/mp4"></audio>
+<audio id="canakkale" preload="none"><source src="canakkale-sehitlerine.mp4" type="audio/mp4"></audio>
 <canvas id="flag" aria-hidden="true"></canvas>
 <div class="loading" id="loading"></div>
 <div class="loading-text" id="loading-text"><div><div class="t">ŞEHADET ATLASI</div><div class="s" id="loading-s">İsimler yükleniyor</div></div></div>
@@ -2112,6 +2112,8 @@ button.stop:hover b { color: var(--gold); }
     music.setAttribute("aria-label", paused ? "Çanakkale Şehitlerine · sesi aç" : "Çanakkale Şehitlerine · sesi kapat");
   };
   const play = () => { const r = audio.play(); if (r) r.catch(() => {}); };
+  // parça bir kez çalar; bitince düğme "kapalı" görünür, basılırsa baştan çalar
+  audio.addEventListener("ended", () => { paused = true; paint(); });
   paint();
   const start = (e) => { if (started || (e && e.target && e.target.closest && e.target.closest("#music"))) return; started = true; if (!paused) play(); };
   ["pointerdown", "keydown"].forEach((ev) => addEventListener(ev, start, { capture: true }));
