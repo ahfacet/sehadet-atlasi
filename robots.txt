@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://ahfacet.github.io/sehadet-atlasi/sitemap.xml

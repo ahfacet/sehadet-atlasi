@@ -3,6 +3,21 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Şehadet Atlası · 110.561 Şehidin Memleketi ve Şehadet Yeri Haritası (1853–1928)</title>
+<meta name="description" content="Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketini ve şehit düştüğü yeri gösteren harita. İsimle şehit arama; il, ilçe, cephe ve muharebelere göre şehit listeleri. MSB Şehit Bilgi Kapısı kayıtları.">
+<link rel="canonical" href="https://ahfacet.github.io/sehadet-atlasi/">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:site_name" content="Şehadet Atlası">
+<meta property="og:title" content="Şehadet Atlası · 110.561 şehit, bir yıldız">
+<meta property="og:description" content="Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketini ve şehit düştüğü yeri gösteren harita. İsimle şehit arama; il, ilçe, cephe ve muharebelere göre şehit listeleri. MSB Şehit Bilgi Kapısı kayıtları.">
+<meta property="og:url" content="https://ahfacet.github.io/sehadet-atlasi/">
+<meta property="og:image" content="https://ahfacet.github.io/sehadet-atlasi/s/img/atlas.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Şehadet Atlası", "url": "https://ahfacet.github.io/sehadet-atlasi/", "inLanguage": "tr"}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dataset", "name": "Şehadet Atlası: 1853–1928 şehitlerinin memleket ve şehadet yerleri", "description": "Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketini ve şehit düştüğü yeri gösteren harita. İsimle şehit arama; il, ilçe, cephe ve muharebelere göre şehit listeleri. MSB Şehit Bilgi Kapısı kayıtları.", "url": "https://ahfacet.github.io/sehadet-atlasi/", "inLanguage": "tr", "temporalCoverage": "1853/1928", "spatialCoverage": {"@type": "Place", "name": "Türkiye, Balkanlar, Kafkasya ve Orta Doğu"}, "keywords": ["şehit listesi", "şehit arama", "Çanakkale şehitleri", "Kurtuluş Savaşı şehitleri", "Birinci Dünya Savaşı", "Balkan Savaşları", "MSB Şehit Bilgi Kapısı"], "isBasedOn": "https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi", "creator": {"@type": "Organization", "name": "Şehadet Atlası", "url": "https://ahfacet.github.io/sehadet-atlasi/"}, "distribution": [{"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://ahfacet.github.io/sehadet-atlasi/data.json"}]}</script>
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
 <!-- Hotjar Tracking Code for Sehadet Atlasi -->
 <script>
@@ -17,7 +32,7 @@
 </script>
 </head>
 <body>
-<title>Şehadet Atlası</title>
+<noscript><p>Şehadet Atlası, MSB Şehit Bilgi Kapısı kayıtlarındaki şehitleri harita üzerinde gösterir ve JavaScript gerektirir. Şehit listelerine <a href="https://ahfacet.github.io/sehadet-atlasi/il/">illere ve ilçelere göre</a> ya da <a href="https://ahfacet.github.io/sehadet-atlasi/cephe/">cephe ve muharebelere göre</a> ulaşabilirsiniz.</p></noscript>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
@@ -139,6 +154,8 @@ button, select, input { font: inherit; color: inherit; }
 
 /* levha (sağ panel) */
 .plaque { position: fixed; z-index: 6; right: max(24px, env(safe-area-inset-right, 0px)); top: calc(110px + env(safe-area-inset-top, 0px)); bottom: calc(72px + env(safe-area-inset-bottom, 0px)); width: 372px; display: flex; flex-direction: column; background: var(--glass); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55); }
+.plaque-share { position: absolute; top: 10px; right: 46px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; display: grid; place-items: center; padding: 0; }
+.plaque-share:hover { color: var(--gold); border-color: var(--gold); }
 .plaque-x { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; }
 .plaque-x:hover { color: var(--ink); border-color: var(--gold); }
 .pbody { overflow-y: auto; padding: 22px 22px 26px; display: grid; gap: 14px; align-content: start; min-height: 0; }
@@ -220,6 +237,24 @@ button.stop:hover b { color: var(--gold); }
 .card dd small { color: var(--dim); font-family: var(--f-data); font-size: 11px; }
 .card .epitaph { font-family: var(--f-serif); font-style: italic; color: var(--dim); font-size: 15px; margin: 0 0 18px; }
 .card .acts { justify-content: center; }
+/* Paylaş penceresi: önizleme kartı, düzenlenebilir mesaj, ağlar */
+.card.share { width: min(540px, 100%); text-align: left; padding: 28px 28px 24px; display: grid; gap: 14px; }
+.card.share h2 { margin: 2px 0 0; font-size: 21px; }
+.sh-prev { display: grid; border: 1px solid var(--line); border-radius: 10px; overflow: hidden; background: #07090d; }
+.sh-prev img { display: block; width: 100%; max-width: 100%; aspect-ratio: 1200 / 630; height: auto; object-fit: cover; background: #04060a; }
+.sh-meta { display: grid; gap: 3px; padding: 10px 14px 12px; border-top: 1px solid var(--line); min-width: 0; }
+.sh-meta small { color: var(--dim); font-size: 11px; letter-spacing: 0.04em; }
+.sh-meta b { font-weight: 500; color: var(--ink); font-size: 13.5px; text-transform: none; }
+.sh-meta span { color: var(--dim); font-size: 12.5px; line-height: 1.45; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sh-lbl { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); }
+.sh-text { width: 100%; resize: vertical; min-height: 92px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); border-radius: 10px; color: var(--ink); font: 13px/1.5 var(--f-ui); padding: 10px 12px; outline: none; }
+.sh-text:focus { border-color: var(--gold); }
+.sh-nets { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
+.sh-nets .pill { justify-content: flex-start; text-decoration: none; color: var(--ink); }
+.sh-nets svg { flex: none; color: var(--gold); }
+.sh-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.sh-link input { min-width: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); border-radius: 999px; color: var(--dim); font: 12px var(--f-data); padding: 8px 14px; outline: none; }
+.sh-note { color: var(--dim); font-size: 11.5px; margin: 0; min-height: 1em; }
 .card-x { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; }
 
 .loading { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: var(--night); transition: opacity 1.2s ease; text-align: center; padding-inline: 16px; }
@@ -292,6 +327,7 @@ button.stop:hover b { color: var(--gold); }
 </div>
 
 <aside class="plaque" id="plaque" hidden aria-label="Levha">
+  <button class="plaque-share" id="plaque-share" aria-label="Bunu paylaş" title="Paylaş"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="12" cy="3.5" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="4" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="12.5" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.8 7 10.2 4.5M5.8 9l4.4 2.5" stroke="currentColor" stroke-width="1.4"/></svg></button>
   <button class="plaque-x" id="plaque-x" aria-label="Levhayı kapat">✕</button>
   <div class="pbody" id="pbody"></div>
 </aside>
@@ -310,7 +346,15 @@ button.stop:hover b { color: var(--gold); }
     <a class="music-tray" id="music-yt" href="https://www.youtube.com/watch?v=YZl7GVcEo68" target="_blank" rel="noopener"><span>Çanakkale Şehitlerine</span> · YouTube'da dinle ↗</a>
     <button class="pill ghost round" id="b-music" aria-pressed="false" aria-label="Çanakkale Şehitlerine · sesi kapat" title="Çanakkale Şehitlerine"></button>
   </div>
+  <button class="pill ghost round" id="b-share" aria-label="Paylaş" title="Paylaş"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><circle cx="12" cy="3.5" r="2" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="4" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="12" cy="12.5" r="2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M5.8 7 10.2 4.5M5.8 9l4.4 2.5" stroke="currentColor" stroke-width="1.3"/></svg></button>
   <button class="pill ghost round" id="b-about" aria-label="Bu atlas hakkında" title="Hakkında"><svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.6 5.8a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2.9-1.2 1.7v.5" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="8" cy="12.6" r=".9" fill="currentColor"/></svg></button>
+</div>
+
+<div class="card-wrap" id="share" hidden>
+  <div class="card share" role="dialog" aria-modal="true" aria-labelledby="share-title">
+    <button class="card-x" id="share-x" aria-label="Kapat">✕</button>
+    <div id="share-body"></div>
+  </div>
 </div>
 
 <div class="card-wrap" id="about" hidden>
@@ -336,6 +380,8 @@ button.stop:hover b { color: var(--gold); }
     <h3>Veriler</h3>
     <p class="small">Bütün şehit kayıtları T.C. Millî Savunma Bakanlığı'nın <a href="https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi" target="_blank" rel="noopener">MSB Şehit Bilgi Kapısı</a>'ndan alınmıştır. İsim, baba adı, memleket, rütbe, birlik, şehadet yeri ve tarihi kayıttaki haliyle gösterilmektedir.</p>
     <p class="small">Haritadaki konumlar bu kayıtlardan çıkarılmıştır: memleketler il ve ilçe merkezlerine, şehadet yerleri bilinen muharebe ve yer adlarına eşlenmiştir. Yeri tam belirlenemeyenler gri yıldızlarla cephe çevresinde gösterilmektedir. Tarihlerin çoğu Rumi takvimdedir; yanında yaklaşık Miladi karşılığı verilir. Cephe ve birlik açıklamaları genel tarih kaynaklarından derlenmiştir.</p>
+    <h3>Şehit listeleri</h3>
+    <p class="small">Şehitler isim isim, künyeleriyle birlikte <a href="https://ahfacet.github.io/sehadet-atlasi/il/">illere ve ilçelere göre</a> ve <a href="https://ahfacet.github.io/sehadet-atlasi/cephe/">cephe ve muharebelere göre</a> de listelenmiştir.</p>
     <p class="small">Bu çalışma resmî bir MSB yayını değildir. Bir kayıtta eksik ya da hata görürseniz asıl kaynak MSB Şehit Bilgi Kapısı'dır.</p>
     <p class="epitaph">Ruhları şad olsun.</p>
   </div>
@@ -354,6 +400,10 @@ button.stop:hover b { color: var(--gold); }
   const fmt = new Intl.NumberFormat("tr-TR");
   const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const trUp = (s) => s.toLocaleUpperCase("tr-TR");
+  const BASE_TITLE = document.title;
+  // adres parçası: Türkçe harfler sadeleştirilir (build_pages.py'deki slug ile aynı)
+  const slug = (s) => s.toLocaleLowerCase("tr-TR").replace(/[çğıöşüâîû]/g, (c) => "cgiosuaiu"["çğıöşüâîû".indexOf(c)])
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   const title = (s) => s.toLocaleLowerCase("tr-TR").replace(/(^|[\s(/-])(\S)/g, (m, a, b) => a + b.toLocaleUpperCase("tr-TR"));
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -721,14 +771,16 @@ button.stop:hover b { color: var(--gold); }
         if (uDirect > 0.5) a *= clamp(0.06 + spacingPx * 0.3, 0.06, 1.0);
         a *= 0.72 + 0.28 * sin(uTime * (0.6 + aSeed * 1.4) + aSeed * 40.0);
         // seçimde yeri kesin yıldızlar parlar; yeri belirsiz bulut vurgulanmaz, işaretleri örtmesin
-        if (uSel > 0.5) a *= mix(0.13, mix(1.15, 0.35, approxMix), aHi);
+        if (uSel > 0.5) a *= mix(0.012, mix(1.15, 0.35, approxMix), aHi);
         vA = a;
         vec3 col = mix(uGold, uEmber, e);
         col = mix(col, uAsh, approxMix);
         col = mix(col, vec3(1.0, 0.93, 0.8), hi * 0.3 * (1.0 - approxMix));
         vCol = col;
         gl_PointSize = clamp(spacingPx * 1.05, 1.3, 9.0) * (0.7 + 0.6 * aSeed) * (1.0 + hi * 0.3) * uDpr * mix(2.2, 1.35, near);
-        if (a < 0.003) gl_PointSize = 0.0;
+        // seçim dışındaki yıldızlar küçülür; seçilen memleketin yıldızları öne çıkar
+        if (uSel > 0.5 && hi < 0.5) gl_PointSize *= 0.6;
+        if (a < 0.002) gl_PointSize = 0.0;
       }`,
     fragmentShader: `
       varying vec3 vCol; varying float vA; varying float vHalo;
@@ -872,7 +924,7 @@ button.stop:hover b { color: var(--gold); }
   addEventListener("resize", resize);
 
   // ---------- durum ----------
-  const S = { text: "", view: "memleket", harp: "", approx: true, sel: null, unit: null, unitLvl: "firka", unitMode: "nerede", unitQ: "", shown: 120, summary: false, cross: null };
+  const S = { text: "", view: "memleket", harp: "", approx: true, sel: null, unit: null, unitLvl: "firka", unitMode: "nerede", unitQ: "", shown: 120, summary: false, cross: null, card: null };
   let idx = [];
   const VIEWS = ["memleket", "sehadet", "cephe", "birlik"];
   const layoutOf = () => (S.view === "memleket" || (S.view === "birlik" && S.unit && S.unitMode === "nereli") ? 0 : 1);
@@ -933,6 +985,7 @@ button.stop:hover b { color: var(--gold); }
   }
   const placeExact = (k) => k[0] !== "y" || !!D.yerPts[+k.slice(1)][3];
   const AYK = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
+  const batDateLong = (b) => { const y0 = Math.floor(b.b0 / 12), y1 = Math.floor(b.b1 / 12), a = AYLAR[b.b0 % 12], z = AYLAR[b.b1 % 12]; return b.b0 === b.b1 ? `${a} ${y0}` : y0 === y1 ? `${a}–${z} ${y1}` : `${a} ${y0} – ${z} ${y1}`; };
   const batDate = (b) => { const a = `${AYK[b.b0 % 12]} ${Math.floor(b.b0 / 12)}`, z = `${AYK[b.b1 % 12]} ${Math.floor(b.b1 / 12)}`; return a === z ? a : Math.floor(b.b0 / 12) === Math.floor(b.b1 / 12) ? `${AYK[b.b0 % 12]}–${z}` : `${a} – ${z}`; };
   const ilName = (i) => (C.il[i] >= 0 ? title(D.ilPts[C.il[i]][0]) : "—");
 
@@ -1082,6 +1135,7 @@ button.stop:hover b { color: var(--gold); }
     hiAttr.needsUpdate = true;
     U.uSel.value = recs.length ? 1 : 0;
     U.uTHi.value = U.uT.value; hiAnim = null;
+    syncUrl();
     flowsCache = buildFlows(recs);
     selT0 = performance.now();
   }
@@ -1096,7 +1150,7 @@ button.stop:hover b { color: var(--gold); }
       out.target = { w: main.w, name: THEATERS[main.t].name };
       const m = new Map();
       for (const i of recs) if (C.il[i] >= 0) m.set(C.il[i], (m.get(C.il[i]) || 0) + 1);
-      out.list = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 50).map(([il, n]) => ({ a: keyW("i" + il), b: main.w, n, name: title(D.ilPts[il][0]), src: true }));
+      out.list = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 50).map(([il, n]) => ({ a: keyW("i" + il), b: main.w, n, name: title(D.ilPts[il][0]), src: true, key: "i" + il }));
       return out;
     }
     const k = S.sel;
@@ -1110,8 +1164,8 @@ button.stop:hover b { color: var(--gold); }
       if (key && key !== k) m.set(key, (m.get(key) || 0) + 1);
     }
     out.list = [...m.entries()].sort((a, b) => b[1] - a[1]).slice(0, 50).map(([key, n]) => outgoing
-      ? { a: tw, b: keyW(key), n, name: placeName(key), exact: placeExact(key) }
-      : { a: keyW(key), b: tw, n, name: placeName(key), src: true, exact: true });
+      ? { a: tw, b: keyW(key), n, name: placeName(key), exact: placeExact(key), key }
+      : { a: keyW(key), b: tw, n, name: placeName(key), src: true, exact: true, key });
     return out;
   }
 
@@ -1123,7 +1177,7 @@ button.stop:hover b { color: var(--gold); }
     const cx = (a[0] + b[0]) / 2 - dy * bend, cy = (a[1] + b[1]) / 2 + dx * bend, u = 1 - t;
     return [u * u * a[0] + 2 * u * t * cx + t * t * b[0], u * u * a[1] + 2 * u * t * cy + t * t * b[1]];
   }
-  const labelBoxes = [];
+  const labelBoxes = [], labelHits = []; // labelHits: [kutu, anahtar, ad, alt yazı]
   function placeLabel(text, sub, x, y, opts = {}) {
     const font = opts.font || "500 10.5px 'IBM Plex Sans', sans-serif";
     ov.font = font;
@@ -1140,6 +1194,7 @@ button.stop:hover b { color: var(--gold); }
       if (x < 4 || hits(box)) return false;
     }
     labelBoxes.push(box);
+    if (opts.key) labelHits.push([[box[0] - 3, box[1] - 4, box[2] + 3, box[3] + 4], opts.key, text, sub]);
     ov.shadowColor = "rgba(0,0,0,0.95)"; ov.shadowBlur = 6;
     ov.font = font; ov.fillStyle = opts.color || `rgba(${CREAM},0.85)`;
     ov.fillText(t, x, y);
@@ -1151,7 +1206,7 @@ button.stop:hover b { color: var(--gold); }
   function drawOverlay(now) {
     ov.setTransform(DPR, 0, 0, DPR, 0, 0);
     ov.clearRect(0, 0, vw, vh);
-    labelBoxes.length = 0;
+    labelBoxes.length = 0; labelHits.length = 0;
     if (!$("plaque").hidden && vw >= 900) labelBoxes.push([vw - 410, 0, vw, vh]);
     labelBoxes.push([0, 0, vw, 96]);
     if (V.s > 22 && V.s < 500) {
@@ -1185,7 +1240,7 @@ button.stop:hover b { color: var(--gold); }
       if (p.n < 12 && V.s < 300) break;
       const [sx, sy] = toScreen(p.x, p.y);
       if (sx < 0 || sx > vw || sy < 100 || sy > vh - 60) continue;
-      if (placeLabel(placeName(p.k), fmt.format(p.n), sx + Math.max(5, p.r * V.s) + 4, sy + 4, { alt: sx - Math.max(5, p.r * V.s) - 4 })) shown++;
+      if (placeLabel(placeName(p.k), fmt.format(p.n), sx + Math.max(5, p.r * V.s) + 4, sy + 4, { alt: sx - Math.max(5, p.r * V.s) - 4, key: p.k })) shown++;
     }
   }
   // Çapraz kılıç işareti
@@ -1219,7 +1274,7 @@ button.stop:hover b { color: var(--gold); }
       const [sx, sy] = toScreen(...b.w);
       if (sx < 0 || sx > vw || sy < 100 || sy > vh - 50) continue;
       if (focusT < 0 && !S.harp && !S.text && b.n < 40 && V.s < 120) continue;
-      placeLabel(b.name, focusT >= 0 ? batDate(b) : fmt.format(b.n), sx + batR(b.n) + 7, sy + 4, { force: b.k === selB, alt: sx - batR(b.n) - 7 });
+      placeLabel(b.name, focusT >= 0 ? batDate(b) : fmt.format(b.n), sx + batR(b.n) + 7, sy + 4, { force: b.k === selB, alt: sx - batR(b.n) - 7, key: "b" + b.k });
     }
     // cephe adları, odak yokken
     if (focusT < 0) {
@@ -1230,7 +1285,7 @@ button.stop:hover b { color: var(--gold); }
         if (Math.max(...xs) - Math.min(...xs) > 7 || Math.max(...ys) - Math.min(...ys) > 7) return;
         const [sx, sy] = toScreen(...t.c);
         if (sx < 30 || sx > vw - 60 || sy < 110 || sy > vh - 60) return;
-        placeLabel(THEATERS[n].name, fmt.format(t.n), sx - 20, sy - batR(t.battles[0].n) - 12, { font: "500 12.5px 'Cinzel', Georgia, serif", color: `rgba(${CREAM},0.95)` });
+        placeLabel(THEATERS[n].name, fmt.format(t.n), sx - 20, sy - batR(t.battles[0].n) - 12, { font: "500 12.5px 'Cinzel', Georgia, serif", color: `rgba(${CREAM},0.95)`, key: "t" + n });
       });
     }
   }
@@ -1254,7 +1309,7 @@ button.stop:hover b { color: var(--gold); }
     GAR.forEach((g, n) => {
       if (sel >= 0) return; // seçiliyken adı okların hedef etiketinde yazar
       const [sx, sy] = toScreen(...g.w);
-      placeLabel(g.name, g.units.length > 1 ? g.units.length + " birlik" : unitName(g.units[0]), sx + 14, sy + 4, { force: n === sel, alt: sx - 14 });
+      placeLabel(g.name, g.units.length > 1 ? g.units.length + " birlik" : unitName(g.units[0]), sx + 14, sy + 4, { force: n === sel, alt: sx - 14, key: "g" + n });
     });
   }
   function nearestGarrison(sx, sy, tol) {
@@ -1308,7 +1363,7 @@ button.stop:hover b { color: var(--gold); }
       }
       const end = fl.src ? a : b;
       ov.fillStyle = `rgba(${col},0.95)`; ov.beginPath(); ov.arc(end[0], end[1], 1.8 + 2 * k, 0, Math.PI * 2); ov.fill();
-      if (rank < 9 && p > 0.6) placeLabel(fl.name, fmt.format(fl.n), end[0] + 7, end[1] + 4);
+      if (rank < 9 && p > 0.6) placeLabel(fl.name, fmt.format(fl.n), end[0] + 7, end[1] + 4, { key: fl.key });
     });
     if (T) {
       const k = ((reduceMotion ? 0 : now) % 2200) / 2200;
@@ -1377,7 +1432,19 @@ button.stop:hover b { color: var(--gold); }
     }
     return best;
   }
+  const labelAt = (sx, sy) => labelHits.find(([b]) => sx >= b[0] && sx <= b[2] && sy >= b[1] && sy <= b[3]);
+  // etikete dokunmak, işaret ettiği yeri seçer; memleket ile şehadet yeri arasında gerekirse görünüm değişir
+  function selectKey(k) {
+    if (k === S.sel) return;
+    const c = k[0];
+    if ((c === "i" || c === "c") && layoutOf() !== 0) setView("memleket");
+    else if (c === "y" && layoutOf() !== 1) setView("sehadet");
+    else if ((c === "b" || c === "t") && S.view !== "cephe") setView("cephe");
+    select(k);
+  }
   function click(sx, sy) {
+    const lab = labelAt(sx, sy);
+    if (lab) { selectKey(lab[1]); return; }
     const [wx, wy] = toWorld(sx, sy);
     if (V.s > 700) { const i = nearestStar(sx, sy, 7); if (i >= 0) { openCard(i); return; } }
     if (S.view === "cephe") {
@@ -1398,7 +1465,9 @@ button.stop:hover b { color: var(--gold); }
     lastHover = now;
     const tip = $("tip"), [wx, wy] = toWorld(sx, sy);
     let html = null;
-    if (V.s > 700) {
+    const lab = labelAt(sx, sy);
+    if (lab) html = `<b>${esc(lab[2])}</b>${lab[3] ? `<div class="g">${esc(lab[3])}${/^[\d.]+$/.test(lab[3]) ? " şehit" : ""}</div>` : ""}`;
+    if (!html && V.s > 700) {
       const i = nearestStar(sx, sy, 7);
       if (i >= 0) html = `<b>${esc(title(C.ad[i]))}</b>${C.baba[i] ? ` <span style="color:var(--dim)">· ${esc(title(C.baba[i]))} oğlu</span>` : ""}<div class="g">${esc(ilName(i))}${miladiKisa(i) ? " · " + miladiKisa(i) : ""}</div>`;
     }
@@ -1421,6 +1490,7 @@ button.stop:hover b { color: var(--gold); }
     S.sel = k; S.shown = 120;
     updateHighlight();
     openPlaque();
+    syncUrl();
     const f = flowsCache;
     if (k[0] === "t") { const bs = theaterInfo[+k.slice(1)].battles; if (bs.length) fitWorld(bs.map((b) => b.w), 0.3, false, 600); }
     else if (f && f.list.length) fitWorld([f.target.w, ...f.list.slice(0, 30).flatMap((x) => [x.a, x.b])], 0.08, true);
@@ -1429,6 +1499,7 @@ button.stop:hover b { color: var(--gold); }
     S.sel = null;
     updateHighlight();
     if (S.view === "birlik" || S.view === "cephe" || S.summary) renderPlaque(); else closePlaque();
+    syncUrl();
   }
   function selectUnit(u) {
     S.unit = u; S.sel = null; S.shown = 120;
@@ -1450,6 +1521,7 @@ button.stop:hover b { color: var(--gold); }
     U.uApprox.value = S.approx ? (v === "cephe" ? 0.2 : 1) : 0;
     updateHighlight();
     if (v === "birlik" || v === "cephe" || S.summary) openPlaque(); else closePlaque();
+    syncUrl();
   }
 
   // ---------- levha ----------
@@ -1675,11 +1747,12 @@ button.stop:hover b { color: var(--gold); }
         ${row("Birlik", esc(birlik))}
       </dl>
       <p class="epitaph">Aziz hatırası önünde saygıyla.</p>
-      <div class="acts"><button class="pill" data-show="${i}">Haritada göster</button>${hasS[i] && !approxS[i] && layoutOf() === 0 ? `<button class="pill ghost" data-showplace="${i}">Şehadet yerine git</button>` : ""}</div>`;
+      <div class="acts"><button class="pill" data-show="${i}">Haritada göster</button><button class="pill ghost" data-share-rec="${i}">Paylaş</button>${hasS[i] && !approxS[i] && layoutOf() === 0 ? `<button class="pill ghost" data-showplace="${i}">Şehadet yerine git</button>` : ""}</div>`;
     $("card").hidden = false;
     $("card-x").focus();
+    S.card = i; syncUrl();
   }
-  function closeCard() { $("card").hidden = true; }
+  function closeCard() { $("card").hidden = true; S.card = null; syncUrl(); }
   function showStar(i, layout) {
     let delay = 0;
     if (layout !== undefined && layout !== layoutOf()) { setView(layout ? "sehadet" : "memleket"); delay = 1400; }
@@ -1704,17 +1777,238 @@ button.stop:hover b { color: var(--gold); }
   function applyText() {
     const raw = $("q").value.trim();
     if (raw.length < 2) return;
-    S.text = raw; $("q").value = ""; $("results").hidden = true;
-    filter(); S.sel = null; S.summary = true; S.shown = 120; updateHighlight(); openPlaque();
-    fitVisible();
+    $("q").value = ""; $("results").hidden = true;
+    runText(raw);
   }
+  function runText(raw) {
+    S.text = raw;
+    filter(); S.sel = null; S.summary = true; S.shown = 120; updateHighlight(); openPlaque();
+    fitVisible(); syncUrl();
+  }
+
+  // ---------- adres: ?il=kastamonu&ilce=tosya, ?muharebe=…, ?cephe=…, ?q=… ----------
+  // şehadet yerlerinin adres parçaları (build_share.py ile aynı sıra ve aynı ek: -2, -3 …)
+  const yerSlug = (() => { const seen = new Map(); return D.yerPts.map((p) => { const s = slug(p[0]) || "yer", c = (seen.get(s) || 0) + 1; seen.set(s, c); return c === 1 ? s : `${s}-${c}`; }); })();
+  const harpSlug = (h) => slug(dict.harp[h] || "");
+  const unitParam = (u) => `${u.lvl}-${u.num}-${harpSlug(u.harp)}`;
+  let urlReady = false, idIndex = null;
+  function urlParams() {
+    const p = new URLSearchParams(), k = S.sel;
+    if (S.harp !== "") p.set("harp", harpSlug(+S.harp));
+    if (S.text) p.set("q", S.text);
+    if (k) {
+      const n = +k.slice(1);
+      if (k[0] === "i") p.set("il", slug(D.ilPts[n][0]));
+      else if (k[0] === "c") { const c = D.ilcePts[n]; p.set("il", slug(D.ilPts[c[0]][0])); p.set("ilce", slug(c[1])); }
+      else if (k[0] === "y") p.set("yer", yerSlug[n]);
+      else if (k[0] === "b") p.set("muharebe", slug(BAT[n].name));
+      else if (k[0] === "t") p.set("cephe", slug(THEATERS[n].name));
+      else if (k[0] === "g" && GAR[n]) p.set("konus", slug(GAR[n].name));
+    } else if (S.view === "birlik" && S.unit) p.set("birlik", unitParam(S.unit));
+    if (S.card != null) p.set("sehit", C.id[S.card]);
+    return p;
+  }
+  function syncUrl() {
+    const k = S.sel;
+    let t = "";
+    if (S.card != null) t = "Şehit " + title(C.ad[S.card]);
+    else if (k && k[0] !== "g") t = (k[0] === "b" ? BAT[+k.slice(1)].name : k[0] === "t" ? THEATERS[+k.slice(1)].name : placeName(k)) + " Şehitleri";
+    else if (S.view === "birlik" && S.unit && !k) t = unitName(S.unit) + " Şehitleri";
+    document.title = t ? `${t} · Şehadet Atlası` : S.text ? `“${S.text}” · Şehadet Atlası` : BASE_TITLE;
+    if (!urlReady) return; // açılışta adresteki seçim okunmadan silinmesin
+    const qs = urlParams().toString();
+    try { history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + location.hash); } catch (e) {}
+  }
+  function openFromUrl() {
+    let p;
+    try { p = new URLSearchParams(location.search); } catch (e) { return; }
+    const q = (p.get("q") || "").trim(), il = p.get("il"), ilce = p.get("ilce"), muh = p.get("muharebe"), ceph = p.get("cephe");
+    const yer = p.get("yer"), harp = p.get("harp"), birlik = p.get("birlik"), konus = p.get("konus"), sehit = p.get("sehit");
+    if (harp) { const h = dict.harp.findIndex((x) => x && slug(x) === harp); if (h >= 0) setHarp(String(h)); }
+    if (q.length >= 2) runText(q);
+    if (yer) {
+      const n = yerSlug.indexOf(yer);
+      if (n >= 0) { if (layoutOf() !== 1) setView("sehadet"); select("y" + n); }
+    } else if (birlik) {
+      const m = birlik.match(/^([a-z]+)-(\d+)-(.*)$/), h = m ? dict.harp.findIndex((x) => x && slug(x) === m[3]) : -1;
+      if (m && h >= 0 && LVL[m[1]]) selectUnit({ lvl: m[1], num: +m[2], harp: h });
+    } else if (konus) {
+      if (S.view !== "birlik") setView("birlik");
+      const n = GAR.findIndex((g) => slug(g.name) === konus);
+      if (n >= 0) select("g" + n);
+    } else if (muh) {
+      const b = BAT.find((x) => slug(x.name) === muh);
+      if (b) { if (S.view !== "cephe") setView("cephe"); select("b" + b.k); }
+    } else if (ceph) {
+      const n = THEATERS.findIndex((x) => slug(x.name) === ceph);
+      if (n >= 0) { if (S.view !== "cephe") setView("cephe"); select("t" + n); }
+    } else if (il) {
+      const ii = D.ilPts.findIndex((x) => slug(x[0]) === il);
+      if (ii >= 0) {
+        const ci = ilce ? D.ilcePts.findIndex((c) => c[0] === ii && slug(c[1]) === ilce) : -1;
+        if (S.view !== "memleket") setView("memleket");
+        select(ci >= 0 ? "c" + ci : "i" + ii);
+      }
+    }
+    if (sehit) {
+      const i = C.id.indexOf(+sehit);
+      if (i >= 0) openCard(i);
+    }
+    urlReady = true; syncUrl();
+  }
+
+  // ---------- paylaş ----------
+  const SITE = "https://ahfacet.github.io/sehadet-atlasi/";
+  const ICONS = {
+    whatsapp: '<path d="M8 1.6a6.4 6.4 0 0 0-5.5 9.7L1.6 14.4l3.2-.8A6.4 6.4 0 1 0 8 1.6z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><path d="M5.9 5.1c.2-.3.6-.3.8 0l.6 1.2c.1.2 0 .5-.1.6l-.4.4c.4.9 1.1 1.6 2 2l.4-.4c.2-.2.4-.2.6-.1l1.2.6c.3.2.3.6 0 .8-.6.6-1.5.8-2.3.4A6 6 0 0 1 5.5 7.4c-.4-.8-.2-1.7.4-2.3z" fill="currentColor"/>',
+    x: '<path d="M2.2 2h3.6l2.7 3.8L11.8 2h1.7L9.3 6.8 14 14h-3.6L7.4 9.8 3.9 14H2.2l4.5-5.2z" fill="currentColor"/>',
+    facebook: '<path d="M9.2 15V9h2l.3-2.4H9.2V5.1c0-.7.2-1.2 1.2-1.2h1.2V1.8c-.2 0-.9-.1-1.8-.1-1.8 0-3 1.1-3 3.1v1.8h-2V9h2v6z" fill="currentColor"/>',
+    telegram: '<path d="M14.3 2.2 1.9 7c-.6.2-.6 1 0 1.2l3 .9 1.2 3.8c.1.5.7.6 1 .3l1.8-1.6 3.2 2.3c.4.3 1 .1 1.1-.4l2-10.5c.1-.6-.4-1-.9-.8zM6.3 9.3l5.8-4.6-4.7 5.3-.3 2.1z" fill="currentColor"/>',
+    linkedin: '<path d="M2.2 6h2.6v8H2.2zM3.5 2a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM6.4 6h2.5v1.1c.4-.7 1.2-1.3 2.5-1.3 2.6 0 3.1 1.7 3.1 3.9V14h-2.6v-3.8c0-.9 0-2.1-1.3-2.1s-1.5 1-1.5 2V14H6.4z" fill="currentColor"/>',
+    mail: '<rect x="1.8" y="3.3" width="12.4" height="9.4" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="m2.3 4 5.7 4.6L13.7 4" fill="none" stroke="currentColor" stroke-width="1.3"/>',
+    more: '<circle cx="3.5" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="12.5" cy="8" r="1.3" fill="currentColor"/>',
+  };
+  const icon = (k) => `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">${ICONS[k]}</svg>`;
+  const allCount = (k) => { let n = 0; for (let i = 0; i < N; i++) if (keyMatch(i, k)) n++; return n; };
+  const cleanYer = (n) => title(D.yerPts[n][0].replace(/\s*\(yer belirsiz\)\s*$/i, ""));
+  function memlekText(i) { return title(dict.memleket[C.memleket[i]] || "").split("/").filter(Boolean).join(", "); }
+
+  // Paylaşılacak şey: açık kart, seçim, birlik, arama ya da atlasın kendisi.
+  // Önizlemesi olan öğeler docs/s/ altındaki sayfalara bağlanır; o sayfalar atlasın aynı seçimle açılan adresine yönlendirir.
+  const HOME_TITLE = `Şehadet Atlası · ${fmt.format(N)} Şehidin Memleketi ve Şehadet Yeri Haritası (1853–1928)`;
+  const HOME_DESC = `Kırım Savaşı'ndan Kurtuluş Savaşı'na ${fmt.format(N)} şehidin memleketini ve şehit düştüğü yeri gösteren harita. İsimle şehit arama; il, ilçe, cephe ve muharebelere göre şehit listeleri. MSB Şehit Bilgi Kapısı kayıtları.`;
+  function shareInfo(rec) {
+    const p = urlParams(), harpTxt = S.harp !== "" ? harpShort(+S.harp) : "";
+    const extra = new URLSearchParams();
+    if (p.get("harp")) extra.set("harp", p.get("harp"));
+    if (p.get("q") && rec === undefined) extra.set("q", p.get("q"));
+    const n = selectionRecs().length || idx.length;
+    let path = null, img = "s/img/atlas.jpg", head, title_, desc, text;
+    const tail = (harpTxt ? ` · ${harpTxt}` : "") + (S.text && rec === undefined && S.sel ? ` · “${S.text}” geçen kayıtlar` : "");
+    if (rec !== undefined) {
+      const i = rec, ad = title(C.ad[i]), baba = C.baba[i] ? `, ${title(C.baba[i])} oğlu` : "";
+      const rutbe = dict.rutbe[C.rutbe[i]] ? title(dict.rutbe[C.rutbe[i]]) : "", mem = memlekText(i);
+      const yer = dict.ham[C.ham[i]] ? title(dict.ham[C.ham[i]]) : "", when = miladi(i) || (C.ym[i] ? String(Math.floor(C.ym[i] / 12)) : C.tarih[i]);
+      // şehit kartı atlasın genel önizlemesiyle paylaşılır; kişiye özel olan mesajdır
+      head = `Şehit ${ad}`;
+      text = [`Şehit ${ad}${baba}${rutbe ? " · " + rutbe : ""}`, mem && `Memleketi: ${mem}`, (yer || when) && `Şehadeti: ${[yer, when].filter(Boolean).join(", ")}`, "Ruhu şad olsun."].filter(Boolean).join("\n");
+      const q = new URLSearchParams({ sehit: C.id[i] });
+      return { head, title: HOME_TITLE, desc: HOME_DESC, text, url: SITE + "?" + q, img };
+    } else if (S.sel) {
+      const k = S.sel, m = +k.slice(1), all = allCount(k);
+      if (k[0] === "i" || k[0] === "c") {
+        const name = placeName(k);
+        path = k[0] === "i" ? `s/il/${slug(D.ilPts[m][0])}/` : `s/il/${slug(D.ilPts[D.ilcePts[m][0]][0])}/${slug(D.ilcePts[m][1])}/`;
+        img = k[0] === "i" ? `s/img/il/${slug(D.ilPts[m][0])}.jpg` : `s/img/il/${slug(D.ilPts[D.ilcePts[m][0]][0])}/${slug(D.ilcePts[m][1])}.jpg`;
+        const short = k[0] === "i" ? name : `${title(D.ilcePts[m][1])} (${title(D.ilPts[D.ilcePts[m][0]][0])})`;
+        head = `${short} Şehitleri`; title_ = `${short} Şehitleri · Şehadet Atlası`;
+        desc = k[0] === "i" ? `Memleketi ${name} olan ${fmt.format(all)} şehidin haritası: şehit düştükleri yerler, cepheler ve isimleri. 1853–1928, MSB Şehit Bilgi Kapısı kayıtları.`
+          : `Memleketi ${title(D.ilPts[D.ilcePts[m][0]][0])} ili ${title(D.ilcePts[m][1])} ilçesi olan ${fmt.format(all)} şehidin haritası: şehit düştükleri yerler, cepheler ve isimleri. MSB Şehit Bilgi Kapısı kayıtları.`;
+        text = `Memleketi ${name} olan ${fmt.format(n)} şehidimiz ve şehit düştükleri yerler${tail}.`;
+      } else if (k[0] === "y") {
+        const name = cleanYer(m), exact = D.yerPts[m][3];
+        path = `s/yer/${yerSlug[m]}/`; img = `s/img/yer/${yerSlug[m]}.jpg`;
+        head = exact ? `${name} Şehitleri` : `${name} · yeri belirsiz`;
+        title_ = exact ? `${name} Şehitleri · Şehadet Atlası` : `${name} · Şehadet Yeri Belirsiz Şehitler · Şehadet Atlası`;
+        desc = exact ? `Şehadet yeri ${name} olan ${fmt.format(all)} şehit ve memleketleri. MSB Şehit Bilgi Kapısı kayıtları.` : `${name} kayıtlı, şehadet yeri belirsiz ${fmt.format(all)} şehit ve memleketleri.`;
+        text = exact ? `Şehadet yeri ${name} olan ${fmt.format(n)} şehidimiz ve memleketleri${tail}.` : `${name} kayıtlı, şehadet yeri belirsiz ${fmt.format(n)} şehidimiz ve memleketleri${tail}.`;
+      } else if (k[0] === "t") {
+        const t = THEATERS[m];
+        path = `s/cephe/${slug(t.name)}/`; img = `s/img/cephe/${slug(t.name)}.jpg`;
+        head = `${t.name} Şehitleri`; title_ = `${t.name} Şehitleri (${t.years}) · Şehadet Atlası`;
+        desc = `${t.name} (${t.years}): ${fmt.format(all)} şehit, muharebeler ve şehitlerin memleketleri. MSB Şehit Bilgi Kapısı kayıtları.`;
+        text = `${t.name} (${t.years}): ${fmt.format(n)} şehidimiz, muharebeleri ve memleketleri${tail}.`;
+      } else if (k[0] === "b") {
+        const b = BAT[m];
+        path = `s/muharebe/${slug(b.name)}/`; img = `s/img/muharebe/${slug(b.name)}.jpg`;
+        head = `${b.name} Şehitleri`; title_ = `${b.name} Şehitleri · Şehadet Atlası`;
+        desc = `${b.name} (${batDateLong(b)}): ${fmt.format(all)} şehit ve memleketleri. MSB Şehit Bilgi Kapısı kayıtları.`;
+        text = `${b.name} (${batDateLong(b)}): ${fmt.format(n)} şehidimiz ve memleketleri${tail}.`;
+      } else if (k[0] === "g") {
+        const g = GAR[m];
+        head = `${g.name} konuşlu birlikler`;
+        text = `${g.name} konuşlu ${g.units.map(unitName).join(", ")}: ${fmt.format(n)} şehidimiz ve cephe güzergâhları${tail}.`;
+      }
+    } else if (S.view === "birlik" && S.unit) {
+      const u = S.unit, nm = `${unitName(u)} (${harpShort(u.harp)})`;
+      head = `${unitName(u)} Şehitleri`;
+      text = `${nm}: ${fmt.format(n)} şehidimiz, konuş yeri ve cephe güzergâhı.`;
+    } else if (S.text) {
+      head = `“${S.text}” araması`;
+      text = `Şehadet Atlası'nda “${S.text}” geçen ${fmt.format(idx.length)} şehit kaydı${harpTxt ? ` · ${harpTxt}` : ""}.`;
+    }
+    // sayfası olmayanlar (birlik, konuş, arama, atlas) genel önizlemeyle paylaşılır
+    if (!path) { title_ = HOME_TITLE; desc = HOME_DESC; img = "s/img/atlas.jpg"; }
+    if (!text) {
+      head = "Şehadet Atlası";
+      text = harpTxt ? `${harpTxt}: ${fmt.format(idx.length)} şehidimizin memleketi ve şehit düştüğü yer, her biri bir yıldız.` : `Kırım Savaşı'ndan Kurtuluş Savaşı'na ${fmt.format(N)} şehidimizin memleketi ve şehit düştüğü yer, her biri bir yıldız.`;
+    }
+    const q = path ? extra.toString() : p.toString();
+    const url = SITE + (path || "") + (q ? "?" + q : "");
+    return { head, title: title_, desc, text, url, img };
+  }
+  function shareLinks(info, text) {
+    const u = encodeURIComponent(info.url), t = encodeURIComponent(text), full = encodeURIComponent(text + "\n\n" + info.url);
+    return [
+      ["whatsapp", "WhatsApp", `https://api.whatsapp.com/send?text=${full}`],
+      ["x", "X", `https://twitter.com/intent/tweet?text=${t}&url=${u}`],
+      ["facebook", "Facebook", `https://www.facebook.com/sharer/sharer.php?u=${u}`],
+      ["telegram", "Telegram", `https://t.me/share/url?url=${u}&text=${t}`],
+      ["linkedin", "LinkedIn", `https://www.linkedin.com/sharing/share-offsite/?url=${u}`],
+      ["mail", "E-posta", `mailto:?subject=${encodeURIComponent(info.title)}&body=${full}`],
+    ];
+  }
+  let shareCur = null;
+  function openShare(rec) {
+    const info = shareInfo(rec);
+    shareCur = info;
+    $("share-body").innerHTML = `<div class="eyebrow">Paylaş</div>
+      <h2 id="share-title">${esc(info.head)}</h2>
+      <div class="sh-prev"><img id="sh-img" alt="" src="${info.img}"><div class="sh-meta"><small>ahfacet.github.io</small><b>${esc(info.title)}</b><span>${esc(info.desc)}</span></div></div>
+      <label class="sh-lbl" for="sh-text">Mesaj</label>
+      <textarea class="sh-text" id="sh-text" rows="4">${esc(info.text)}</textarea>
+      <div class="sh-nets" id="sh-nets"></div>
+      <div class="sh-link"><input id="sh-url" readonly value="${esc(info.url)}" aria-label="Bağlantı"><button class="pill" id="sh-copy">Bağlantıyı kopyala</button></div>
+      <p class="sh-note" id="sh-note" aria-live="polite"></p>`;
+    // yayın dışı önizlemede görsel bulunamazsa yayındaki kopyası denenir, o da yoksa alan gizlenir
+    const im = $("sh-img");
+    im.onerror = () => { if (!im.dataset.alt) { im.dataset.alt = 1; im.src = SITE + info.img; } else im.hidden = true; };
+    const paint = () => {
+      const text = $("sh-text").value.trim();
+      $("sh-nets").innerHTML = shareLinks(info, text).map(([k, name, href]) => `<a class="pill ghost" href="${esc(href)}" target="_blank" rel="noopener">${icon(k)}${name}</a>`).join("") +
+        `<button class="pill ghost" id="sh-copytext">${icon("more")}Metni kopyala</button>` +
+        (navigator.share ? `<button class="pill ghost" id="sh-native">${icon("more")}Diğer…</button>` : "");
+    };
+    paint();
+    $("sh-text").addEventListener("input", paint);
+    $("share").hidden = false;
+    $("share-x").focus();
+  }
+  const note = (m) => { $("sh-note").textContent = m; };
+  function copy(text, ok, fallbackEl) {
+    const done = () => note(ok);
+    try { navigator.clipboard.writeText(text).then(done, () => { if (fallbackEl) { fallbackEl.focus(); fallbackEl.select(); note("Kopyalamak için seçili metni kopyalayın."); } }); }
+    catch (e) { if (fallbackEl) { fallbackEl.focus(); fallbackEl.select(); note("Kopyalamak için seçili metni kopyalayın."); } }
+  }
+  $("share").addEventListener("click", (e) => {
+    if (e.target === $("share")) { $("share").hidden = true; return; }
+    const b = e.target.closest("button");
+    if (!b || !shareCur) return;
+    const text = $("sh-text").value.trim();
+    if (b.id === "sh-copy") copy(shareCur.url, "Bağlantı kopyalandı.", $("sh-url"));
+    else if (b.id === "sh-copytext") copy(text + "\n\n" + shareCur.url, "Mesaj ve bağlantı kopyalandı.", $("sh-text"));
+    else if (b.id === "sh-native") navigator.share({ title: shareCur.title, text, url: shareCur.url }).catch(() => {});
+  });
+  $("share-x").onclick = () => { $("share").hidden = true; };
+  $("b-share").onclick = () => openShare(S.card != null ? S.card : undefined);
+  $("plaque-share").onclick = () => openShare();
   $("q").addEventListener("input", () => { clearTimeout(qt); qt = setTimeout(previewSearch, 180); });
   $("q").addEventListener("keydown", (e) => {
     if (e.key === "Escape") { $("results").hidden = true; e.target.blur(); }
     else if (e.key === "Enter") { e.preventDefault(); applyText(); }
   });
   $("q-go").onclick = applyText;
-  $("text-chip").onclick = () => { S.text = ""; filter(); updateHighlight(); if (!$("plaque").hidden) renderPlaque(); flyTo(homeView()); };
+  $("text-chip").onclick = () => { S.text = ""; filter(); updateHighlight(); if (!$("plaque").hidden) renderPlaque(); flyTo(homeView()); syncUrl(); };
   // süzgeçten sonra haritayı görünen kayıtlara sığdır
   function fitVisible() {
     let pts;
@@ -1784,7 +2078,7 @@ button.stop:hover b { color: var(--gold); }
   };
   $("card-x").onclick = closeCard;
   $("card").addEventListener("click", (e) => { if (e.target === $("card")) closeCard(); });
-  addEventListener("keydown", (e) => { if (e.key === "Escape") { if (!$("card").hidden) closeCard(); if (!$("about").hidden) $("about").hidden = true; } });
+  addEventListener("keydown", (e) => { if (e.key === "Escape") { if (!$("share").hidden) { $("share").hidden = true; return; } if (!$("card").hidden) closeCard(); if (!$("about").hidden) $("about").hidden = true; } });
   $("pbody").addEventListener("input", (e) => {
     if (e.target.id !== "f-unit") return;
     clearTimeout(qt);
@@ -1798,6 +2092,7 @@ button.stop:hover b { color: var(--gold); }
     if (d.harp !== undefined) { setHarp(d.harp); return; }
     if (d.textfilter !== undefined) { applyText(); return; }
     if (d.rec !== undefined) { openCard(+d.rec); $("results").hidden = true; }
+    else if (d.shareRec !== undefined) openShare(+d.shareRec);
     else if (d.show !== undefined) { closeCard(); showStar(+d.show); }
     else if (d.showplace !== undefined) { closeCard(); showStar(+d.showplace, 1); }
     else if (d.x === "sel") clearSel();
@@ -1858,6 +2153,7 @@ button.stop:hover b { color: var(--gold); }
   setTimeout(() => {
     $("loading").classList.add("done"); $("loading-text").classList.add("done");
     dockFlag();
+    openFromUrl();
     setTimeout(() => { $("loading").hidden = true; $("loading-text").hidden = true; }, 1600);
   }, reduceMotion ? 0 : 900);
 })();
