@@ -1601,12 +1601,14 @@ button.stop:hover b { color: var(--gold); }
   function recDetail(i) {
     const rutbe = dict.rutbe[C.rutbe[i]];
     const mem = (dict.memleket[C.memleket[i]] || "").split("/").filter(Boolean).map(title).join(", ");
+    // Şehadet yeri: <cephe> – <kayıttaki yer>; cephesi belirtilmemişse yalnız yer
+    const yer = [dict.cephe[C.cephe[i]], dict.ham[C.ham[i]]].filter(Boolean).map(title).join(" – ");
     return [
       C.baba[i] && `${esc(title(C.baba[i]))} oğlu`,
       C.lakap[i] && `<i>${esc(title(C.lakap[i]))}</i>`,
       rutbe && `<span class="r">${esc(title(rutbe))}</span>`,
       mem && esc(mem),
-    ].filter(Boolean).join(" · ") + (dict.ham[C.ham[i]] ? `<br>Şehadet yeri: <span class="r">${esc(title(dict.ham[C.ham[i]]))}</span>` : "");
+    ].filter(Boolean).join(" · ") + (yer ? `<br>Şehadet yeri: <span class="r">${esc(yer)}</span>` : "");
   }
   // şehadetteki yaş: doğum ayı kayıtlarda yok, bir yıl şaşabilir. 12–80 dışındaki sonuçlar kayıt hatasıdır, gösterilmez.
   function yas(i) {
