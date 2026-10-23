@@ -25,17 +25,23 @@
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Şehadet Atlası", "url": "https://ahfacet.github.io/sehadet-atlasi/", "inLanguage": "tr"}</script>
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dataset", "name": "Şehadet Atlası: 1853–1928 şehitlerinin memleket ve şehadet yerleri", "description": "Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketi ve şehadet yeri haritası. İsimle arama; il, ilçe ve muharebelere göre şehit listeleri.", "url": "https://ahfacet.github.io/sehadet-atlasi/", "inLanguage": "tr", "temporalCoverage": "1853/1928", "spatialCoverage": {"@type": "Place", "name": "Türkiye, Balkanlar, Kafkasya ve Orta Doğu"}, "keywords": ["şehit listesi", "şehit arama", "Çanakkale şehitleri", "Kurtuluş Savaşı şehitleri", "Birinci Dünya Savaşı", "Balkan Savaşları", "MSB Şehit Bilgi Kapısı"], "isBasedOn": "https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi", "creator": {"@type": "Organization", "name": "Şehadet Atlası", "url": "https://ahfacet.github.io/sehadet-atlasi/"}, "distribution": [{"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://ahfacet.github.io/sehadet-atlasi/data.json"}]}</script>
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
-<!-- Hotjar Tracking Code for Sehadet Atlasi -->
 <script>
-    (function(h,o,t,j,a,r){
-        h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
-        h._hjSettings={hjid:6829460,hjsv:6};
-        a=o.getElementsByTagName('head')[0];
-        r=o.createElement('script');r.async=1;
-        r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
-        a.appendChild(r);
-    })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  var cerez = null; try { cerez = localStorage.getItem("cerez"); } catch (e) {}
+  gtag('consent', 'default', { analytics_storage: cerez === "red" ? "denied" : "granted", ad_storage: "denied", ad_user_data: "denied", ad_personalization: "denied" });
+  gtag('js', new Date());
+  gtag('config', 'G-LZ4BV6QRXK');
+  (function(h,o,t,j,a,r){
+    h.hj=h.hj||function(){(h.hj.q=h.hj.q||[]).push(arguments)};
+    h._hjSettings={hjid:6829460,hjsv:6};
+    a=o.getElementsByTagName('head')[0];
+    r=o.createElement('script');r.async=1;
+    r.src=t+h._hjSettings.hjid+j+h._hjSettings.hjsv;
+    a.appendChild(r);
+  })(window,document,'https://static.hotjar.com/c/hotjar-','.js?sv=');
 </script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-LZ4BV6QRXK"></script>
 </head>
 <body>
 <noscript><p>Şehadet Atlası, MSB Şehit Bilgi Kapısı kayıtlarındaki şehitleri harita üzerinde gösterir ve JavaScript gerektirir. Şehit listelerine <a href="https://ahfacet.github.io/sehadet-atlasi/il/">illere ve ilçelere göre</a> ya da <a href="https://ahfacet.github.io/sehadet-atlasi/cephe/">cephe ve muharebelere göre</a> ulaşabilirsiniz.</p></noscript>
@@ -2217,5 +2223,6 @@ button.stop:hover b { color: var(--gold); }
 })();
 </script>
 
+<script src="cerez.js" data-lift="74px" defer></script>
 </body>
 </html>
