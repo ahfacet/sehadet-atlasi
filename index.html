@@ -75,7 +75,7 @@ button, select, input { font: inherit; color: inherit; }
   padding-block: calc(18px + env(safe-area-inset-top, 0px)) 28px; padding-left: max(24px, env(safe-area-inset-left, 0px)); padding-right: max(24px, env(safe-area-inset-right, 0px));
   background: linear-gradient(to bottom, rgba(3, 4, 6, 0.8), transparent); pointer-events: none; }
 .top > * { pointer-events: auto; }
-.brand .mark { font-family: var(--f-display); font-weight: 500; font-size: 17px; letter-spacing: 0.42em; color: var(--ink); white-space: nowrap; }
+.brand .mark { margin: 0; line-height: normal; font-family: var(--f-display); font-weight: 500; font-size: 17px; letter-spacing: 0.42em; color: var(--ink); white-space: nowrap; }
 .brand .rule { width: 56px; height: 1px; background: var(--gold); opacity: 0.7; margin: 9px 0 8px; }
 .brand .sub { font-size: 10.5px; letter-spacing: 0.16em; color: var(--dim); text-transform: uppercase; }
 .views { display: flex; gap: 2px; padding: 3px; border: 1px solid var(--line); border-radius: 999px; background: rgba(8, 9, 12, 0.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
@@ -295,7 +295,7 @@ button.stop:hover b { color: var(--gold); }
 <header class="top">
   <div class="brand">
     <span class="flag-slot" id="flag-slot" aria-hidden="true"></span>
-    <div class="mark">ŞEHADET ATLASI</div>
+    <h1 class="mark">ŞEHADET ATLASI</h1>
     <div class="rule"></div>
     <div class="sub">1853 – 1928 · <a href="https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi" target="_blank" rel="noopener">MSB Şehit Bilgi Kapısı</a> kayıtları</div>
     <div class="dedication">Aziz şehitlerimizin hatırasına</div>
