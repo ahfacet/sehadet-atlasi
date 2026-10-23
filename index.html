@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Şehadet Atlası · 110.561 Şehidin Memleketi ve Şehadet Yeri</title>
 <meta name="google-site-verification" content="2pQhKq3weqrWTfU727pzwvAGVfykiuW93fzzkAyFDw4">
+<meta name="msvalidate.01" content="78AEDAEBD4911CEE80B3B56F7A82F278">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -130,6 +131,7 @@ button, select, input { font: inherit; color: inherit; }
 .about .lead { text-align: left; margin: 18px 0 0; }
 .about h3 { font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); font-weight: 500; margin: 20px 0 8px; text-align: left; }
 .about ul { text-align: left; margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13px; }
+.about .byline { text-align: left; margin: 10px 0 0; font-size: 12px; letter-spacing: 0.04em; color: var(--dim); opacity: 0.8; }
 .about p.small { text-align: left; font-size: 12.5px; color: #cfc6b4; margin: 0 0 8px; }
 .about a { color: var(--gold); }
 
@@ -210,6 +212,7 @@ button.stop:hover b { color: var(--gold); }
 .names button { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 10px; row-gap: 2px; align-items: baseline; text-align: left; background: none; border: 0; border-top: 1px solid rgba(224, 185, 104, 0.1); padding: 8px 2px; cursor: pointer; }
 .names button:hover b { color: var(--gold); }
 .names b { font-family: var(--f-display); font-weight: 500; font-size: 12.5px; letter-spacing: 0.06em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; transition: color 0.15s; }
+.names b .age, .results b .age { font-family: var(--f-ui); font-size: 11px; letter-spacing: 0.02em; text-transform: none; color: var(--dim); font-weight: 400; }
 .names .y { font-family: var(--f-data); font-size: 11px; color: var(--gold); }
 .names small { grid-column: 1 / -1; color: var(--dim); font-size: 11.5px; line-height: 1.45; overflow-wrap: anywhere; }
 .names small i { font-family: var(--f-serif); font-size: 13px; color: #cfc6b4; }
@@ -373,6 +376,7 @@ button.stop:hover b { color: var(--gold); }
     </figure>
     <p class="lead">1853'ten 1928'e uzanan yetmiş beş yıl boyunca, Kırım'dan Kurtuluş Savaşı'na, bu toprakların savunmasında canını veren 110.561 şehidimizin her biri bu haritada bir yıldızdır. Her ışık bir isimdir: bir köyden, bir kasabadan yola çıkıp Seddülbahir'de, Sarıkamış'ta, Kûtü'l-Amâre'de, Gazze'de, Sakarya'da toprağa düşmüş bir hayat.</p>
     <p class="lead">Atlas, onların nereden geldiğini ve nerede kaldığını aynı haritada göstermek için hazırlanmıştır. Bir memleketin ışıkları şehadet yerlerine uçarken, rakamların ardındaki insanları hatırlamak dileğiyle.</p>
+    <p class="byline">Dr. Yusuf Mücahit Çetinkaya</p>
     <h3>Nasıl gezilir</h3>
     <ul>
       <li><b>Memleket</b>: yıldızlar şehitlerin doğduğu yerde. Bir memlekete dokununca şehit düştükleri yerlere oklar çizilir.</li>
@@ -1604,9 +1608,16 @@ button.stop:hover b { color: var(--gold); }
       mem && esc(mem),
     ].filter(Boolean).join(" · ");
   }
+  // şehadetteki yaş: doğum ayı kayıtlarda yok, bir yıl şaşabilir. 12–80 dışındaki sonuçlar kayıt hatasıdır, gösterilmez.
+  function yas(i) {
+    const d = +C.dogum[i];
+    if (!d || !C.ym[i]) return 0;
+    const a = Math.floor(C.ym[i] / 12) - d;
+    return a >= 12 && a <= 80 ? a : 0;
+  }
   function names(recs) {
     return `<div class="sec">İsimler</div><div class="names">${recs.slice(0, S.shown).map((i) =>
-      `<button data-rec="${i}"><b>${esc(title(C.ad[i]))}</b><span class="y">${C.ym[i] ? Math.floor(C.ym[i] / 12) : ""}</span><small>${recDetail(i)}</small></button>`).join("")}</div>
+      `<button data-rec="${i}"><b>${esc(title(C.ad[i]))}${yas(i) ? `<span class="age"> – ${yas(i)} yaşında</span>` : ""}</b><span class="y">${C.ym[i] ? Math.floor(C.ym[i] / 12) : ""}</span><small>${recDetail(i)}</small></button>`).join("")}</div>
       ${recs.length > S.shown ? `<button class="pill ghost more" data-more>${fmt.format(Math.min(200, recs.length - S.shown))} isim daha</button>` : ""}`;
   }
 
@@ -1779,6 +1790,7 @@ button.stop:hover b { color: var(--gold); }
       <dl>
         ${row("Memleket", esc(title(dict.memleket[C.memleket[i]] || "").split("/").filter(Boolean).join(" · ")))}
         ${row("Doğum", esc(C.dogum[i]))}
+        ${row("Şehadetinde", yas(i) ? `${yas(i)} yaşında` : "")}
         ${row("Harp", esc(title(dict.harp[C.harp[i]] || "")))}
         ${row("Cephe", esc(title(dict.cephe[C.cephe[i]] || "")))}
         ${row("Şehadet yeri", esc(title(dict.ham[C.ham[i]] || "")))}
@@ -1810,7 +1822,7 @@ button.stop:hover b { color: var(--gold); }
     const out = []; let n = 0;
     for (const i of idx) { if (textMatch(i, q)) { n++; if (out.length < 30) out.push(i); } }
     box.innerHTML = (n ? `<button class="all" data-textfilter="1"><b>“${esc(raw)}” geçen tüm kayıtları listele</b><small>${fmt.format(n)} şehit · Enter</small></button>` : "") +
-      (out.length ? out.map((i) => `<button data-rec="${i}"><b>${esc(title(C.ad[i]))}</b><small>${recDetail(i)}</small></button>`).join("") : '<div class="none">Bu aramayla eşleşen kayıt bulunmamaktadır.</div>');
+      (out.length ? out.map((i) => `<button data-rec="${i}"><b>${esc(title(C.ad[i]))}${yas(i) ? `<span class="age"> – ${yas(i)} yaşında</span>` : ""}</b><small>${recDetail(i)}</small></button>`).join("") : '<div class="none">Bu aramayla eşleşen kayıt bulunmamaktadır.</div>');
     box.hidden = false;
   }
   function applyText() {
