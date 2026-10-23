@@ -539,8 +539,43 @@ button.stop:hover b { color: var(--gold); }
     $("loading-s").textContent = "Veri dosyaları yüklenemedi. Sayfayı data.json ve basemap.json ile aynı klasörden açın.";
     return;
   }
+  // Kayıttaki tarih (çoğunlukla Rumi) -> Miladi yıl*12 + ay-1; bilinmiyorsa 0. build_web.py'deki miladi_ay ile aynıdır:
+  // 1334 öncesi Rumi yıl Mart'ta başlar ve ay numarası bu sıraya göredir (01 = Mart); ay 00 ise yılın ortası alınır.
+  function miladiAy(t) {
+    t = (t || "").trim().replace(/[.\-]/g, "/").replace(/\/+/g, "/");
+    if (/^\d{1,2}\/\d{4}$/.test(t)) t = "00/" + t;
+    const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if (!m) return 0;
+    let ay = +m[2];
+    const y = +m[3];
+    if (!(ay >= 1 && ay <= 12)) ay = 0;
+    if (y >= 1250 && y <= 1333) {
+      if (!ay) return (y + 584) * 12 + 8;
+      const g = ay + 2;
+      return (y + 584 + (g > 12 ? 1 : 0)) * 12 + ((g - 1) % 12);
+    }
+    if (y >= 1334 && y <= 1345) return (y + 584) * 12 + ((ay || 7) - 1);
+    if (y >= 1800 && y <= 1930) return y * 12 + ((ay || 7) - 1);
+    return 0;
+  }
   const C = D.cols, N = D.n, dict = D.dicts;
   for (const k of ["ad", "baba", "lakap", "dogum", "tarih"]) C[k] = C[k].split("\n");
+  // dosyada gönderilmeyen sütunları yeniden kur (build_web.py: DERIVED)
+  {
+    const id = new Int32Array(N), ym = new Int32Array(N), il = new Int32Array(N), ilce = new Int32Array(N);
+    const lv = { kolordu: new Int32Array(N), firka: new Int32Array(N), alay: new Int32Array(N) }, dv = D.derive;
+    const sy = {};
+    for (const f in dv.sy) sy[f] = new Int32Array(N);
+    let acc = 0;
+    for (let i = 0; i < N; i++) {
+      acc += C.id[i]; id[i] = acc;
+      ym[i] = miladiAy(C.tarih[i]);
+      il[i] = dv.memIl[C.memleket[i]]; ilce[i] = dv.memIlce[C.memleket[i]];
+      for (const f in lv) lv[f][i] = dv.birlik[f][C.birlik[i]];
+      for (const f in sy) sy[f][i] = dv.sy[f][C.sy[i]];
+    }
+    Object.assign(C, { id, ym, il, ilce }, lv, sy);
+  }
 
   // ---------- projeksiyon: dünya koordinatı = (boylam, Mercator enlemi), derece ----------
   const mercY = (lat) => (Math.log(Math.tan(Math.PI / 4 + (lat * Math.PI) / 360)) * 180) / Math.PI;
@@ -1741,7 +1776,7 @@ button.stop:hover b { color: var(--gold); }
       ${C.lakap[i] ? `<div class="baba">${esc(title(C.lakap[i]))}</div>` : ""}
       ${rutbe ? `<div class="rank">${esc(rutbe)}</div>` : ""}
       <dl>
-        ${row("Memleket", esc(title(dict.memleket[C.memleket[i]] || "").replace(/\//g, " · ")))}
+        ${row("Memleket", esc(title(dict.memleket[C.memleket[i]] || "").split("/").filter(Boolean).join(" · ")))}
         ${row("Doğum", esc(C.dogum[i]))}
         ${row("Harp", esc(title(dict.harp[C.harp[i]] || "")))}
         ${row("Cephe", esc(title(dict.cephe[C.cephe[i]] || "")))}
