@@ -1548,15 +1548,17 @@ button.stop:hover b { color: var(--gold); }
       <div class="acts"><button class="pill" data-th="${b.th}">${esc(th.name)}</button><button class="pill ghost" data-x="sel">Kapat</button></div>
       ${yearHist(recs)}${unitBlock(recs)}${memBars(recs)}${names(recs)}`;
   }
+  // Seçili yıldızlar diğer yerleşime uçuruldu mu? Animasyon sürüyorsa gideceği yere bakılır
+  const selFlown = () => (hiAnim ? hiAnim.to !== U.uT.value : Math.abs(U.uTHi.value - U.uT.value) > 0.5);
   function placeHtml() {
     const k = S.sel, recs = selectionRecs();
     const outgoing = layoutOf() === 0;
     const other = new Map();
     for (const i of recs) { const key = outgoing ? (C.yer[i] >= 0 ? "y" + C.yer[i] : null) : (C.il[i] >= 0 ? "i" + C.il[i] : null); if (key) other.set(key, (other.get(key) || 0) + 1); }
-    const flown = Math.abs(U.uTHi.value - U.uT.value) > 0.5 || (hiAnim && hiAnim.to !== U.uT.value);
+    const flown = selFlown();
     const flyBtn = outgoing
-      ? `<button class="pill gold" data-fly>${flown ? "Memleketlerine geri getir" : "Şehadet yerlerine uğurla"}</button>`
-      : `<button class="pill gold" data-fly>${flown ? "Şehadet yerine geri götür" : "Memleketlerine götür"}</button>`;
+      ? `<button class="pill gold" data-fly>${flown ? "Memleketlerine geri çağır" : "Şehadet yerlerine uğurla"}</button>`
+      : `<button class="pill gold" data-fly>${flown ? "Şehadet yerine geri çağır" : "Memleketlerine uğurla"}</button>`;
     const unitsHere = S.view === "birlik" && !S.unit ? `<div class="sec">Burada şehit düşen ${LVL[S.unitLvl].toLocaleLowerCase("tr-TR")}lar</div>${unitButtons(unitCounts(recs, S.unitLvl), 10, true)}` : "";
     return `<div class="eyebrow">${outgoing ? "Memleket" : "Şehadet yeri"}${S.view === "birlik" && S.unit ? " · " + esc(unitName(S.unit)) : ""}</div>
       <h2 class="ptitle">${esc(placeName(k))}${placeExact(k) ? "" : '<span class="approx-tag">yaklaşık</span>'}</h2>
@@ -1786,7 +1788,7 @@ button.stop:hover b { color: var(--gold); }
     else if (d.th !== undefined) { if (S.view !== "cephe") setView("cephe"); select("t" + d.th); }
     else if (d.bat !== undefined) { if (S.view !== "cephe") setView("cephe"); select("b" + d.bat); }
     else if (d.fly !== undefined) {
-      const back = Math.abs(U.uTHi.value - U.uT.value) > 0.5;
+      const back = selFlown();
       animateT(back ? U.uT.value : 1 - U.uT.value, U.uTHi, 2600);
       setTimeout(renderPlaque, 30);
     }
