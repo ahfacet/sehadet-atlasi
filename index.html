@@ -4,7 +4,6 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
-<script>window.MSB_EMBED = true;</script>
 <!-- Hotjar Tracking Code for Sehadet Atlasi -->
 <script>
     (function(h,o,t,j,a,r){
@@ -90,7 +89,6 @@ button, select, input { font: inherit; color: inherit; }
 .music-tray span { color: var(--gold); }
 .music-tray:hover { border-color: var(--gold); }
 .music:hover .music-tray, .music:focus-within .music-tray, .music.open .music-tray { opacity: 1; transform: translate(0, -50%); pointer-events: auto; }
-#yt { position: fixed; width: 1px; height: 1px; left: -10px; bottom: -10px; opacity: 0; pointer-events: none; border: 0; }
 /* aranabilir harp listesi */
 .combo { position: relative; }
 .combo-btn b { font-weight: 500; color: var(--ink); max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -343,7 +341,7 @@ button.stop:hover b { color: var(--gold); }
   </div>
 </div>
 
-<iframe id="yt" title="Çanakkale Şehitlerine" tabindex="-1" aria-hidden="true" allow="autoplay; encrypted-media" hidden></iframe>
+<audio id="canakkale" loop preload="none"><source src="canakkale-sehitlerine.mp4" type="audio/mp4"></audio>
 <canvas id="flag" aria-hidden="true"></canvas>
 <div class="loading" id="loading"></div>
 <div class="loading-text" id="loading-text"><div><div class="t">ŞEHADET ATLASI</div><div class="s" id="loading-s">İsimler yükleniyor</div></div></div>
@@ -1508,11 +1506,28 @@ button.stop:hover b { color: var(--gold); }
     else if (S.sel && S.sel[0] === "b") b.innerHTML = battleHtml(+S.sel.slice(1));
     else if (S.sel && S.sel[0] === "g") b.innerHTML = garrisonHtml(+S.sel.slice(1));
     else if (S.sel) b.innerHTML = placeHtml();
+    else if (S.summary && S.text) b.innerHTML = searchHtml();
     else if (S.view === "birlik" && S.unit) b.innerHTML = unitHtml();
     else if (S.view === "birlik") b.innerHTML = unitPickerHtml();
     else if (S.view === "cephe") b.innerHTML = theaterListHtml();
     else b.innerHTML = summaryHtml();
     if (keepFocus) { const el = $("f-unit"); if (el) { el.focus(); el.setSelectionRange(el.value.length, el.value.length); } }
+  }
+  const ABC = new Intl.Collator("tr");
+  function searchHtml() {
+    const yer = new Map(), byHarp = new Map();
+    for (const i of idx) {
+      if (C.yer[i] >= 0 && placeExact("y" + C.yer[i])) yer.set("y" + C.yer[i], (yer.get("y" + C.yer[i]) || 0) + 1);
+      byHarp.set(C.harp[i], (byHarp.get(C.harp[i]) || 0) + 1);
+    }
+    const recs = idx.length <= 20000 ? Array.from(idx).sort((a, b) => ABC.compare(C.ad[a], C.ad[b])) : Array.from(idx);
+    return `<div class="eyebrow">Arama</div>
+      <h2 class="ptitle">“${esc(S.text)}”</h2>
+      <p class="lead">${fmt.format(idx.length)} kayıt bulunmuştur. Bir isme dokunarak künyesini açabilirsiniz; memleket ve şehadet yeri dağılımları listenin altındadır.</p>
+      ${names(recs)}
+      ${memBars(recs)}
+      <div class="sec">Şehit düştükleri yerler</div>${bars(yer, placeName, 10)}
+      <div class="sec">Harplere göre</div>${bars(byHarp, harpShort, 8)}`;
   }
   function summaryHtml() {
     const L0 = layoutOf(), list = L0 ? placesS : placesIl, byHarp = new Map();
@@ -1682,7 +1697,7 @@ button.stop:hover b { color: var(--gold); }
     if (q.length < 2) { box.hidden = true; return; }
     const out = []; let n = 0;
     for (const i of idx) { if (textMatch(i, q)) { n++; if (out.length < 30) out.push(i); } }
-    box.innerHTML = (n ? `<button class="all" data-textfilter="1"><b>“${esc(raw)}” geçen tüm kayıtları süz</b><small>${fmt.format(n)} şehit · Enter</small></button>` : "") +
+    box.innerHTML = (n ? `<button class="all" data-textfilter="1"><b>“${esc(raw)}” geçen tüm kayıtları listele</b><small>${fmt.format(n)} şehit · Enter</small></button>` : "") +
       (out.length ? out.map((i) => `<button data-rec="${i}"><b>${esc(title(C.ad[i]))}</b><small>${recDetail(i)}</small></button>`).join("") : '<div class="none">Bu aramayla eşleşen kayıt bulunmamaktadır.</div>');
     box.hidden = false;
   }
@@ -1690,7 +1705,7 @@ button.stop:hover b { color: var(--gold); }
     const raw = $("q").value.trim();
     if (raw.length < 2) return;
     S.text = raw; $("q").value = ""; $("results").hidden = true;
-    filter(); if (S.sel && !selectionRecs().length) S.sel = null; updateHighlight(); if (!$("plaque").hidden) renderPlaque();
+    filter(); S.sel = null; S.summary = true; S.shown = 120; updateHighlight(); openPlaque();
     fitVisible();
   }
   $("q").addEventListener("input", () => { clearTimeout(qt); qt = setTimeout(previewSearch, 180); });
@@ -1734,40 +1749,31 @@ button.stop:hover b { color: var(--gold); }
   $("about").addEventListener("click", (e) => { if (e.target === $("about")) $("about").hidden = true; });
 
   // ---------- Çanakkale Şehitlerine: gizli YouTube oynatıcısı; tarayıcılar sesi ilk dokunuştan sonra açmaya izin verir ----------
-  const YT_ID = "YZl7GVcEo68";
   const ICON_ON = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6h2.2L8 3.3v9.4L4.7 10H2.5z" fill="currentColor"/><path d="M10.3 5.6a3.2 3.2 0 0 1 0 4.8M12 3.9a5.6 5.6 0 0 1 0 8.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>';
   const ICON_OFF = '<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 6h2.2L8 3.3v9.4L4.7 10H2.5z" fill="currentColor" opacity=".55"/><path d="M10.3 5.6a3.2 3.2 0 0 1 0 4.8M12 3.9a5.6 5.6 0 0 1 0 8.2" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" opacity=".55"/><path d="M2 14 14.2 1.8" stroke="var(--night)" stroke-width="3.2" stroke-linecap="round"/><path d="M2 14 14.2 1.8" stroke="var(--gold)" stroke-width="1.6" stroke-linecap="round"/></svg>';
   const music = $("b-music"), musicBox = $("music");
   let trayTimer;
   // Şeridi kısa süre açık tut: kullanıcı isterse YouTube'a geçebilsin
   const showTray = () => { musicBox.classList.add("open"); clearTimeout(trayTimer); trayTimer = setTimeout(() => musicBox.classList.remove("open"), 4000); };
-  if (window.MSB_EMBED) {
-    // GitHub Pages sürümü: sessiz başlar, ilk etkileşimde ses açılır; buton sesi kapatır ya da açar
-    const yt = $("yt");
-    yt.src = `https://www.youtube.com/embed/${YT_ID}?autoplay=1&mute=1&loop=1&playlist=${YT_ID}&controls=0&enablejsapi=1&playsinline=1`;
-    yt.hidden = false;
-    const cmd = (func) => { try { yt.contentWindow.postMessage(JSON.stringify({ event: "command", func, args: [] }), "*"); } catch (e) {} };
-    let paused = false, started = false;
-    const paint = () => {
-      music.innerHTML = paused ? ICON_OFF : ICON_ON;
-      music.setAttribute("aria-pressed", String(!paused));
-      music.setAttribute("aria-label", paused ? "Çanakkale Şehitlerine · sesi aç" : "Çanakkale Şehitlerine · sesi kapat");
-    };
-    paint();
-    const start = (e) => { if (started || (e && e.target && e.target.closest && e.target.closest("#music"))) return; started = true; if (!paused) { cmd("unMute"); cmd("playVideo"); } };
-    ["pointerdown", "keydown"].forEach((ev) => addEventListener(ev, start, { capture: true }));
-    music.onclick = (e) => {
-      e.stopPropagation(); started = true; paused = !paused;
-      if (paused) cmd("pauseVideo"); else { cmd("unMute"); cmd("playVideo"); }
-      paint(); showTray();
-    };
-    $("music-yt").addEventListener("click", () => { if (!paused) { paused = true; cmd("pauseVideo"); paint(); } });
-  } else {
-    // Bu görüntüleyici gömülü video oynatmaya izin vermiyor: buton yalnız YouTube şeridini açar
-    music.innerHTML = ICON_ON;
-    music.setAttribute("aria-label", "Çanakkale Şehitlerine · YouTube'da dinle");
-    music.onclick = (e) => { e.stopPropagation(); showTray(); $("music-yt").focus(); };
-  }
+  // Sayfayla birlikte gelen ses: tarayıcılar sesi ilk etkileşimden sonra açtığı için oynatma ilk dokunuşta başlar
+  const audio = $("canakkale");
+  audio.volume = 0.7;
+  let paused = false, started = false;
+  const paint = () => {
+    music.innerHTML = paused ? ICON_OFF : ICON_ON;
+    music.setAttribute("aria-pressed", String(!paused));
+    music.setAttribute("aria-label", paused ? "Çanakkale Şehitlerine · sesi aç" : "Çanakkale Şehitlerine · sesi kapat");
+  };
+  const play = () => { const r = audio.play(); if (r) r.catch(() => {}); };
+  paint();
+  const start = (e) => { if (started || (e && e.target && e.target.closest && e.target.closest("#music"))) return; started = true; if (!paused) play(); };
+  ["pointerdown", "keydown"].forEach((ev) => addEventListener(ev, start, { capture: true }));
+  music.onclick = (e) => {
+    e.stopPropagation(); started = true; paused = !paused;
+    if (paused) audio.pause(); else play();
+    paint(); showTray();
+  };
+  $("music-yt").addEventListener("click", () => { if (!paused) { paused = true; audio.pause(); paint(); } });
   $("f-approx").onchange = (e) => { S.approx = e.target.checked; U.uApprox.value = S.approx ? (S.view === "cephe" ? 0.2 : 1) : 0; };
   $("b-reset").onclick = () => flyTo(homeView());
   $("b-summary").onclick = () => { S.summary = true; if (S.sel) { S.sel = null; updateHighlight(); } openPlaque(); };
