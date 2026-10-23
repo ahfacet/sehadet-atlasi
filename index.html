@@ -3,24 +3,24 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Şehadet Atlası · 110.561 Şehidin Memleketi ve Şehadet Yeri Haritası (1853–1928)</title>
+<title>Şehadet Atlası · 110.561 Şehidin Memleketi ve Şehadet Yeri</title>
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="description" content="Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketini ve şehit düştüğü yeri gösteren harita. İsimle şehit arama; il, ilçe, cephe ve muharebelere göre şehit listeleri. MSB Şehit Bilgi Kapısı kayıtları.">
+<meta name="description" content="Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketi ve şehadet yeri haritası. İsimle arama; il, ilçe ve muharebelere göre şehit listeleri.">
 <link rel="canonical" href="https://ahfacet.github.io/sehadet-atlasi/">
 <meta property="og:type" content="website">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:site_name" content="Şehadet Atlası">
 <meta property="og:title" content="Şehadet Atlası · 110.561 şehit, bir yıldız">
-<meta property="og:description" content="Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketini ve şehit düştüğü yeri gösteren harita. İsimle şehit arama; il, ilçe, cephe ve muharebelere göre şehit listeleri. MSB Şehit Bilgi Kapısı kayıtları.">
+<meta property="og:description" content="Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketi ve şehadet yeri haritası. İsimle arama; il, ilçe ve muharebelere göre şehit listeleri.">
 <meta property="og:url" content="https://ahfacet.github.io/sehadet-atlasi/">
 <meta property="og:image" content="https://ahfacet.github.io/sehadet-atlasi/s/img/atlas.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <script type="application/ld+json">{"@context": "https://schema.org", "@type": "WebSite", "name": "Şehadet Atlası", "url": "https://ahfacet.github.io/sehadet-atlasi/", "inLanguage": "tr"}</script>
-<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dataset", "name": "Şehadet Atlası: 1853–1928 şehitlerinin memleket ve şehadet yerleri", "description": "Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketini ve şehit düştüğü yeri gösteren harita. İsimle şehit arama; il, ilçe, cephe ve muharebelere göre şehit listeleri. MSB Şehit Bilgi Kapısı kayıtları.", "url": "https://ahfacet.github.io/sehadet-atlasi/", "inLanguage": "tr", "temporalCoverage": "1853/1928", "spatialCoverage": {"@type": "Place", "name": "Türkiye, Balkanlar, Kafkasya ve Orta Doğu"}, "keywords": ["şehit listesi", "şehit arama", "Çanakkale şehitleri", "Kurtuluş Savaşı şehitleri", "Birinci Dünya Savaşı", "Balkan Savaşları", "MSB Şehit Bilgi Kapısı"], "isBasedOn": "https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi", "creator": {"@type": "Organization", "name": "Şehadet Atlası", "url": "https://ahfacet.github.io/sehadet-atlasi/"}, "distribution": [{"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://ahfacet.github.io/sehadet-atlasi/data.json"}]}</script>
+<script type="application/ld+json">{"@context": "https://schema.org", "@type": "Dataset", "name": "Şehadet Atlası: 1853–1928 şehitlerinin memleket ve şehadet yerleri", "description": "Kırım Savaşı'ndan Kurtuluş Savaşı'na 110.561 şehidin memleketi ve şehadet yeri haritası. İsimle arama; il, ilçe ve muharebelere göre şehit listeleri.", "url": "https://ahfacet.github.io/sehadet-atlasi/", "inLanguage": "tr", "temporalCoverage": "1853/1928", "spatialCoverage": {"@type": "Place", "name": "Türkiye, Balkanlar, Kafkasya ve Orta Doğu"}, "keywords": ["şehit listesi", "şehit arama", "Çanakkale şehitleri", "Kurtuluş Savaşı şehitleri", "Birinci Dünya Savaşı", "Balkan Savaşları", "MSB Şehit Bilgi Kapısı"], "isBasedOn": "https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi", "creator": {"@type": "Organization", "name": "Şehadet Atlası", "url": "https://ahfacet.github.io/sehadet-atlasi/"}, "distribution": [{"@type": "DataDownload", "encodingFormat": "application/json", "contentUrl": "https://ahfacet.github.io/sehadet-atlasi/data.json"}]}</script>
 <style>*,*::before,*::after{box-sizing:border-box}body{margin:0}[hidden]{display:none!important}</style>
 <!-- Hotjar Tracking Code for Sehadet Atlasi -->
 <script>
@@ -1828,6 +1828,8 @@ button.stop:hover b { color: var(--gold); }
   // şehadet yerlerinin adres parçaları (build_share.py ile aynı sıra ve aynı ek: -2, -3 …)
   const yerSlug = (() => { const seen = new Map(); return D.yerPts.map((p) => { const s = slug(p[0]) || "yer", c = (seen.get(s) || 0) + 1; seen.set(s, c); return c === 1 ? s : `${s}-${c}`; }); })();
   const harpSlug = (h) => slug(dict.harp[h] || "");
+  // muharebe adresleri: aynı adı taşıyanlardan ilki yalın, sonrakiler -<sıra> alır (build_pages.py: battle_slug)
+  const batSlug = BAT.map((b, k) => { const s = slug(b.name); return BAT.slice(0, k).some((x) => slug(x.name) === s) ? `${s}-${k}` : s; });
   const unitParam = (u) => `${u.lvl}-${u.num}-${harpSlug(u.harp)}`;
   let urlReady = false, idIndex = null;
   function urlParams() {
@@ -1839,7 +1841,7 @@ button.stop:hover b { color: var(--gold); }
       if (k[0] === "i") p.set("il", slug(D.ilPts[n][0]));
       else if (k[0] === "c") { const c = D.ilcePts[n]; p.set("il", slug(D.ilPts[c[0]][0])); p.set("ilce", slug(c[1])); }
       else if (k[0] === "y") p.set("yer", yerSlug[n]);
-      else if (k[0] === "b") p.set("muharebe", slug(BAT[n].name));
+      else if (k[0] === "b") p.set("muharebe", batSlug[n]);
       else if (k[0] === "t") p.set("cephe", slug(THEATERS[n].name));
       else if (k[0] === "g" && GAR[n]) p.set("konus", slug(GAR[n].name));
     } else if (S.view === "birlik" && S.unit) p.set("birlik", unitParam(S.unit));
@@ -1875,7 +1877,7 @@ button.stop:hover b { color: var(--gold); }
       const n = GAR.findIndex((g) => slug(g.name) === konus);
       if (n >= 0) select("g" + n);
     } else if (muh) {
-      const b = BAT.find((x) => slug(x.name) === muh);
+      const b = BAT[batSlug.indexOf(muh)];
       if (b) { if (S.view !== "cephe") setView("cephe"); select("b" + b.k); }
     } else if (ceph) {
       const n = THEATERS.findIndex((x) => slug(x.name) === ceph);
@@ -1958,7 +1960,7 @@ button.stop:hover b { color: var(--gold); }
         text = `${t.name} (${t.years}): ${fmt.format(n)} şehidimiz, muharebeleri ve memleketleri${tail}.`;
       } else if (k[0] === "b") {
         const b = BAT[m];
-        path = `s/muharebe/${slug(b.name)}/`; img = `s/img/muharebe/${slug(b.name)}.jpg`;
+        path = `s/muharebe/${batSlug[m]}/`; img = `s/img/muharebe/${batSlug[m]}.jpg`;
         head = `${b.name} Şehitleri`; title_ = `${b.name} Şehitleri · Şehadet Atlası`;
         desc = `${b.name} (${batDateLong(b)}): ${fmt.format(all)} şehit ve memleketleri. MSB Şehit Bilgi Kapısı kayıtları.`;
         text = `${b.name} (${batDateLong(b)}): ${fmt.format(n)} şehidimiz ve memleketleri${tail}.`;
