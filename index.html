@@ -807,11 +807,15 @@ button.stop:hover b { color: var(--gold); }
     const lines = gm.type === "LineString" ? [gm.coordinates] : gm.coordinates;
     lines.forEach((l) => pushLine(borderPts, l));
   }));
+  // Türkiye il sınırları: ülke sınırlarından da silik
+  const ilPtsLine = [];
+  if (B.iller) geoms(B.iller).forEach((gm) => (gm.type === "LineString" ? [gm.coordinates] : gm.coordinates).forEach((l) => pushLine(ilPtsLine, l)));
   const lineGeo = (arr) => { const g = new THREE.BufferGeometry(); g.setAttribute("position", new THREE.Float32BufferAttribute(arr, 3)); return g; };
   const coast = new THREE.LineSegments(lineGeo(coastPts), new THREE.LineBasicMaterial({ color: 0xe0b968, transparent: true, opacity: 0.28, depthTest: false }));
   const border = new THREE.LineSegments(lineGeo(borderPts), new THREE.LineBasicMaterial({ color: 0xe0b968, transparent: true, opacity: 0.11, depthTest: false }));
-  coast.renderOrder = 1; border.renderOrder = 1;
-  scene.add(coast, border);
+  const ilBorder = new THREE.LineSegments(lineGeo(ilPtsLine), new THREE.LineBasicMaterial({ color: 0xe0b968, transparent: true, opacity: 0.09, depthTest: false }));
+  coast.renderOrder = 1; border.renderOrder = 1; ilBorder.renderOrder = 1;
+  scene.add(coast, border, ilBorder);
 
   // Yıldızlar
   const geo = new THREE.BufferGeometry();
