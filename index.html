@@ -104,6 +104,8 @@ button, select, input { font: inherit; color: inherit; }
 .loading-text { position: fixed; inset: 0; z-index: 32; display: grid; place-items: center; text-align: center; pointer-events: none; transition: opacity 1s ease; padding-inline: 16px; }
 .loading-text .t { font-family: var(--f-display); font-size: 22px; letter-spacing: 0.5em; color: #fff; text-shadow: 0 2px 18px rgba(0, 0, 0, 0.75); }
 .loading-text .s { margin-top: 14px; font-size: 11px; letter-spacing: 0.24em; text-transform: uppercase; color: #f3ead6; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); }
+.loading-text .n { margin-top: 10px; font-size: 12.5px; color: #cfc6b4; text-shadow: 0 1px 8px rgba(0, 0, 0, 0.8); min-height: 1.4em; }
+.loading-text .n button { pointer-events: auto; margin-top: 14px; font: 500 12px var(--f-ui); letter-spacing: 0.06em; padding: 8px 18px; border-radius: 999px; border: 1px solid var(--gold); background: var(--gold); color: var(--night); cursor: pointer; }
 .loading-text.done { opacity: 0; }
 .loading-text > div { transform: translateY(calc(min(22vw, 207px) + 52px)); }
 /* sağ alt köşe: Çanakkale Şehitlerine ve hakkında */
@@ -405,7 +407,7 @@ button.stop:hover b { color: var(--gold); }
 <audio id="canakkale" preload="none"><source src="canakkale-sehitlerine.mp4" type="audio/mp4"></audio>
 <canvas id="flag" aria-hidden="true"></canvas>
 <div class="loading" id="loading"></div>
-<div class="loading-text" id="loading-text"><div><div class="t">ŞEHADET ATLASI</div><div class="s" id="loading-s">İsimler yükleniyor</div></div></div>
+<div class="loading-text" id="loading-text"><div><div class="t">ŞEHADET ATLASI</div><div class="s" id="loading-s">İsimler yükleniyor</div><div class="n" id="loading-n" aria-live="polite"></div></div></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script>
@@ -544,11 +546,50 @@ button.stop:hover b { color: var(--gold); }
     } else { const r = bigFlagRect(); placeFlag(r); if (flagSize) flagSize(r.width, r.height); }
   });
 
+  // Veri yükleme: ilerleme yüzdesi, yavaş bağlantıda not, kopmada otomatik yeniden deneme; olmazsa sade bir mesaj ve "Yeniden dene"
+  const DATA_BYTES = +"9399715" || 0; // build_web.py data.json'un açılmış boyutunu yazar
+  const loadS = $("loading-s"), loadN = $("loading-n");
+  let slowTimer = setTimeout(() => { loadN.textContent = "Bağlantınız yavaş, biraz sürebilir."; }, 8000);
+  async function getJSON(url, onBytes) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(url + " " + r.status);
+    if (!onBytes || !r.body || !window.TextDecoder) return r.json();
+    const reader = r.body.getReader(), parts = [];
+    let got = 0;
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      parts.push(value); got += value.length; onBytes(got);
+    }
+    const buf = new Uint8Array(got);
+    let o = 0;
+    for (const p of parts) { buf.set(p, o); o += p.length; }
+    return JSON.parse(new TextDecoder().decode(buf));
+  }
+  const progress = (got) => { if (DATA_BYTES) loadS.textContent = `İsimler yükleniyor · %${Math.min(99, Math.floor((got / DATA_BYTES) * 100))}`; };
+  async function loadData() {
+    for (let k = 0; ; k++) {
+      try { return await Promise.all([getJSON("data.json", progress), getJSON("basemap.json")]); }
+      catch (e) {
+        if (k >= 3 || navigator.onLine === false) throw e;
+        loadN.textContent = "Bağlantı koptu, yeniden deneniyor…";
+        await new Promise((r) => setTimeout(r, 1500 * (k + 1)));
+      }
+    }
+  }
   let D, B;
   try {
-    [D, B] = await Promise.all([fetch("data.json").then((r) => r.json()), fetch("basemap.json").then((r) => r.json())]);
+    [D, B] = await loadData();
+    clearTimeout(slowTimer);
+    loadS.textContent = "İsimler yükleniyor"; loadN.textContent = "";
   } catch (e) {
-    $("loading-s").textContent = "Veri dosyaları yüklenemedi. Sayfayı data.json ve basemap.json ile aynı klasörden açın.";
+    clearTimeout(slowTimer);
+    const off = navigator.onLine === false;
+    loadS.textContent = off ? "İnternet bağlantısı yok" : "Atlas yüklenemedi";
+    loadN.innerHTML = (off ? "Bağlantı geldiğinde sayfa kendiliğinden yenilenecek." : "İnternet bağlantınızı kontrol edip yeniden deneyin.") +
+      '<br><button type="button" id="loading-retry">Yeniden dene</button>';
+    $("loading-retry").onclick = () => location.reload();
+    addEventListener("online", () => location.reload(), { once: true });
     return;
   }
   // Kayıttaki tarih (çoğunlukla Rumi) -> Miladi yıl*12 + ay-1; bilinmiyorsa 0. build_web.py'deki miladi_ay ile aynıdır:
