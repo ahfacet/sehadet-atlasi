@@ -80,6 +80,7 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 html, body { overscroll-behavior: none; touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
 @media (pointer: coarse) {
   input, textarea, select { font-size: 16px !important; }
+  #harp-q { display: none; }
 }
 #gl.drag { cursor: grabbing; }
 #ov { pointer-events: none; }
@@ -331,7 +332,12 @@ button.stop:hover b { color: var(--gold); }
   .tools > * { flex: none; }
   .search { position: static; }
   .search input { width: 128px; }
-  .results { left: max(16px, env(safe-area-inset-left, 0px)); bottom: calc(100% + 8px); }
+  /* araç çubuğu yana kaydırıldığı için içindeki açılır listeler kırpılıyordu: mobilde gövdeye taşınır (JS) ve ekrana sabitlenir.
+     Arama sonuçları klavye açıkken görünen alanın üstünde açılır (--vv-top, --vv-h: visualViewport). */
+  .results.m { position: fixed; z-index: 40; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto; bottom: auto;
+    top: calc(var(--vv-top, 0px) + 12px); max-height: calc(var(--vv-h, 100vh) - 96px); }
+  .combo-pop.m { position: fixed; z-index: 40; left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto;
+    bottom: calc(70px + env(safe-area-inset-bottom, 0px)); }
   .pill select { max-width: 150px; }
   .plaque { left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); width: auto; top: auto; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); max-height: 46vh; }
   .pbody { padding: 18px 18px 22px; }
@@ -1110,10 +1116,23 @@ button.stop:hover b { color: var(--gold); }
     harpActive = Math.min(harpActive, Math.max(0, list.length - 1));
     $("harp-list").innerHTML = list.length ? list.map((h, k) => `<button role="option" data-harp="${h.v}" aria-selected="${S.harp === h.v}" class="${k === harpActive ? "active" : ""}"><span><b>${esc(h.name)}</b><small>${esc(h.years)}</small></span><span class="n">${fmt.format(h.n)}</span></button>`).join("") : '<div class="none">Bu adla bir harp bulunmamaktadır.</div>';
   }
+  const COARSE = matchMedia("(pointer: coarse)").matches;
+  // mobilde arama sonuçları ve harp listesi kaydırılabilir araç çubuğunun dışına, gövdeye taşınır (yoksa kırpılıyorlar)
+  if (matchMedia("(max-width: 900px)").matches) {
+    for (const id of ["results", "harp-pop"]) { const el = $(id); el.classList.add("m"); document.body.appendChild(el); }
+    const vv = window.visualViewport;
+    const fit = () => {
+      const r = document.documentElement.style;
+      r.setProperty("--vv-top", (vv ? vv.offsetTop : 0) + "px");
+      r.setProperty("--vv-h", (vv ? vv.height : innerHeight) + "px");
+    };
+    fit();
+    if (vv) { vv.addEventListener("resize", fit); vv.addEventListener("scroll", fit); }
+  }
   function openHarps(open) {
     $("harp-pop").hidden = !open;
     $("harp-btn").setAttribute("aria-expanded", open);
-    if (open) { $("harp-q").value = ""; harpActive = 0; renderHarps(); $("harp-q").focus(); }
+    if (open) { $("harp-q").value = ""; harpActive = 0; renderHarps(); if (!COARSE) $("harp-q").focus(); }
   }
   function setHarp(v) {
     S.harp = v;
@@ -2378,8 +2397,8 @@ button.stop:hover b { color: var(--gold); }
   });
   document.addEventListener("click", (e) => {
     const t = e.target.closest("button");
-    if (!e.target.closest(".combo")) openHarps(false);
-    if (!t) { if (!e.target.closest(".search")) $("results").hidden = true; return; }
+    if (!e.target.closest(".combo, #harp-pop")) openHarps(false);
+    if (!t) { if (!e.target.closest(".search, #results")) $("results").hidden = true; return; }
     const d = t.dataset;
     if (d.harp !== undefined) { setHarp(d.harp); return; }
     if (d.textfilter !== undefined) { applyText(); return; }
