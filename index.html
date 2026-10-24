@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Şehadet Atlası · 110.561 Şehidin Memleketi ve Şehadet Yeri</title>
 <meta name="google-site-verification" content="2pQhKq3weqrWTfU727pzwvAGVfykiuW93fzzkAyFDw4">
 <meta name="msvalidate.01" content="78AEDAEBD4911CEE80B3B56F7A82F278">
@@ -75,6 +75,12 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 #stage { position: fixed; inset: 0; background: radial-gradient(120% 90% at 55% 40%, var(--night-2) 0%, var(--night) 70%); }
 #stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 #gl { cursor: grab; touch-action: none; }
+/* Dokunmatik cihazda sayfanın kendisi büyütülmez ve kenarından esnemez; iki parmak hareketi yalnız haritayı yakınlaştırır,
+   paneller yine kaydırılabilir. iPhone'da 16 pikselden küçük yazılı kutuya dokununca sayfa kendiliğinden büyür: kutular 16 piksel. */
+html, body { overscroll-behavior: none; touch-action: pan-x pan-y; -webkit-text-size-adjust: 100%; }
+@media (pointer: coarse) {
+  input, textarea, select { font-size: 16px !important; }
+}
 #gl.drag { cursor: grabbing; }
 #ov { pointer-events: none; }
 .vignette { position: fixed; inset: 0; pointer-events: none; background: radial-gradient(120% 100% at 50% 45%, transparent 55%, rgba(0, 0, 0, 0.65) 100%); }
@@ -173,6 +179,8 @@ button, select, input { font: inherit; color: inherit; }
 .plaque { position: fixed; z-index: 6; right: max(24px, env(safe-area-inset-right, 0px)); top: calc(110px + env(safe-area-inset-top, 0px)); bottom: calc(72px + env(safe-area-inset-bottom, 0px)); width: 372px; display: flex; flex-direction: column; background: var(--glass); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55); }
 .plaque-share { position: absolute; top: 10px; right: 46px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; display: grid; place-items: center; padding: 0; }
 .plaque-share:hover, .plaque-fb:hover { color: var(--gold); border-color: var(--gold); }
+.plaque-handle { display: none; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 18px; background: none; border: 0; color: var(--ink); font: 500 13px var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; text-align: left; }
+.plaque-handle small { font: 11px var(--f-ui); letter-spacing: 0.08em; text-transform: none; color: var(--gold); white-space: nowrap; }
 .plaque-fb { position: absolute; top: 10px; right: 82px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; display: grid; place-items: center; padding: 0; }
 .plaque-x { position: absolute; top: 10px; right: 10px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; }
 .plaque-x:hover { color: var(--ink); border-color: var(--gold); }
@@ -323,7 +331,13 @@ button.stop:hover b { color: var(--gold); }
   .pill select { max-width: 150px; }
   .plaque { left: max(10px, env(safe-area-inset-left, 0px)); right: max(10px, env(safe-area-inset-right, 0px)); width: auto; top: auto; bottom: calc(62px + env(safe-area-inset-bottom, 0px)); max-height: 46vh; }
   .pbody { padding: 18px 18px 22px; }
-  .corner { right: max(16px, env(safe-area-inset-right, 0px)); top: calc(14px + env(safe-area-inset-top, 0px)); bottom: auto; }
+  .corner { right: max(12px, env(safe-area-inset-right, 0px)); top: calc(124px + env(safe-area-inset-top, 0px)); bottom: auto; flex-direction: column; gap: 6px; }
+  .card-wrap.docked { padding-right: calc(58px + env(safe-area-inset-right, 0px)) !important; padding-top: calc(110px + env(safe-area-inset-top, 0px)); }
+  .card-wrap.docked .card { width: min(290px, 100%); }
+  /* kart haritada gösterilirken panel başlığını taşıyan ince bir şeride iner; şeride dokununca açılır */
+  .plaque.collapsed { max-height: none; }
+  .plaque.collapsed > :not(.plaque-handle) { display: none !important; }
+  .plaque.collapsed .plaque-handle { display: flex; }
   .pill.round { width: 34px; height: 34px; }
   .dedication { font-size: 13.5px; }
   .flag-slot { width: 36px; height: 24px; }
@@ -372,6 +386,7 @@ button.stop:hover b { color: var(--gold); }
 </div>
 
 <aside class="plaque" id="plaque" hidden aria-label="Levha">
+  <button class="plaque-handle" id="plaque-handle" type="button"><span id="plaque-handle-t"></span><small>Listeyi aç ▴</small></button>
   <button class="plaque-fb" id="plaque-fb" aria-label="Bununla ilgili geri bildirim" title="Geri bildirim"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7.2H6.8L3.6 13.2v-2.5H2.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.2 6.3h5.6M5.2 8.3h3.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
   <button class="plaque-share" id="plaque-share" aria-label="Bunu paylaş" title="Paylaş"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="12" cy="3.5" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="4" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="12.5" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.8 7 10.2 4.5M5.8 9l4.4 2.5" stroke="currentColor" stroke-width="1.4"/></svg></button>
   <button class="plaque-x" id="plaque-x" aria-label="Levhayı kapat">✕</button>
@@ -809,6 +824,10 @@ button.stop:hover b { color: var(--gold); }
 
   // ---------- WebGL sahnesi ----------
   const glc = $("gl"), ovc = $("ov"), ov = ovc.getContext("2d");
+  // Safari kısıtlamaya rağmen sayfayı iki parmakla büyütür; büyütme hareketi engellenir (harita kendi dokunuşlarını ayrıca işler).
+  // Masaüstünde dokunmatik yüzeyle büyütme (ctrl + tekerlek) harita dışında sayfayı büyütmesin.
+  ["gesturestart", "gesturechange", "gestureend"].forEach((t) => document.addEventListener(t, (e) => e.preventDefault(), { passive: false }));
+  addEventListener("wheel", (e) => { if (e.ctrlKey && e.target !== glc) e.preventDefault(); }, { passive: false });
   const renderer = new THREE.WebGLRenderer({ canvas: glc, antialias: true, alpha: true });
   const DPR = Math.min(window.devicePixelRatio || 1, 2);
   renderer.setPixelRatio(DPR);
@@ -1659,7 +1678,7 @@ button.stop:hover b { color: var(--gold); }
   }
 
   // ---------- levha ----------
-  function openPlaque() { $("plaque").hidden = false; renderPlaque(); $("pbody").scrollTop = 0; }
+  function openPlaque() { $("plaque").classList.remove("collapsed"); $("plaque").hidden = false; renderPlaque(); $("pbody").scrollTop = 0; }
   function closePlaque() { $("plaque").hidden = true; S.summary = false; }
   function bars(counts, labeler, limit) {
     const arr = [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
@@ -1873,8 +1892,17 @@ button.stop:hover b { color: var(--gold); }
   // Kartı kenara al: haritada yıldızı gösterirken önceki görünüm, seçim ve levha saklanır; kart ortaya dönünce geri gelir
   let dock = null;
   function dockCard(i, layout) {
-    if (!dock) dock = { view: S.view, sel: S.sel, summary: S.summary, unit: S.unit, plaque: !$("plaque").hidden, V: { ...V } };
+    const first = !dock, wasOpen = !$("plaque").hidden, label = ($("pbody").querySelector(".ptitle") || {}).textContent || "Liste";
+    if (first) dock = { view: S.view, sel: S.sel, summary: S.summary, unit: S.unit, plaque: wasOpen, V: { ...V } };
     showStar(i, layout);
+    // mobilde panel haritayı kapatmasın: başlığıyla ince bir şeride iner (görünüm değiştiyse şerit önceki hâli geri getirir)
+    if (vw < 900 && (wasOpen || dock.plaque)) {
+      if (first) dock.label = label;
+      dock.stale = $("plaque").hidden || dock.stale;
+      $("plaque-handle-t").textContent = dock.label;
+      $("plaque").hidden = false;
+      $("plaque").classList.add("collapsed");
+    }
     const right = !$("plaque").hidden && vw >= 900 ? 434 : 24;
     $("card").style.setProperty("--dock-r", `max(${right}px, env(safe-area-inset-right, 0px))`);
     $("card").classList.add("docked");
@@ -1884,6 +1912,7 @@ button.stop:hover b { color: var(--gold); }
     const d = dock;
     dock = null; pulse = null;
     $("card").classList.remove("docked");
+    $("plaque").classList.remove("collapsed");
     if (!restore) return;
     if (S.view !== d.view) setView(d.view, true);
     S.unit = d.unit; S.summary = d.summary;
@@ -2237,6 +2266,11 @@ button.stop:hover b { color: var(--gold); }
   }
   $("b-feedback").onclick = () => openFeedback(S.card != null ? S.card : undefined);
   $("plaque-fb").onclick = () => openFeedback();
+  // şeride dokununca panel açılır; görünüm değiştiği için panelin içeriği eskidiyse önceki hâl geri getirilir
+  $("plaque-handle").onclick = () => {
+    if (dock && dock.stale) undockCard();
+    else $("plaque").classList.remove("collapsed");
+  };
   $("fb-x").onclick = () => { $("feedback").hidden = true; };
   $("feedback").addEventListener("click", (e) => { if (e.target === $("feedback")) $("feedback").hidden = true; });
   $("q").addEventListener("input", () => { clearTimeout(qt); qt = setTimeout(previewSearch, 180); });
