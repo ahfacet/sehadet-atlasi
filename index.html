@@ -309,6 +309,9 @@ button.stop:hover b { color: var(--gold); }
 .fb-send { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .fb-done { text-align: center; padding: 18px 0 6px; display: grid; gap: 8px; }
 .fb-done b { font-family: var(--f-display); font-weight: 500; font-size: 18px; letter-spacing: 0.08em; }
+.card-fb { position: absolute; top: 14px; left: 14px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; display: grid; place-items: center; padding: 0; }
+.card-fb:hover { color: var(--gold); border-color: var(--gold); }
+.card-wrap.docked .card-fb { display: none; }
 .card-x { position: absolute; top: 14px; right: 14px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; }
 
 .loading { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; background: var(--night); transition: opacity 1.2s ease; text-align: center; padding-inline: 16px; }
@@ -404,6 +407,7 @@ button.stop:hover b { color: var(--gold); }
 <div class="card-wrap" id="card" hidden>
   <div class="card" role="dialog" aria-modal="true" aria-labelledby="card-name">
     <button class="card-x" id="card-x" aria-label="Kapat">✕</button>
+    <button class="card-fb" id="card-fb" aria-label="Bu kayıtla ilgili geri bildirim" title="Geri bildirim"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7.2H6.8L3.6 13.2v-2.5H2.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.2 6.3h5.6M5.2 8.3h3.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
     <div id="card-body"></div>
   </div>
 </div>
@@ -1948,7 +1952,7 @@ button.stop:hover b { color: var(--gold); }
         ${row("Birlik", esc(birlik))}
       </dl>
       <p class="epitaph">Aziz hatırası önünde saygıyla.</p>
-      <div class="acts"><button class="pill dock-only" data-undock>Kartı aç</button><button class="pill undock-hide" data-show="${i}">Haritada göster</button><button class="pill ghost" data-share-rec="${i}">Paylaş</button><button class="pill ghost undock-hide" data-fb-rec="${i}">Geri bildirim</button>${hasS[i] && !approxS[i] && layoutOf() === 0 ? `<button class="pill ghost undock-hide" data-showplace="${i}">Şehadet yerine git</button>` : ""}</div>`;
+      <div class="acts"><button class="pill dock-only" data-undock>Kartı aç</button><button class="pill undock-hide" data-show="${i}">Haritada göster</button><button class="pill ghost" data-share-rec="${i}">Paylaş</button>${hasS[i] && !approxS[i] && layoutOf() === 0 ? `<button class="pill ghost undock-hide" data-showplace="${i}">Şehadet yerine git</button>` : ""}</div>`;
     $("card").hidden = false;
     $("card-x").focus();
     S.card = i; syncUrl();
@@ -2272,6 +2276,7 @@ button.stop:hover b { color: var(--gold); }
   }
   $("b-feedback").onclick = () => openFeedback(S.card != null ? S.card : undefined);
   $("plaque-fb").onclick = () => openFeedback();
+  $("card-fb").onclick = () => { if (S.card != null) openFeedback(S.card); };
   // şeride dokununca panel açılır; görünüm değiştiği için panelin içeriği eskidiyse önceki hâl geri getirilir
   function setCollapsed(on) {
     $("plaque").classList.toggle("collapsed", on);
