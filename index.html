@@ -179,6 +179,7 @@ button, select, input { font: inherit; color: inherit; }
 .plaque { position: fixed; z-index: 6; right: max(24px, env(safe-area-inset-right, 0px)); top: calc(110px + env(safe-area-inset-top, 0px)); bottom: calc(72px + env(safe-area-inset-bottom, 0px)); width: 372px; display: flex; flex-direction: column; background: var(--glass); border: 1px solid var(--line); border-radius: 14px; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55); }
 .plaque-share { position: absolute; top: 10px; right: 46px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; display: grid; place-items: center; padding: 0; }
 .plaque-share:hover, .plaque-fb:hover { color: var(--gold); border-color: var(--gold); }
+.plaque-min { display: none; }
 .plaque-handle { display: none; width: 100%; align-items: center; justify-content: space-between; gap: 12px; padding: 13px 18px; background: none; border: 0; color: var(--ink); font: 500 13px var(--f-display); letter-spacing: 0.12em; text-transform: uppercase; cursor: pointer; text-align: left; }
 .plaque-handle small { font: 11px var(--f-ui); letter-spacing: 0.08em; text-transform: none; color: var(--gold); white-space: nowrap; }
 .plaque-fb { position: absolute; top: 10px; right: 82px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; z-index: 1; display: grid; place-items: center; padding: 0; }
@@ -336,7 +337,11 @@ button.stop:hover b { color: var(--gold); }
   .card-wrap.docked .card { width: min(290px, 100%); }
   /* kart haritada gösterilirken panel başlığını taşıyan ince bir şeride iner; şeride dokununca açılır */
   .plaque.collapsed { max-height: none; }
-  .plaque.collapsed > :not(.plaque-handle) { display: none !important; }
+  .plaque.collapsed > :not(.plaque-handle):not(.plaque-min) { display: none !important; }
+  /* listenin üst kenarında yuvarlak katla düğmesi: liste başlık şeridine iner, yeniden basınca açılır */
+  .plaque-min { display: grid; place-items: center; position: absolute; z-index: 2; top: -15px; left: 50%; transform: translateX(-50%); width: 30px; height: 30px; padding: 0; border-radius: 50%; border: 1px solid var(--line); background: var(--night-2); color: var(--gold); cursor: pointer; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5); }
+  .plaque-min svg { transition: transform 0.25s; }
+  .plaque.collapsed .plaque-min svg { transform: rotate(180deg); }
   .plaque.collapsed .plaque-handle { display: flex; }
   .pill.round { width: 34px; height: 34px; }
   .dedication { font-size: 13.5px; }
@@ -386,6 +391,7 @@ button.stop:hover b { color: var(--gold); }
 </div>
 
 <aside class="plaque" id="plaque" hidden aria-label="Levha">
+  <button class="plaque-min" id="plaque-min" type="button" aria-label="Listeyi katla" aria-expanded="true"><svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true"><path d="M3 5.2 7 9.2l4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
   <button class="plaque-handle" id="plaque-handle" type="button"><span id="plaque-handle-t"></span><small>Listeyi aç ▴</small></button>
   <button class="plaque-fb" id="plaque-fb" aria-label="Bununla ilgili geri bildirim" title="Geri bildirim"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><path d="M2.5 3.5h11v7.2H6.8L3.6 13.2v-2.5H2.5z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path d="M5.2 6.3h5.6M5.2 8.3h3.6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg></button>
   <button class="plaque-share" id="plaque-share" aria-label="Bunu paylaş" title="Paylaş"><svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true"><circle cx="12" cy="3.5" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="4" cy="8" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><circle cx="12" cy="12.5" r="2" fill="none" stroke="currentColor" stroke-width="1.4"/><path d="M5.8 7 10.2 4.5M5.8 9l4.4 2.5" stroke="currentColor" stroke-width="1.4"/></svg></button>
@@ -2267,9 +2273,17 @@ button.stop:hover b { color: var(--gold); }
   $("b-feedback").onclick = () => openFeedback(S.card != null ? S.card : undefined);
   $("plaque-fb").onclick = () => openFeedback();
   // şeride dokununca panel açılır; görünüm değiştiği için panelin içeriği eskidiyse önceki hâl geri getirilir
-  $("plaque-handle").onclick = () => {
-    if (dock && dock.stale) undockCard();
-    else $("plaque").classList.remove("collapsed");
+  function setCollapsed(on) {
+    $("plaque").classList.toggle("collapsed", on);
+    $("plaque-min").setAttribute("aria-expanded", String(!on));
+    $("plaque-min").setAttribute("aria-label", on ? "Listeyi aç" : "Listeyi katla");
+  }
+  const expandPlaque = () => { if (dock && dock.stale) undockCard(); else setCollapsed(false); };
+  $("plaque-handle").onclick = expandPlaque;
+  $("plaque-min").onclick = () => {
+    if ($("plaque").classList.contains("collapsed")) { expandPlaque(); return; }
+    $("plaque-handle-t").textContent = ($("pbody").querySelector(".ptitle") || {}).textContent || "Liste";
+    setCollapsed(true);
   };
   $("fb-x").onclick = () => { $("feedback").hidden = true; };
   $("feedback").addEventListener("click", (e) => { if (e.target === $("feedback")) $("feedback").hidden = true; });
