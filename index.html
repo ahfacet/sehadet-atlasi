@@ -2173,7 +2173,7 @@ button.stop:hover b { color: var(--gold); }
 
   // ---------- geri bildirim: atlasın içinde form, yanıtlar Google Forms'a gider ----------
   const FB_FORM = "https://docs.google.com/forms/d/e/1FAIpQLScTlkvKXTHw8YQfMEAyGrEhlLUkmG_sBGyqn3Bp5olKmYgCJg/formResponse";
-  const FB = { konu: "entry.1709899388", mesaj: "entry.1087826175", kayit: "entry.620647150", eposta: "entry.262533170" };
+  const FB = { konu: "entry.1709899388", mesaj: "entry.1087826175", kayit: "entry.620647150", eposta: "entry.262533170", ad: "entry.520107710" };
   const FB_TOPICS = ["Genel görüş", "Kayıtta hata", "Sistem hatası", "Öneri"];
   let fbOpened = 0;
   // Geri bildirimin neyle ilgili olduğu: açık kart, seçim, birlik ya da arama; ana ekranda yok (genel görüş)
@@ -2198,18 +2198,21 @@ button.stop:hover b { color: var(--gold); }
         </fieldset>
         <label class="sh-lbl" for="fb-msg" style="display:block;margin:14px 0 6px">Mesajınız</label>
         <textarea class="sh-text" id="fb-msg" rows="5" maxlength="4000" placeholder="${rec !== undefined ? "Kayıtta gördüğünüz eksik ya da hatayı yazın" : "Görüş, öneri ya da düzeltme"}"></textarea>
+        <label class="sh-lbl" for="fb-name" style="display:block;margin:14px 0 6px">Ad soyad <span style="text-transform:none;letter-spacing:0;color:var(--dim)">(isteğe bağlı)</span></label>
+        <input class="fb-mail" id="fb-name" type="text" autocomplete="name" maxlength="120">
         <label class="sh-lbl" for="fb-mail" style="display:block;margin:14px 0 6px">E-posta <span style="text-transform:none;letter-spacing:0;color:var(--dim)">(isteğe bağlı, yanıt almak isterseniz)</span></label>
         <input class="fb-mail" id="fb-mail" type="email" autocomplete="email" maxlength="200">
         <input class="fb-trap" id="fb-web" name="web" tabindex="-1" autocomplete="off" aria-hidden="true">
         <div class="fb-send" style="margin-top:16px"><button class="pill" type="submit" id="fb-go" style="background:var(--gold);color:var(--night);border-color:var(--gold)">Gönder</button><p class="sh-note" id="fb-note" aria-live="polite"></p></div>
       </form>`;
+    try { const k = JSON.parse(localStorage.getItem("fb-kim") || "{}"); $("fb-name").value = k.ad || ""; $("fb-mail").value = k.eposta || ""; } catch (e) {}
     $("fb-form").addEventListener("submit", (e) => { e.preventDefault(); sendFeedback(ctx); });
     $("feedback").hidden = false;
     setTimeout(() => $("fb-msg").focus(), 50);
   }
   async function sendFeedback(ctx) {
     const note = (m) => { $("fb-note").textContent = m; };
-    const msg = $("fb-msg").value.trim(), mail = $("fb-mail").value.trim();
+    const msg = $("fb-msg").value.trim(), mail = $("fb-mail").value.trim(), ad = $("fb-name").value.trim();
     if (msg.length < 3) { note("Lütfen mesajınızı yazın."); $("fb-msg").focus(); return; }
     if (mail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)) { note("E-posta adresi geçerli görünmüyor."); $("fb-mail").focus(); return; }
     // otomatik gönderimlere karşı: gizli alan dolu ya da form çok hızlı gönderildiyse sessizce yok say
@@ -2225,9 +2228,10 @@ button.stop:hover b { color: var(--gold); }
       body.set(FB.mesaj, msg);
       if (ctx) body.set(FB.kayit, `${ctx.head} — ${ctx.url}`);
       if (mail) body.set(FB.eposta, mail);
+      if (ad) body.set(FB.ad, ad);
       try { await fetch(FB_FORM, { method: "POST", mode: "no-cors", body }); }
       catch (e) { $("fb-go").disabled = false; note("Gönderilemedi; bağlantınızı kontrol edip yeniden deneyin."); return; }
-      try { localStorage.setItem("fb-last", String(Date.now())); } catch (e) {}
+      try { localStorage.setItem("fb-last", String(Date.now())); localStorage.setItem("fb-kim", JSON.stringify({ ad, eposta: mail })); } catch (e) {}
     }
     $("fb-body").innerHTML = `<div class="fb-done"><div class="star" style="color:var(--gold);letter-spacing:.6em">✦ ✦ ✦</div><b id="fb-title">Teşekkürler</b><p class="lead" style="margin:0;text-align:center">Mesajınız iletildi.</p></div>`;
   }
