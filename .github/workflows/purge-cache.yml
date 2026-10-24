@@ -1,14 +1,27 @@
-name: Purge cache
+name: Purge Cloudflare cache
 on:
-  workflow_run:
-    workflows: ["pages build and deployment"]
-    types: [completed]
+  push:
+    branches: [main]
   workflow_dispatch:
+permissions:
+  contents: read
+  pages: read
 jobs:
   purge:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
     steps:
+      - name: Wait for Pages build
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          for i in $(seq 1 60); do
+            s=$(gh api repos/${{ github.repository }}/pages/builds/latest --jq '.status + " " + .commit')
+            [ "$s" = "built ${{ github.sha }}" ] && exit 0
+            [ "${s%% *}" = "errored" ] && exit 1
+            sleep 10
+          done
+          exit 1
       - name: Purge cache
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
