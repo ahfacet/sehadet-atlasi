@@ -664,25 +664,45 @@ button.stop:hover b { color: var(--gold); }
     addEventListener("online", () => location.reload(), { once: true });
     return;
   }
-  // Kayıttaki tarih (çoğunlukla Rumi) -> Miladi yıl*12 + ay-1; bilinmiyorsa 0. build_web.py'deki miladi_ay ile aynıdır:
-  // 1334 öncesi Rumi yıl Mart'ta başlar ve ay numarası bu sıraya göredir (01 = Mart); ay 00 ise yılın ortası alınır.
-  function miladiAy(t) {
-    t = (t || "").trim().replace(/[.\-]/g, "/").replace(/\/+/g, "/");
+  // Kayıttaki tarih (çoğunlukla Rumi) -> Miladi [yıl, ay, gün, kesinlik]; scripts/takvim.py ile aynı kural.
+  // 1334 öncesi Rumi yıl Mart'ta başlar ve ay numarası bu sıradadır (01 = Mart). 1 Mart 1333'e (1917) kadar tarih Jülyen
+  // takvimidir (Miladi 12–13 gün sonra); sonrası Miladi ile aynıdır; 1334'ten itibaren yıl Ocak'ta başlar.
+  const jdnJulyen = (y, m, d) => { const a = Math.floor((14 - m) / 12), y2 = y + 4800 - a, m2 = m + 12 * a - 3; return d + Math.floor((153 * m2 + 2) / 5) + 365 * y2 + Math.floor(y2 / 4) - 32083; };
+  const miladiGun = (jdn) => { const a = jdn + 32044, b = Math.floor((4 * a + 3) / 146097), c = a - Math.floor(146097 * b / 4), d = Math.floor((4 * c + 3) / 1461), e = c - Math.floor(1461 * d / 4), m = Math.floor((5 * e + 2) / 153);
+    return [100 * b + d - 4800 + Math.floor(m / 10), m + 3 - 12 * Math.floor(m / 10), e - Math.floor((153 * m + 2) / 5) + 1]; };
+  const ayGun = (y, m, julyen) => (m === 2 ? ((julyen ? y % 4 === 0 : y % 4 === 0 && (y % 100 !== 0 || y % 400 === 0)) ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31);
+  const AY_ADLARI = { OCAK: 1, KANUNUSANİ: 1, KANUNUSANI: 1, ŞUBAT: 2, MART: 3, NİSAN: 4, MAYIS: 5, HAZİRAN: 6, TEMMUZ: 7, AĞUSTOS: 8, EYLÜL: 9, EKİM: 10, TEŞRİNİEVVEL: 10, KASIM: 11, TEŞRİNİSANİ: 11, ARALIK: 12, KANUNUEVVEL: 12 };
+  function miladiTarih(t) {
+    let ham = (t || "").trim();
+    // ay adı yazıyla: '18 Ağustos 1332' (Rumi yılda Ocak ve Şubat sonraki Miladi yıla düşer)
+    const yazi = ham.match(/^(\d{1,2})\s+([^\d\s]+)\s+(\d{4})$/), adi = yazi ? yazi[2].replace(/i/g, "İ").toUpperCase() : "";
+    if (yazi && AY_ADLARI[adi]) { const tm = AY_ADLARI[adi], y = +yazi[3]; ham = y >= 1250 && y <= 1333 ? `${+yazi[1]}/${tm >= 3 ? tm - 2 : tm + 10}/${y}` : `${+yazi[1]}/${tm}/${y}`; }
+    // Excel'in Amerikan biçimi (ay/gün/yıl, iki haneli yıl): Miladi tarih
+    const us = ham.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2})$/);
+    if (us) { const ay = +us[1], gun = +us[2], y = 1900 + +us[3]; return ay >= 1 && ay <= 12 && gun >= 1 && gun <= ayGun(y, ay, false) ? [y, ay, gun, "g"] : null; }
+    t = ham.replace(/[.\-]/g, "/").replace(/\/+/g, "/").replace(/^(\d{1,2})\/(\d{2})(\d{4})$/, "$1/$2/$3");
     if (/^\d{1,2}\/\d{4}$/.test(t)) t = "00/" + t;
     const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-    if (!m) return 0;
+    if (!m) return null;
+    const gun = +m[1], y = +m[3];
     let ay = +m[2];
-    const y = +m[3];
     if (!(ay >= 1 && ay <= 12)) ay = 0;
     if (y >= 1250 && y <= 1333) {
-      if (!ay) return (y + 584) * 12 + 8;
-      const g = ay + 2;
-      return (y + 584 + (g > 12 ? 1 : 0)) * 12 + ((g - 1) % 12);
+      if (!ay) return [y + 584, 9, 0, "y"];
+      const jy = ay <= 10 ? y + 584 : y + 585, jm = ay <= 10 ? ay + 2 : ay - 10, dogrudan = y === 1333;
+      if (!(gun >= 1 && gun <= ayGun(jy, jm, !dogrudan))) return [jy, jm, 0, "a"];
+      if (dogrudan) return [jy, jm, gun, "g"];
+      return [...miladiGun(jdnJulyen(jy, jm, gun)), "g"];
     }
-    if (y >= 1334 && y <= 1345) return (y + 584) * 12 + ((ay || 7) - 1);
-    if (y >= 1800 && y <= 1930) return y * 12 + ((ay || 7) - 1);
-    return 0;
+    if ((y >= 1334 && y <= 1345) || (y >= 1800 && y <= 1930)) {
+      const gy = y <= 1345 ? y + 584 : y;
+      if (!ay) return [gy, 7, 0, "y"];
+      if (!(gun >= 1 && gun <= ayGun(gy, ay, false))) return [gy, ay, 0, "a"];
+      return [gy, ay, gun, "g"];
+    }
+    return null;
   }
+  function miladiAy(t) { const r = miladiTarih(t); return r ? r[0] * 12 + r[1] - 1 : 0; }
   const C = D.cols, N = D.n, dict = D.dicts;
   for (const k of ["ad", "baba", "lakap", "dogum", "tarih"]) C[k] = C[k].split("\n");
   // dosyada gönderilmeyen sütunları yeniden kur (build_web.py: DERIVED)
@@ -708,11 +728,13 @@ button.stop:hover b { color: var(--gold); }
 
   // Rumi tarihin Miladi karşılığı (yerleşimde hesaplanan ay değerinden): 1334 öncesinde ay numarası Mart'tan sayılır
   const AY_ADI = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran", "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"];
+  // kaydın Miladi karşılığı: gün biliniyorsa "7 Ağustos 1916", değilse "Ağustos 1916" ya da yıl
+  const rumiMi = (t) => /(^|\D)1[23]\d\d$/.test((t || "").trim());
   function miladi(i) {
-    const t = C.tarih[i], ym = C.ym[i];
-    const m = /^(\d{1,2})\/(\d{1,2})\/(\d{4})$/.exec(t || "");
-    if (!m || !ym || +m[3] < 1250 || +m[3] > 1345) return "";
-    return (+m[2] >= 1 && +m[2] <= 12 ? AY_ADI[ym % 12] + " " : "") + Math.floor(ym / 12);
+    const t = C.tarih[i];
+    const r = miladiTarih(t);
+    if (!r) return "";
+    return r[3] === "g" ? `${r[2]} ${AY_ADI[r[1] - 1]} ${r[0]}` : r[3] === "a" ? `${AY_ADI[r[1] - 1]} ${r[0]}` : String(r[0]);
   }
   // İpuçlarında gösterilen Miladi tarih (kayıt Rumi de olsa Miladi de olsa): "Ağustos 1915" ya da yalnız yıl
   function miladiKisa(i) {
@@ -1970,7 +1992,7 @@ button.stop:hover b { color: var(--gold); }
         ${row("Harp", esc(title(dict.harp[C.harp[i]] || "")))}
         ${row("Cephe", esc(title(dict.cephe[C.cephe[i]] || "")))}
         ${row("Şehadet yeri", esc(title(dict.ham[C.ham[i]] || "")))}
-        ${row("Şehadet tarihi", t ? `${esc(t)} ${mi ? `<small>Rumi · ≈ ${mi}</small>` : ""}` : "")}
+        ${row("Şehadet tarihi", t ? `${esc(t)} ${mi ? `<small>${rumiMi(t) ? "Rumi · " : ""}${/^\d+ /.test(mi) ? "Miladi" : "≈"} ${mi}</small>` : ""}` : "")}
         ${row("Birlik", esc(birlik))}
       </dl>
       <p class="epitaph">Aziz hatırası önünde saygıyla.</p>
