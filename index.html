@@ -621,7 +621,7 @@ button.stop:hover b { color: var(--gold); }
   });
 
   // Veri yükleme: ilerleme yüzdesi, yavaş bağlantıda not, kopmada otomatik yeniden deneme; olmazsa sade bir mesaj ve "Yeniden dene"
-  const DATA_BYTES = +"9467308" || 0; // build_web.py data.json'un açılmış boyutunu yazar
+  const DATA_BYTES = +"9467294" || 0; // build_web.py data.json'un açılmış boyutunu yazar
   const loadS = $("loading-s"), loadN = $("loading-n");
   let slowTimer = setTimeout(() => { loadN.textContent = "Bağlantınız yavaş, biraz sürebilir."; }, 8000);
   async function getJSON(url, onBytes) {
