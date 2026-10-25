@@ -76,3 +76,62 @@ footer { border-top: 1px solid var(--line); padding-block: 22px 40px; margin-top
 footer p { margin: 0; max-width: 78ch; }
 footer .verse { font: italic 500 18px/1.5 var(--f-serif); color: var(--soft); }
 footer .verse span { display: block; font: 500 10.5px var(--f-ui); letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-top: 4px; font-style: normal; }
+
+/* Şehit ve yer kartları (sayfa.js): isme ya da yer adına dokununca açılır */
+.names li[data-i] { cursor: pointer; transition: background 0.15s; border-radius: 6px; }
+.names li[data-i]:hover b, .names li[data-i]:focus-visible b { color: var(--gold); }
+h3[data-place] { cursor: pointer; }
+h3[data-place]:hover { color: var(--gold); }
+.kart-wrap { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(2, 3, 5, 0.7); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px);
+  padding-block: 20px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.kart { position: relative; width: min(470px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; background: linear-gradient(180deg, #0e1117, #07090d);
+  border: 1px solid rgba(224, 185, 104, 0.35); border-radius: 6px; padding: 34px 30px 26px; box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7); text-align: center;
+  outline: 1px solid rgba(224, 185, 104, 0.18); outline-offset: -8px; }
+.kart-ic { display: grid; gap: 10px; }
+.kart-x, .kart-fb { position: absolute; top: 14px; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--dim); cursor: pointer; display: grid; place-items: center; padding: 0; font-size: 13px; z-index: 1; }
+.kart-x { right: 14px; }
+.kart-fb { left: 14px; }
+.kart-x:hover, .kart-fb:hover { color: var(--gold); border-color: var(--gold); }
+.kart-yildiz { color: var(--gold); font-size: 14px; letter-spacing: 0.6em; text-indent: 0.6em; }
+.kart h2 { color: var(--ink); font: 500 24px/1.2 var(--f-display); letter-spacing: 0.1em; text-transform: uppercase; margin: 4px 0 0; text-wrap: balance; display: block; }
+.kart h2::after { content: none; }
+.kart h2.kart-yer { font-size: 21px; }
+.kart-baba { font: italic 500 19px var(--f-serif); color: var(--soft); }
+.kart-rutbe { font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold); margin-top: 6px; }
+.kart dl { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 7px 18px; text-align: left; margin: 14px 0 0; padding-top: 16px; border-top: 1px solid var(--line); }
+.kart dt { font-size: 10.5px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim); padding-top: 2px; }
+.kart dd { margin: 0; font-size: 14px; overflow-wrap: anywhere; }
+.kart dd small { color: var(--dim); font-size: 11.5px; }
+.kart-not { font: italic 500 16px var(--f-serif); color: var(--dim); margin: 10px 0 0; }
+.kart-sayi { margin: 4px 0 0; color: var(--soft); font-size: 15px; }
+.kart-sayi b { font: italic 500 30px var(--f-serif); color: var(--gold); font-weight: 500; }
+.kart-dugmeler { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 14px; }
+.kart .go { justify-self: auto; }
+.hayalet { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.14); background: transparent; color: var(--ink);
+  font: 500 13.5px var(--f-ui); text-decoration: none; cursor: pointer; }
+.hayalet:hover { border-color: var(--gold); color: var(--gold); }
+.hayalet svg { color: var(--gold); flex: none; }
+.kart-etiket { text-align: left; font-size: 10.5px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold); margin-top: 6px; }
+.kart-etiket span { text-transform: none; letter-spacing: 0; color: var(--dim); }
+.kart-alan, .kart-girdi, .kart-baglanti input { width: 100%; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); color: var(--ink); font: 14px/1.5 var(--f-ui); outline: none; }
+.kart-alan { border-radius: 10px; padding: 10px 12px; resize: vertical; min-height: 90px; }
+.kart-girdi { border-radius: 999px; padding: 8px 14px; }
+.kart-alan:focus, .kart-girdi:focus { border-color: var(--gold); }
+.kart-aglar { display: grid; grid-template-columns: repeat(auto-fill, minmax(124px, 1fr)); gap: 8px; text-align: left; }
+.kart-baglanti { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
+.kart-baglanti input { border-radius: 999px; padding: 8px 14px; color: var(--dim); font-size: 12px; }
+.kart-durum { margin: 0; min-height: 1em; color: var(--dim); font-size: 12px; text-align: left; }
+.kart-hakkinda { display: grid; gap: 2px; text-align: left; padding: 10px 14px; border: 1px solid var(--line); border-radius: 10px; background: #07090d; }
+.kart-hakkinda small { font-size: 10px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--dim); }
+.kart-hakkinda span { font-size: 12px; color: var(--soft); overflow-wrap: anywhere; }
+.kart-form { display: grid; gap: 8px; text-align: left; }
+.kart-konular { display: flex; flex-wrap: wrap; gap: 6px; }
+.kart-konular input { position: absolute; opacity: 0; pointer-events: none; }
+.kart-konular span { display: inline-block; padding: 6px 13px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.12); color: var(--dim); font-size: 12.5px; cursor: pointer; }
+.kart-konular input:checked + span { background: var(--gold); border-color: var(--gold); color: var(--night); }
+.kart-konular input:focus-visible + span { outline: 2px solid var(--gold); outline-offset: 2px; }
+.kart-tuzak { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.kart-gonder { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 6px; }
+.kart-tamam { display: grid; gap: 8px; padding: 10px 0; }
+.kart-tamam p { margin: 0; font: italic 500 18px var(--f-serif); color: var(--soft); }
+@media (max-width: 520px) { .kart { padding: 30px 18px 20px; } .kart dl { grid-template-columns: 1fr; gap: 2px; } .kart dd { margin-bottom: 6px; } }

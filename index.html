@@ -2081,7 +2081,13 @@ button.stop:hover b { color: var(--gold); }
     }
     if (sehit) {
       const i = C.id.indexOf(+sehit);
-      if (i >= 0) openCard(i);
+      if (i >= 0) {
+        openCard(i);
+        // liste sayfalarından gelen "haritada göster" / "şehadet yerine git": kart kenara alınır, yıldız gösterilir
+        const g = p.get("goster");
+        if (g === "harita") dockCard(i);
+        else if (g === "yer") dockCard(i, hasS[i] && !approxS[i] ? 1 : undefined);
+      }
     }
     urlReady = true; syncUrl();
   }
