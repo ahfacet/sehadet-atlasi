@@ -493,7 +493,9 @@ button.stop:hover b { color: var(--gold); }
   // adres parçası: Türkçe harfler sadeleştirilir (build_pages.py'deki slug ile aynı)
   const slug = (s) => s.toLocaleLowerCase("tr-TR").replace(/[çğıöşüâîû]/g, (c) => "cgiosuaiu"["çğıöşüâîû".indexOf(c)])
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  const title = (s) => s.toLocaleLowerCase("tr-TR").replace(/(^|[\s(/-])(\S)/g, (m, a, b) => a + b.toLocaleUpperCase("tr-TR"));
+  // tireden sonraki izafet ve tanımlık küçük kalır: Meydan-ı Harp, Bab-ül Ali
+  const title = (s) => s.toLocaleLowerCase("tr-TR").replace(/(^|[\s(/-])(\S)/g, (m, a, b) => a + b.toLocaleUpperCase("tr-TR"))
+    .replace(/-(I|İ|U|Ü|Yı|Yi|Yu|Yü|El|Ül)(?=$|[\s,.;:)/'’-])/g, (m) => m.toLocaleLowerCase("tr-TR"));
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   // ---------- dalgalanan bayrak: yüklenirken büyük, sonra künyenin soluna yerleşir ----------
