@@ -1998,7 +1998,7 @@ button.stop:hover b { color: var(--gold); }
         ${row("Birlik", esc(birlik))}
       </dl>
       <p class="epitaph">Aziz hatırası önünde saygıyla.</p>
-      <div class="acts"><button class="pill dock-only" data-undock>Kartı aç</button><button class="pill undock-hide" data-show="${i}">Haritada göster</button><button class="pill ghost" data-share-rec="${i}">Paylaş</button>${hasS[i] && !approxS[i] && layoutOf() === 0 ? `<button class="pill ghost undock-hide" data-showplace="${i}">Şehadet yerine git</button>` : ""}</div>`;
+      <div class="acts"><button class="pill dock-only" data-undock>Kartı aç</button>${hasM[i] ? `<button class="pill undock-hide" data-showhome="${i}">Memleketini göster</button>` : ""}${hasS[i] && !approxS[i] ? `<button class="pill undock-hide${hasM[i] ? " ghost" : ""}" data-showplace="${i}">Şehadet yerini göster</button>` : ""}${!hasM[i] && (!hasS[i] || approxS[i]) ? `<button class="pill undock-hide" data-show="${i}">Haritada göster</button>` : ""}<button class="pill ghost" data-share-rec="${i}">Paylaş</button></div>`;
     $("card").hidden = false;
     $("card-x").focus();
     S.card = i; syncUrl();
@@ -2107,9 +2107,10 @@ button.stop:hover b { color: var(--gold); }
       const i = C.id.indexOf(+sehit);
       if (i >= 0) {
         openCard(i);
-        // liste sayfalarından gelen "haritada göster" / "şehadet yerine git": kart kenara alınır, yıldız gösterilir
+        // liste sayfalarından gelen "memleketini göster" / "şehadet yerini göster": kart kenara alınır, yıldız gösterilir
         const g = p.get("goster");
         if (g === "harita") dockCard(i);
+        else if (g === "memleket") dockCard(i, hasM[i] ? 0 : undefined);
         else if (g === "yer") dockCard(i, hasS[i] && !approxS[i] ? 1 : undefined);
       }
     }
@@ -2439,6 +2440,7 @@ button.stop:hover b { color: var(--gold); }
     else if (d.shareRec !== undefined) openShare(+d.shareRec);
     else if (d.fbRec !== undefined) openFeedback(+d.fbRec);
     else if (d.show !== undefined) dockCard(+d.show);
+    else if (d.showhome !== undefined) dockCard(+d.showhome, 0);
     else if (d.showplace !== undefined) dockCard(+d.showplace, 1);
     else if (d.undock !== undefined) undockCard();
     else if (d.x === "sel") clearSel();

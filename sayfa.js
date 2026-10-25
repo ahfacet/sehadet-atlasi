@@ -52,7 +52,7 @@
       <dl>${row("Memleket", esc(mem))}${row("Doğum", esc(dogum))}${row("Şehadetinde", yas ? `${yas} yaşında` : "")}${row("Harp", esc(harp))}${row("Cephe", esc(cephe))}
         ${row("Şehadet yeri", esc(yer))}${row("Şehadet tarihi", tarih ? `${esc(tarih)}${mil ? ` <small>${/(^|\D)1[23]\d\d$/.test(tarih.trim()) ? "Rumi · " : ""}${/^\d+ /.test(mil) ? "Miladi" : "≈"} ${esc(mil)}</small>` : ""}` : "")}${row("Birlik", esc(birlik))}</dl>
       <p class="kart-not">Aziz hatırası önünde saygıyla.</p>
-      <div class="kart-dugmeler"><a class="go" href="${url}&goster=harita">Haritada göster</a>${sy ? `<a class="hayalet" href="${url}&goster=yer">Şehadet yerine git</a>` : ""}<button type="button" class="hayalet" data-paylas>Paylaş</button></div>`);
+      <div class="kart-dugmeler"><a class="go" href="${url}&goster=memleket">Memleketini göster</a>${sy ? `<a class="hayalet" href="${url}&goster=yer">Şehadet yerini göster</a>` : ""}<button type="button" class="hayalet" data-paylas>Paylaş</button></div>`);
     const share = {
       head: `Şehit ${ad}`, url,
       text: [`Şehit ${ad}${baba ? `, ${baba} oğlu` : ""}${rutbe ? " · " + rutbe : ""}`, mem && `Memleketi: ${mem.replace(/ · /g, ", ")}`,
