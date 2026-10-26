@@ -1821,11 +1821,13 @@ button.stop:hover b { color: var(--gold); }
   }
   function summaryHtml() {
     const L0 = layoutOf(), list = L0 ? placesS : placesIl, byHarp = new Map();
-    for (const i of idx) byHarp.set(C.harp[i], (byHarp.get(C.harp[i]) || 0) + 1);
+    let memsiz = 0;
+    for (const i of idx) { byHarp.set(C.harp[i], (byHarp.get(C.harp[i]) || 0) + 1); if (C.il[i] < 0) memsiz++; }
     return `<div class="eyebrow">${L0 ? "Şehadet yerleri" : "Memleketler"}</div>
       <h2 class="ptitle">${fmt.format(idx.length)} şehit</h2>
       <div class="sec">${L0 ? "En çok şehit verilen yerler" : "En çok şehit veren memleketler"}</div>
       ${bars(new Map(list.filter((p) => placeExact(p.k)).slice(0, 14).map((p) => [p.k, p.n])), placeName, 14)}
+      ${!L0 && memsiz ? `<p class="note"><a href="il/memleketi-belirtilmemis/">Memleketi belirtilmemiş ${fmt.format(memsiz)} şehit</a>: kayıtta memleketi yazılmadığı için haritada memleketleriyle gösterilemeyen şehitlerin listesi.</p>` : ""}
       <div class="sec">Harplere göre</div>${bars(byHarp, harpShort, 10)}
       ${yearHist(idx)}`;
   }
