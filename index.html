@@ -167,6 +167,10 @@ button, select, input { font: inherit; color: inherit; }
 .search input::placeholder { color: var(--dim); }
 .search-go { background: none; border: 0; color: var(--gold); padding: 0 13px 0 4px; font-size: 15px; cursor: pointer; }
 .results .all { border-bottom: 1px solid var(--line); border-radius: 8px 8px 0 0; }
+.results .sug { display: grid; border-bottom: 1px solid var(--line); padding-bottom: 4px; margin-bottom: 4px; }
+.results .sug button { grid-template-columns: auto minmax(0, 1fr); column-gap: 8px; align-items: baseline; }
+.results .sug small { grid-column: 2; }
+.results .sug-t { grid-row: span 2; align-self: center; font-size: 9.5px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); border: 1px solid var(--line); border-radius: 999px; padding: 2px 7px; white-space: nowrap; }
 .results .all b { color: var(--gold); }
 .results { position: absolute; left: 0; bottom: calc(100% + 8px); width: min(360px, calc(100vw - 48px)); max-height: 52vh; overflow-y: auto; background: var(--glass); border: 1px solid var(--line); border-radius: 12px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); padding: 6px; display: grid; }
 .results button { text-align: left; background: none; border: 0; border-radius: 8px; padding: 7px 10px; cursor: pointer; display: grid; gap: 1px; }
@@ -288,7 +292,14 @@ button.stop:hover b { color: var(--gold); }
 .sh-nets { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
 .sh-nets .pill { justify-content: flex-start; text-decoration: none; color: var(--ink); }
 .sh-nets svg { flex: none; color: var(--gold); }
-.sh-maps { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin-top: 4px; }
+.sh-nets .pill { min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+@media (min-width: 520px) {
+  .sh-nets { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .sh-nets > * { grid-column: span 2; }
+  .sh-nets .sh-map { grid-column: span 3; }
+  .sh-nets .sh-map1 { grid-column: 1 / span 3; }
+}
+@media (max-width: 519px) { .sh-nets .sh-map { grid-column: 1 / -1; } }
 .sh-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 .sh-link input { min-width: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); border-radius: 999px; color: var(--dim); font: 12px var(--f-data); padding: 8px 14px; outline: none; }
 .sh-note { color: var(--dim); font-size: 11.5px; margin: 0; min-height: 1em; }
@@ -495,7 +506,7 @@ button.stop:hover b { color: var(--gold); }
   const slug = (s) => s.toLocaleLowerCase("tr-TR").replace(/[çğıöşüâîû]/g, (c) => "cgiosuaiu"["çğıöşüâîû".indexOf(c)])
     .normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
   // tireden sonraki izafet ve tanımlık küçük kalır: Meydan-ı Harp, Bab-ül Ali
-  const title = (s) => s.toLocaleLowerCase("tr-TR").replace(/(^|[\s(/-])(\S)/g, (m, a, b) => a + b.toLocaleUpperCase("tr-TR"))
+  const title = (s) => s.toLocaleLowerCase("tr-TR").replace(/(^|[\s(/-])([^\s(/-])/g, (m, a, b) => a + b.toLocaleUpperCase("tr-TR"))
     .replace(/-(I|İ|U|Ü|Yı|Yi|Yu|Yü|El|Ül)(?=$|[\s,.;:)/'’-])/g, (m) => m.toLocaleLowerCase("tr-TR"));
   const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 
@@ -1179,9 +1190,13 @@ button.stop:hover b { color: var(--gold); }
       case "t": return TH[i] === n;
       case "b": return C.muh[i] === n;
       case "g": return GAR[n].units.some((u) => inUnit(i, u));
+      case "m": return C.memleket[i] === n;
+      case "n": return hasWord(C.ad[i], k.slice(1));
+      case "f": return hasWord(C.baba[i], k.slice(1));
     }
     return false;
   }
+  const hasWord = (s, w) => s === w || s.startsWith(w + " ") || s.endsWith(" " + w) || s.includes(" " + w + " ");
   function placeName(k) {
     const n = +k.slice(1);
     if (k[0] === "i") return title(D.ilPts[n][0]);
@@ -1797,7 +1812,7 @@ button.stop:hover b { color: var(--gold); }
     else if (S.sel && S.sel[0] === "b") b.innerHTML = battleHtml(+S.sel.slice(1));
     else if (S.sel && S.sel[0] === "g") b.innerHTML = garrisonHtml(+S.sel.slice(1));
     else if (S.sel) b.innerHTML = placeHtml();
-    else if (S.summary && S.text) b.innerHTML = searchHtml();
+    else if (S.summary && (S.text || (S.cross && S.cross.list))) b.innerHTML = searchHtml();
     else if (S.view === "birlik" && S.unit) b.innerHTML = unitHtml();
     else if (S.view === "birlik") b.innerHTML = unitPickerHtml();
     else if (S.view === "cephe") b.innerHTML = theaterListHtml();
@@ -1813,7 +1828,7 @@ button.stop:hover b { color: var(--gold); }
     }
     const recs = idx.length <= 20000 ? Array.from(idx).sort((a, b) => ABC.compare(C.ad[a], C.ad[b])) : Array.from(idx);
     return `<div class="eyebrow">Arama</div>
-      <h2 class="ptitle">“${esc(S.text)}”</h2>
+      <h2 class="ptitle">${S.text ? `“${esc(S.text)}”` : esc(S.cross ? S.cross.name : "")}</h2>
       <p class="lead">${fmt.format(idx.length)} kayıt bulunmuştur. Bir isme dokunarak künyesini açabilirsiniz; memleket ve şehadet yeri dağılımları listenin altındadır.</p>
       ${names(recs)}
       ${memBars(recs)}
@@ -2018,13 +2033,77 @@ button.stop:hover b { color: var(--gold); }
   }
 
   // ---------- arama: yazdıkça önizleme, Enter ile süzgeç ----------
+  // Öneriler: yazılan, bir il, ilçe, köy, şehadet yeri, muharebe, cephe, isim ya da baba adının başına uyuyorsa türüyle üstte çıkar;
+  // seçilince o görünüme geçilir ve ona göre süzülür. Altta serbest metin eşleşmeleri kalır.
+  let sugIdx = null, sugCur = [];
+  function buildSugIdx() {
+    const tally = (col, len) => { const a = new Int32Array(len); for (let i = 0; i < N; i++) if (col[i] >= 0) a[col[i]]++; return a; };
+    const nIl = tally(C.il, D.ilPts.length), nIc = tally(C.ilce, D.ilcePts.length), nY = tally(C.yer, D.yerPts.length), nB = tally(C.muh, BAT.length), nT = tally(TH, THEATERS.length);
+    const nM = tally(C.memleket, dict.memleket.length), firstM = new Int32Array(dict.memleket.length).fill(-1);
+    for (let i = 0; i < N; i++) if (firstM[C.memleket[i]] < 0) firstM[C.memleket[i]] = i;
+    const items = [];
+    D.ilPts.forEach((p, n) => nIl[n] && items.push({ t: "İl", name: title(p[0]), key: "i" + n, n: nIl[n] }));
+    D.ilcePts.forEach((p, n) => nIc[n] && items.push({ t: "İlçe", name: title(p[1]), sub: title(D.ilPts[p[0]][0]), key: "c" + n, n: nIc[n] }));
+    dict.memleket.forEach((m, n) => {
+      const [il, ic, koy] = m.split("/"), i = firstM[n];
+      if (!koy || !nM[n] || i < 0 || /\bMAH\b|MAHALLE/.test(koy)) return;
+      const at = C.ilce[i] >= 0 ? "c" + C.ilce[i] : C.il[i] >= 0 ? "i" + C.il[i] : null;
+      items.push({ t: "Köy", name: title(koy), sub: [ic, il].filter(Boolean).map(title).join(", "), key: "m" + n, at, n: nM[n] });
+    });
+    D.yerPts.forEach((p, n) => p[3] && p[4] !== "muharebe" && nY[n] && items.push({ t: "Şehadet yeri", name: title(p[0]), key: "y" + n, n: nY[n] }));
+    BAT.forEach((b, n) => nB[n] && items.push({ t: "Muharebe", name: b.name, key: "b" + n, n: nB[n] }));
+    THEATERS.forEach((t, n) => nT[n] && items.push({ t: "Cephe", name: t.name, sub: t.years, key: "t" + n, n: nT[n] }));
+    for (const it of items) { it.u = trUp(it.name); it.w = it.u.split(/[\s\-–(),.]+/).filter(Boolean); }
+    sugIdx = items;
+  }
+  function suggestions(q) {
+    if (!sugIdx) buildSugIdx();
+    const score = (it) => it.u === q ? 3 : it.u.startsWith(q) ? 2 : it.w.some((w) => w.startsWith(q)) ? 1 : 0;
+    const out = [];
+    for (const it of sugIdx) { const sc = score(it); if (sc) out.push([sc, it]); }
+    // isim ve baba adı: kelimesi yazılanla başlayan adlar, kayıt sayısıyla
+    const ad = new Map(), baba = new Map();
+    const words = (s, m) => { for (const w of s.split(" ")) if (w.startsWith(q)) m.set(w, (m.get(w) || 0) + 1); };
+    for (let i = 0; i < N; i++) { words(C.ad[i], ad); if (C.baba[i]) words(C.baba[i], baba); }
+    const top = (m, t, k) => [...m.entries()].sort((a, b) => (b[0] === q) - (a[0] === q) || b[1] - a[1]).slice(0, 2)
+      .forEach(([w, n]) => out.push([w === q ? 3 : 2, { t, name: title(w), key: k + w, n }]));
+    top(ad, "İsim", "n"); top(baba, "Baba adı", "f");
+    // aynı eşleşme düzeyinde önce yer ve muharebe, sonra isim; köyler en çok üç
+    const ORDER = { "İl": 0, "İlçe": 1, "Muharebe": 2, "Cephe": 3, "Şehadet yeri": 4, "İsim": 5, "Köy": 6, "Baba adı": 7 };
+    out.sort((a, b) => b[0] - a[0] || (a[0] === 1 ? 0 : ORDER[a[1].t] - ORDER[b[1].t]) || b[1].n - a[1].n);
+    const res = [], per = {};
+    for (const [, it] of out) { if ((per[it.t] = (per[it.t] || 0) + 1) > (it.t === "Köy" ? 3 : 2)) continue; res.push(it); if (res.length === 7) break; }
+    return res;
+  }
+  function pickSug(it) {
+    $("q").value = ""; $("results").hidden = true;
+    const k = it.key, t = k[0];
+    if (t === "n" || t === "f") {
+      // isim/baba adı: o adı taşıyan şehitlerin listesi
+      S.text = ""; S.cross = { k, name: `${it.t}: ${it.name}`, list: true };
+      filter(); S.sel = null; S.summary = true; S.shown = 120; updateHighlight(); openPlaque(); fitVisible(); syncUrl();
+      return;
+    }
+    if (t === "m") {
+      // köy: memleket görünümünde köyün ilçesi (ya da ili) seçilir, yalnız o köyün şehitleri kalır
+      if (S.view !== "memleket") setView("memleket");
+      S.cross = { k, name: `${it.name} (${it.sub})` }; filter();
+      if (it.at) select(it.at); else { S.summary = true; openPlaque(); }
+      return;
+    }
+    const view = t === "i" || t === "c" ? "memleket" : t === "y" ? "sehadet" : "cephe";
+    if (S.view !== view) setView(view);
+    select(k);
+  }
   let qt;
   function previewSearch() {
     const raw = $("q").value.trim(), q = trUp(raw), box = $("results");
     if (q.length < 2) { box.hidden = true; return; }
     const out = []; let n = 0;
     for (const i of idx) { if (textMatch(i, q)) { n++; if (out.length < 30) out.push(i); } }
-    box.innerHTML = (n ? `<button class="all" data-textfilter="1"><b>“${esc(raw)}” geçen tüm kayıtları listele</b><small>${fmt.format(n)} şehit · Enter</small></button>` : "") +
+    sugCur = suggestions(q);
+    box.innerHTML = (sugCur.length ? `<div class="sug">${sugCur.map((it, j) => `<button data-sug="${j}"><span class="sug-t">${esc(it.t)}</span><b>${esc(it.name)}</b><small>${it.sub ? esc(it.sub) + " · " : ""}${fmt.format(it.n)} şehit</small></button>`).join("")}</div>` : "") +
+      (n ? `<button class="all" data-textfilter="1"><b>“${esc(raw)}” geçen tüm kayıtları listele</b><small>${fmt.format(n)} şehit · Enter</small></button>` : "") +
       (out.length ? out.map((i) => `<button data-rec="${i}"><b>${esc(title(C.ad[i]))}${yas(i) ? `<span class="age"> – ${yas(i)} yaşında</span>` : ""}</b><small>${recDetail(i)}</small></button>`).join("") : '<div class="none">Bu aramayla eşleşen kayıt bulunmamaktadır.</div>');
     box.hidden = false;
   }
@@ -2219,7 +2298,6 @@ button.stop:hover b { color: var(--gold); }
       ["facebook", "Facebook", `https://www.facebook.com/sharer/sharer.php?u=${u}`],
       ["telegram", "Telegram", `https://t.me/share/url?url=${u}&text=${t}`],
       ["linkedin", "LinkedIn", `https://www.linkedin.com/sharing/share-offsite/?url=${u}`],
-      ["mail", "E-posta", `mailto:?subject=${encodeURIComponent(info.title)}&body=${full}`],
     ];
   }
   // paylaşılan şeyin haritadaki yeri: şehit kartında şehadet yeri (kesinse) ve memleketi, seçimde o yer, ilçe, il ya da muharebe
@@ -2239,8 +2317,8 @@ button.stop:hover b { color: var(--gold); }
     }
     return out;
   }
-  // Google Haritalar uydu görünümü (Maps URLs: basemap=satellite)
-  const gmapsUrl = (p) => `https://www.google.com/maps/@?api=1&map_action=map&center=${p.lat},${p.lon}&zoom=${p.zoom}&basemap=satellite`;
+  // Google Haritalar: koordinatta iğne (q), uydu görünümü (t=k), yakınlık (z)
+  const gmapsUrl = (p) => `https://www.google.com/maps?q=${p.lat},${p.lon}&t=k&z=${p.zoom}`;
   let shareCur = null;
   function openShare(rec) {
     const info = shareInfo(rec);
@@ -2251,17 +2329,18 @@ button.stop:hover b { color: var(--gold); }
       <label class="sh-lbl" for="sh-text">Mesaj</label>
       <textarea class="sh-text" id="sh-text" rows="4">${esc(info.text)}</textarea>
       <div class="sh-nets" id="sh-nets"></div>
-      ${(() => { const ps = mapPlaces(rec); return ps.length ? `<div class="sh-nets sh-maps">${ps.map((p) => `<a class="pill ghost" href="${esc(gmapsUrl(p))}" target="_blank" rel="noopener">${icon("map")}${p.label ? `${p.label} · Google Maps` : "Google Maps'te göster (uydu)"}</a>`).join("")}</div>` : ""; })()}
       <div class="sh-link"><input id="sh-url" readonly value="${esc(info.url)}" aria-label="Bağlantı"><button class="pill" id="sh-copy">Bağlantıyı kopyala</button></div>
       <p class="sh-note" id="sh-note" aria-live="polite"></p>`;
     // yayın dışı önizlemede görsel bulunamazsa yayındaki kopyası denenir, o da yoksa alan gizlenir
     const im = $("sh-img");
     im.onerror = () => { if (!im.dataset.alt) { im.dataset.alt = 1; im.src = SITE + info.img; } else im.hidden = true; };
+    // Google Haritalar düğmeleri paylaşım düğmeleriyle aynı ızgarada, aynı boyda
+    const maps = mapPlaces(rec).map((p, j) => `<a class="pill ghost${p.label ? ` sh-map${j ? "" : " sh-map1"}` : ""}" href="${esc(gmapsUrl(p))}" target="_blank" rel="noopener" title="Google Haritalar'da uydu görünümüyle aç">${icon("map")}Google Maps${p.label ? ` – ${p.label === "Şehadet yeri" ? "Şehadet" : "Memleket"}` : ""}</a>`).join("");
     const paint = () => {
       const text = $("sh-text").value.trim();
       $("sh-nets").innerHTML = shareLinks(info, text).map(([k, name, href]) => `<a class="pill ghost" href="${esc(href)}" target="_blank" rel="noopener">${icon(k)}${name}</a>`).join("") +
         `<button class="pill ghost" id="sh-copytext">${icon("more")}Metni kopyala</button>` +
-        (navigator.share ? `<button class="pill ghost" id="sh-native">${icon("more")}Diğer…</button>` : "");
+        (navigator.share ? `<button class="pill ghost" id="sh-native">${icon("more")}Diğer…</button>` : "") + maps;
     };
     paint();
     $("sh-text").addEventListener("input", paint);
@@ -2460,6 +2539,7 @@ button.stop:hover b { color: var(--gold); }
     const d = t.dataset;
     if (d.harp !== undefined) { setHarp(d.harp); return; }
     if (d.textfilter !== undefined) { applyText(); return; }
+    if (d.sug !== undefined) { const it = sugCur[+d.sug]; if (it) pickSug(it); return; }
     if (d.rec !== undefined) { openCard(+d.rec); $("results").hidden = true; }
     else if (d.shareRec !== undefined) openShare(+d.shareRec);
     else if (d.fbRec !== undefined) openFeedback(+d.fbRec);
