@@ -288,6 +288,7 @@ button.stop:hover b { color: var(--gold); }
 .sh-nets { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 8px; }
 .sh-nets .pill { justify-content: flex-start; text-decoration: none; color: var(--ink); }
 .sh-nets svg { flex: none; color: var(--gold); }
+.sh-maps { grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); margin-top: 4px; }
 .sh-link { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px; }
 .sh-link input { min-width: 0; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--line); border-radius: 999px; color: var(--dim); font: 12px var(--f-data); padding: 8px 14px; outline: none; }
 .sh-note { color: var(--dim); font-size: 11.5px; margin: 0; min-height: 1em; }
@@ -2129,6 +2130,7 @@ button.stop:hover b { color: var(--gold); }
     linkedin: '<path d="M2.2 6h2.6v8H2.2zM3.5 2a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zM6.4 6h2.5v1.1c.4-.7 1.2-1.3 2.5-1.3 2.6 0 3.1 1.7 3.1 3.9V14h-2.6v-3.8c0-.9 0-2.1-1.3-2.1s-1.5 1-1.5 2V14H6.4z" fill="currentColor"/>',
     mail: '<rect x="1.8" y="3.3" width="12.4" height="9.4" rx="1.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="m2.3 4 5.7 4.6L13.7 4" fill="none" stroke="currentColor" stroke-width="1.3"/>',
     more: '<circle cx="3.5" cy="8" r="1.3" fill="currentColor"/><circle cx="8" cy="8" r="1.3" fill="currentColor"/><circle cx="12.5" cy="8" r="1.3" fill="currentColor"/>',
+    map: '<path d="M8 14.6s-4.6-4.4-4.6-8a4.6 4.6 0 0 1 9.2 0c0 3.6-4.6 8-4.6 8z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/><circle cx="8" cy="6.6" r="1.7" fill="currentColor"/>',
   };
   const icon = (k) => `<svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true">${ICONS[k]}</svg>`;
   const allCount = (k) => { let n = 0; for (let i = 0; i < N; i++) if (keyMatch(i, k)) n++; return n; };
@@ -2220,6 +2222,25 @@ button.stop:hover b { color: var(--gold); }
       ["mail", "E-posta", `mailto:?subject=${encodeURIComponent(info.title)}&body=${full}`],
     ];
   }
+  // paylaşılan şeyin haritadaki yeri: şehit kartında şehadet yeri (kesinse) ve memleketi, seçimde o yer, ilçe, il ya da muharebe
+  function mapPlaces(rec) {
+    const out = [], add = (label, lat, lon, zoom) => out.push({ label, lat, lon, zoom });
+    if (rec !== undefined) {
+      const y = C.yer[rec];
+      if (y >= 0 && D.yerPts[y][3]) add("Şehadet yeri", D.yerPts[y][1], D.yerPts[y][2], 15);
+      if (C.ilce[rec] >= 0) add("Memleketi", D.ilcePts[C.ilce[rec]][2], D.ilcePts[C.ilce[rec]][3], 13);
+      else if (C.il[rec] >= 0) add("Memleketi", D.ilPts[C.il[rec]][1], D.ilPts[C.il[rec]][2], 12);
+    } else if (S.sel) {
+      const k = S.sel, m = +k.slice(1);
+      if (k[0] === "y" && D.yerPts[m][3]) add("", D.yerPts[m][1], D.yerPts[m][2], 15);
+      else if (k[0] === "c") add("", D.ilcePts[m][2], D.ilcePts[m][3], 13);
+      else if (k[0] === "i") add("", D.ilPts[m][1], D.ilPts[m][2], 12);
+      else if (k[0] === "b") add("", D.battles[m][4], D.battles[m][5], 14);
+    }
+    return out;
+  }
+  // Google Haritalar uydu görünümü (Maps URLs: basemap=satellite)
+  const gmapsUrl = (p) => `https://www.google.com/maps/@?api=1&map_action=map&center=${p.lat},${p.lon}&zoom=${p.zoom}&basemap=satellite`;
   let shareCur = null;
   function openShare(rec) {
     const info = shareInfo(rec);
@@ -2230,6 +2251,7 @@ button.stop:hover b { color: var(--gold); }
       <label class="sh-lbl" for="sh-text">Mesaj</label>
       <textarea class="sh-text" id="sh-text" rows="4">${esc(info.text)}</textarea>
       <div class="sh-nets" id="sh-nets"></div>
+      ${(() => { const ps = mapPlaces(rec); return ps.length ? `<div class="sh-nets sh-maps">${ps.map((p) => `<a class="pill ghost" href="${esc(gmapsUrl(p))}" target="_blank" rel="noopener">${icon("map")}${p.label ? `${p.label} · Google Maps` : "Google Maps'te göster (uydu)"}</a>`).join("")}</div>` : ""; })()}
       <div class="sh-link"><input id="sh-url" readonly value="${esc(info.url)}" aria-label="Bağlantı"><button class="pill" id="sh-copy">Bağlantıyı kopyala</button></div>
       <p class="sh-note" id="sh-note" aria-live="polite"></p>`;
     // yayın dışı önizlemede görsel bulunamazsa yayındaki kopyası denenir, o da yoksa alan gizlenir
