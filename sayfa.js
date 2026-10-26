@@ -72,7 +72,9 @@
       return { t: "İlçe", ad, alt: iln, n: +cnt, liste: anc ? `#${anc}` : sayfa, harita: geoC === "1" ? `${SITE}?il=${si}&ilce=${sc}` : geoI === "1" ? `${SITE}?il=${si}` : SITE,
         pay: geoC === "1" ? `${SITE}s/il/${si}/${sc}/` : sayfa, mesaj: `Memleketi ${iln} ili ${ad} ilçesi olan ${fmt(cnt)} şehidimiz ve şehit düştükleri yerler.` }; }
     if (k === "k") { const [, si, sc, ad, icn, iln, cnt, anc, geoC, geoI] = f;
-      return { t: "Köy · Mahalle", ad, alt: `${icn} · ${iln}`, n: +cnt, liste: `#${anc}`, harita: geoC === "1" ? `${SITE}?il=${si}&ilce=${sc}` : geoI === "1" ? `${SITE}?il=${si}` : SITE,
+      // köyün atlastaki noktası (yoksa atlas ilçeye düşer)
+      const koy = `&koy=${anc.replace(/^k-/, "")}`;
+      return { t: "Köy · Mahalle", ad, alt: `${icn} · ${iln}`, n: +cnt, liste: `#${anc}`, harita: geoC === "1" ? `${SITE}?il=${si}&ilce=${sc}${koy}` : geoI === "1" ? `${SITE}?il=${si}${koy}` : SITE,
         pay: `${SITE}il/${si}/${sc}/#${anc}`, mesaj: `Memleketi ${ad} (${icn}, ${iln}) olan ${fmt(cnt)} şehidimiz.` }; }
     if (k === "b") { const [, s, ad, thn, cnt] = f;
       return { t: "Muharebe", ad, alt: thn, n: +cnt, liste: `${SITE}muharebe/${s}/`, harita: `${SITE}?muharebe=${s}`, pay: `${SITE}s/muharebe/${s}/`, mesaj: `${ad}: ${fmt(cnt)} şehidimiz ve memleketleri.` }; }

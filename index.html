@@ -633,7 +633,7 @@ button.stop:hover b { color: var(--gold); }
   });
 
   // Veri yükleme: ilerleme yüzdesi, yavaş bağlantıda not, kopmada otomatik yeniden deneme; olmazsa sade bir mesaj ve "Yeniden dene"
-  const DATA_BYTES = +"9470389" || 0; // build_web.py data.json'un açılmış boyutunu yazar
+  const DATA_BYTES = +"10074042" || 0; // build_web.py data.json'un açılmış boyutunu yazar
   const loadS = $("loading-s"), loadN = $("loading-n");
   let slowTimer = setTimeout(() => { loadN.textContent = "Bağlantınız yavaş, biraz sürebilir."; }, 8000);
   async function getJSON(url, onBytes) {
@@ -721,7 +721,7 @@ button.stop:hover b { color: var(--gold); }
   for (const k of ["ad", "baba", "lakap", "dogum", "tarih"]) C[k] = C[k].split("\n");
   // dosyada gönderilmeyen sütunları yeniden kur (build_web.py: DERIVED)
   {
-    const id = new Int32Array(N), ym = new Int32Array(N), il = new Int32Array(N), ilce = new Int32Array(N);
+    const id = new Int32Array(N), ym = new Int32Array(N), il = new Int32Array(N), ilce = new Int32Array(N), koy = new Int32Array(N);
     const lv = { kolordu: new Int32Array(N), firka: new Int32Array(N), alay: new Int32Array(N) }, dv = D.derive;
     const sy = {};
     for (const f in dv.sy) sy[f] = new Int32Array(N);
@@ -729,11 +729,11 @@ button.stop:hover b { color: var(--gold); }
     for (let i = 0; i < N; i++) {
       acc += C.id[i]; id[i] = acc;
       ym[i] = miladiAy(C.tarih[i]);
-      il[i] = dv.memIl[C.memleket[i]]; ilce[i] = dv.memIlce[C.memleket[i]];
+      il[i] = dv.memIl[C.memleket[i]]; ilce[i] = dv.memIlce[C.memleket[i]]; koy[i] = dv.memKoy ? dv.memKoy[C.memleket[i]] : -1;
       for (const f in lv) lv[f][i] = dv.birlik[f][C.birlik[i]];
       for (const f in sy) sy[f][i] = dv.sy[f][C.sy[i]];
     }
-    Object.assign(C, { id, ym, il, ilce }, lv, sy);
+    Object.assign(C, { id, ym, il, ilce, koy }, lv, sy);
   }
 
   // ---------- projeksiyon: dünya koordinatı = (boylam, Mercator enlemi), derece ----------
@@ -836,6 +836,7 @@ button.stop:hover b { color: var(--gold); }
     let w;
     if (k[0] === "i") { const p = D.ilPts[n]; w = W(p[1], p[2]); }
     else if (k[0] === "c") { const p = D.ilcePts[n]; w = W(p[2], p[3]); }
+    else if (k[0] === "k") { const p = D.koyPts[n]; w = W(p[3], p[4]); }
     else if (k[0] === "b") w = BAT[n].w;
     else if (k[0] === "g") return GAR[n].w;
     else { const p = D.yerPts[n]; w = W(p[1], p[2]); }
@@ -846,7 +847,7 @@ button.stop:hover b { color: var(--gold); }
     const gm = new Map(), gs = new Map();
     const push = (m, k, i) => { let a = m.get(k); if (!a) m.set(k, (a = [])); a.push(i); };
     for (let i = 0; i < N; i++) {
-      if (C.il[i] >= 0) { const k = C.ilce[i] >= 0 ? "c" + C.ilce[i] : "i" + C.il[i]; mKey[i] = k; push(gm, k, i); }
+      if (C.il[i] >= 0) { const k = C.koy[i] >= 0 ? "k" + C.koy[i] : C.ilce[i] >= 0 ? "c" + C.ilce[i] : "i" + C.il[i]; mKey[i] = k; push(gm, k, i); }
       if (C.yer[i] >= 0) { const k = "y" + C.yer[i]; sKey[i] = k; push(gs, k, i); }
     }
     const lay = (groups, out, has, isS) => {
@@ -1186,6 +1187,7 @@ button.stop:hover b { color: var(--gold); }
     switch (k[0]) {
       case "i": return C.il[i] === n;
       case "c": return C.ilce[i] === n;
+      case "k": return C.koy[i] === n;
       case "y": return C.yer[i] === n;
       case "t": return TH[i] === n;
       case "b": return C.muh[i] === n;
@@ -1201,6 +1203,7 @@ button.stop:hover b { color: var(--gold); }
     const n = +k.slice(1);
     if (k[0] === "i") return title(D.ilPts[n][0]);
     if (k[0] === "c") return title(D.ilcePts[n][1]) + ", " + title(D.ilPts[D.ilcePts[n][0]][0]);
+    if (k[0] === "k") { const p = D.koyPts[n]; return title(p[2]) + ", " + (p[0] >= 0 ? title(D.ilcePts[p[0]][1]) : title(D.ilPts[p[1]][0])); }
     if (k[0] === "t") return THEATERS[n].name;
     if (k[0] === "b") return BAT[n].name;
     if (k[0] === "g") return "Konuş: " + GAR[n].name;
@@ -1239,6 +1242,9 @@ button.stop:hover b { color: var(--gold); }
   // tıklanabilir yerler ve görünür sayıları
   let placesM = [], placesS = [], placesIl = [], theaterInfo = [];
   const IL_ZOOM = 140; // bu ölçeğin altında memleketler il düzeyinde seçilir ve etiketlenir
+  const KOY_ZOOM = 700; // bunun üstünde köyler ayrı ayrı; arada ilçe düzeyi
+  let placesC = [];
+  const memPlaces = () => (V.s < IL_ZOOM ? placesIl : V.s < KOY_ZOOM ? placesC : placesM);
   function computePlaces() {
     const cm = new Map(), cs = new Map(), ct = new Map();
     for (const i of idx) {
@@ -1257,6 +1263,14 @@ button.stop:hover b { color: var(--gold); }
       a.n++; a.x += M[i * 2]; a.y += M[i * 2 + 1];
     }
     placesIl = [...il.entries()].map(([n, a]) => ({ k: "i" + n, n: a.n, x: a.x / a.n, y: a.y / a.n, r: SPACING * Math.sqrt(a.n) * 1.6 })).sort((a, b) => b.n - a.n);
+    // ilçe düzeyi: köylerine dağılmış yıldızlar ilçe noktasında toplanır (ilçesizler ilin noktasında)
+    const ic = new Map();
+    for (const i of idx) {
+      if (C.il[i] < 0) continue;
+      const k = C.ilce[i] >= 0 ? "c" + C.ilce[i] : "i" + C.il[i];
+      ic.set(k, (ic.get(k) || 0) + 1);
+    }
+    placesC = [...ic.entries()].map(([k, n]) => { const w = keyW(k); return { k, n, x: w[0], y: w[1], r: SPACING * Math.sqrt(n) * 1.3 }; }).sort((a, b) => b.n - a.n);
     theaterInfo = theaterShapes(ct);
   }
   // Cephe: muharebelerinin görünür şehit sayıları; etiket en büyük muharebenin üstünde
@@ -1456,7 +1470,7 @@ button.stop:hover b { color: var(--gold); }
     }
   }
   function drawPlaceLabels() {
-    const list = layoutOf() === 0 ? (V.s < IL_ZOOM ? placesIl : placesM) : placesS;
+    const list = layoutOf() === 0 ? memPlaces() : placesS;
     let shown = 0;
     for (const p of list) {
       if (shown > 24) break;
@@ -1681,7 +1695,7 @@ button.stop:hover b { color: var(--gold); }
       const g = nearestGarrison(sx, sy, 14);
       if (g >= 0) { select("g" + g); return; }
     }
-    const p = nearestPlace(wx, wy, layoutOf() ? placesS : V.s < IL_ZOOM ? placesIl : placesM, 10);
+    const p = nearestPlace(wx, wy, layoutOf() ? placesS : memPlaces(), 10);
     if (p) select(p.k); else if (S.sel) clearSel();
   }
   function hover(sx, sy) {
@@ -1704,7 +1718,7 @@ button.stop:hover b { color: var(--gold); }
       const b = nearestBattle(sx, sy, 8);
       if (b) html = `<b>${esc(b.name)}</b><div class="g">${batDate(b)} · ${fmt.format(b.n)} şehit</div>`;
     } else if (!html) {
-      const p = nearestPlace(wx, wy, layoutOf() ? placesS : V.s < IL_ZOOM ? placesIl : placesM, 6);
+      const p = nearestPlace(wx, wy, layoutOf() ? placesS : memPlaces(), 6);
       if (p) html = `<b>${esc(placeName(p.k))}</b><div class="g">${fmt.format(p.n)} şehit</div>`;
     }
     if (html) { tip.innerHTML = html; tip.style.left = Math.min(vw - 270, sx + 14) + "px"; tip.style.top = sy + 14 + "px"; tip.style.opacity = 1; glc.style.cursor = "pointer"; }
@@ -2044,9 +2058,16 @@ button.stop:hover b { color: var(--gold); }
     const items = [];
     D.ilPts.forEach((p, n) => nIl[n] && items.push({ t: "İl", name: title(p[0]), key: "i" + n, n: nIl[n] }));
     D.ilcePts.forEach((p, n) => nIc[n] && items.push({ t: "İlçe", name: title(p[1]), sub: title(D.ilPts[p[0]][0]), key: "c" + n, n: nIc[n] }));
+    const koyItem = new Map();
     dict.memleket.forEach((m, n) => {
       const [il, ic, koy] = m.split("/"), i = firstM[n];
       if (!koy || !nM[n] || i < 0 || /\bMAH\b|MAHALLE/.test(koy)) return;
+      if (C.koy[i] >= 0) {
+        const k = "k" + C.koy[i], it = koyItem.get(k);
+        if (it) it.n += nM[n];
+        else { const c = D.koyPts[C.koy[i]]; const x = { t: "Köy", name: title(c[2]), sub: [c[0] >= 0 ? title(D.ilcePts[c[0]][1]) : "", title(D.ilPts[c[1]][0])].filter(Boolean).join(", "), key: k, n: nM[n] }; koyItem.set(k, x); items.push(x); }
+        return;
+      }
       const at = C.ilce[i] >= 0 ? "c" + C.ilce[i] : C.il[i] >= 0 ? "i" + C.il[i] : null;
       items.push({ t: "Köy", name: title(koy), sub: [ic, il].filter(Boolean).map(title).join(", "), key: "m" + n, at, n: nM[n] });
     });
@@ -2091,7 +2112,7 @@ button.stop:hover b { color: var(--gold); }
       if (it.at) select(it.at); else { S.summary = true; openPlaque(); }
       return;
     }
-    const view = t === "i" || t === "c" ? "memleket" : t === "y" ? "sehadet" : "cephe";
+    const view = t === "i" || t === "c" || t === "k" ? "memleket" : t === "y" ? "sehadet" : "cephe";
     if (S.view !== view) setView(view);
     select(k);
   }
@@ -2135,6 +2156,7 @@ button.stop:hover b { color: var(--gold); }
       const n = +k.slice(1);
       if (k[0] === "i") p.set("il", slug(D.ilPts[n][0]));
       else if (k[0] === "c") { const c = D.ilcePts[n]; p.set("il", slug(D.ilPts[c[0]][0])); p.set("ilce", slug(c[1])); }
+      else if (k[0] === "k") { const c = D.koyPts[n]; p.set("il", slug(D.ilPts[c[1]][0])); if (c[0] >= 0) p.set("ilce", slug(D.ilcePts[c[0]][1])); p.set("koy", slug(c[2])); }
       else if (k[0] === "y") p.set("yer", yerSlug[n]);
       else if (k[0] === "b") p.set("muharebe", batSlug[n]);
       else if (k[0] === "t") p.set("cephe", slug(THEATERS[n].name));
@@ -2157,7 +2179,7 @@ button.stop:hover b { color: var(--gold); }
   function openFromUrl() {
     let p;
     try { p = new URLSearchParams(location.search); } catch (e) { return; }
-    const q = (p.get("q") || "").trim(), il = p.get("il"), ilce = p.get("ilce"), muh = p.get("muharebe"), ceph = p.get("cephe");
+    const q = (p.get("q") || "").trim(), il = p.get("il"), ilce = p.get("ilce"), koy = p.get("koy"), muh = p.get("muharebe"), ceph = p.get("cephe");
     const yer = p.get("yer"), harp = p.get("harp"), birlik = p.get("birlik"), konus = p.get("konus"), sehit = p.get("sehit");
     if (harp) { const h = dict.harp.findIndex((x) => x && slug(x) === harp); if (h >= 0) setHarp(String(h)); }
     if (q.length >= 2) runText(q);
@@ -2181,8 +2203,9 @@ button.stop:hover b { color: var(--gold); }
       const ii = D.ilPts.findIndex((x) => slug(x[0]) === il);
       if (ii >= 0) {
         const ci = ilce ? D.ilcePts.findIndex((c) => c[0] === ii && slug(c[1]) === ilce) : -1;
+        const ki = koy ? D.koyPts.findIndex((c) => c[1] === ii && (ci < 0 || c[0] === ci) && slug(c[2]) === koy) : -1;
         if (S.view !== "memleket") setView("memleket");
-        select(ci >= 0 ? "c" + ci : "i" + ii);
+        select(ki >= 0 ? "k" + ki : ci >= 0 ? "c" + ci : "i" + ii);
       }
     }
     if (sehit) {
@@ -2239,7 +2262,11 @@ button.stop:hover b { color: var(--gold); }
       return { head, title: HOME_TITLE, desc: HOME_DESC, text, url: SITE + "?" + q, img };
     } else if (S.sel) {
       const k = S.sel, m = +k.slice(1), all = allCount(k);
-      if (k[0] === "i" || k[0] === "c") {
+      if (k[0] === "k") {
+        const c = D.koyPts[m], where = [title(c[2]), c[0] >= 0 ? title(D.ilcePts[c[0]][1]) : "", title(D.ilPts[c[1]][0])].filter(Boolean).join(", ");
+        head = `${title(c[2])} Şehitleri`;
+        text = `Memleketi ${where} olan ${fmt.format(n)} şehidimiz ve şehit düştükleri yerler${tail}.`;
+      } else if (k[0] === "i" || k[0] === "c") {
         const name = placeName(k);
         path = k[0] === "i" ? `s/il/${slug(D.ilPts[m][0])}/` : `s/il/${slug(D.ilPts[D.ilcePts[m][0]][0])}/${slug(D.ilcePts[m][1])}/`;
         img = k[0] === "i" ? `s/img/il/${slug(D.ilPts[m][0])}.jpg` : `s/img/il/${slug(D.ilPts[D.ilcePts[m][0]][0])}/${slug(D.ilcePts[m][1])}.jpg`;
@@ -2306,12 +2333,14 @@ button.stop:hover b { color: var(--gold); }
     if (rec !== undefined) {
       const y = C.yer[rec];
       if (y >= 0 && D.yerPts[y][3]) add("Şehadet yeri", D.yerPts[y][1], D.yerPts[y][2], 15);
-      if (C.ilce[rec] >= 0) add("Memleketi", D.ilcePts[C.ilce[rec]][2], D.ilcePts[C.ilce[rec]][3], 13);
+      if (C.koy[rec] >= 0) add("Memleketi", D.koyPts[C.koy[rec]][3], D.koyPts[C.koy[rec]][4], 15);
+      else if (C.ilce[rec] >= 0) add("Memleketi", D.ilcePts[C.ilce[rec]][2], D.ilcePts[C.ilce[rec]][3], 13);
       else if (C.il[rec] >= 0) add("Memleketi", D.ilPts[C.il[rec]][1], D.ilPts[C.il[rec]][2], 12);
     } else if (S.sel) {
       const k = S.sel, m = +k.slice(1);
       if (k[0] === "y" && D.yerPts[m][3]) add("", D.yerPts[m][1], D.yerPts[m][2], 15);
       else if (k[0] === "c") add("", D.ilcePts[m][2], D.ilcePts[m][3], 13);
+      else if (k[0] === "k") add("", D.koyPts[m][3], D.koyPts[m][4], 15);
       else if (k[0] === "i") add("", D.ilPts[m][1], D.ilPts[m][2], 12);
       else if (k[0] === "b") add("", D.battles[m][4], D.battles[m][5], 14);
     }
