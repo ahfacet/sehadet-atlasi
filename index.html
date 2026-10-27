@@ -247,6 +247,7 @@ button.stop:hover b { color: var(--gold); }
 .note { font-size: 11px; color: var(--dim); border-top: 1px solid var(--line); padding-top: 12px; line-height: 1.5; }
 .note p { margin: 0 0 6px; }
 .note a { color: var(--ink); }
+.cnote { font: 12px/1.5 var(--f-ui); color: var(--ash); margin: 14px 0 0; text-align: left; }
 .approx-tag { display: inline-block; vertical-align: middle; margin-left: 8px; font: 10px var(--f-ui); letter-spacing: 0.12em; text-transform: uppercase; color: var(--ash); border: 1px dashed var(--ash); border-radius: 999px; padding: 2px 8px; }
 .xcross { background: none; border: 0; color: var(--gold); cursor: pointer; font: inherit; letter-spacing: inherit; text-transform: inherit; padding: 0; }
 
@@ -480,7 +481,7 @@ button.stop:hover b { color: var(--gold); }
     </ul>
     <h3>Veriler</h3>
     <p class="small">Bütün şehit kayıtları T.C. Millî Savunma Bakanlığı'nın <a href="https://www.msb.gov.tr/SehitBilgiKapisi/SehitListesi" target="_blank" rel="noopener">MSB Şehit Bilgi Kapısı</a>'ndan alınmıştır. İsim, baba adı, memleket, rütbe, birlik, şehadet yeri ve tarihi kayıttaki haliyle gösterilmektedir.</p>
-    <p class="small">Haritadaki konumlar bu kayıtlardan çıkarılmıştır: memleketler il ve ilçe merkezlerine, şehadet yerleri bilinen muharebe ve yer adlarına eşlenmiştir. Yeri tam belirlenemeyenler gri yıldızlarla cephe çevresinde gösterilmektedir. Tarihlerin çoğu Rumi takvimdedir; yanında yaklaşık Miladi karşılığı verilir. Cephe ve birlik açıklamaları genel tarih kaynaklarından derlenmiştir.</p>
+    <p class="small">Haritadaki konumlar bu kayıtlardan çıkarılmıştır: memleketler köy, ilçe ya da il düzeyinde (yalnız il düzeyinde bilinenler il merkezinde halka biçimli yıldızla), şehadet yerleri bilinen muharebe ve yer adlarına eşlenmiştir. Bir nokta kayıttaki yer adının konumudur, şehadet yerini tam olarak göstermez; konumu kaynakla doğrulanmamış yer adları "doğrulanmamış" diye işaretlenir. Yeri tam belirlenemeyenler gri yıldızlarla cephe çevresinde, karada kalacak biçimde gösterilmektedir. Tarihlerin çoğu Rumi takvimdedir; yanında yaklaşık Miladi karşılığı verilir. Cephe ve birlik açıklamaları genel tarih kaynaklarından derlenmiştir.</p>
     <h3>Şehit listeleri</h3>
     <p class="small">Şehitler isim isim, künyeleriyle birlikte <a href="https://sehadetatlasi.com/il/">illere ve ilçelere göre</a> ve <a href="https://sehadetatlasi.com/cephe/">cephe ve muharebelere göre</a> de listelenmiştir.</p>
     <p class="small">Bu çalışma resmî bir MSB yayını değildir. Bir kayıtta eksik ya da hata görürseniz asıl kaynak MSB Şehit Bilgi Kapısı'dır.</p>
@@ -826,6 +827,24 @@ button.stop:hover b { color: var(--gold); }
   let seed = 7;
   const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
+  // Kara maskesi (Mercator koordinatında, 0,05° çözünürlük): yaklaşık noktalar denize düşmesin
+  const landAt = (() => {
+    const X0 = 5, X1 = 62, Y0 = mercY(8), Y1 = mercY(57), R = 20;
+    const w = Math.ceil((X1 - X0) * R), h = Math.ceil((Y1 - Y0) * R);
+    const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+    const g = cv.getContext("2d");
+    if (!g) return () => true;
+    g.fillStyle = "#fff";
+    const gs = (x) => (x.features ? x.features.map((f) => f.geometry) : x.geometries || [x]).filter(Boolean);
+    B.land.forEach((fc) => gs(fc).forEach((gm) => (gm.type === "Polygon" ? [gm.coordinates] : gm.coordinates).forEach((poly) => {
+      g.beginPath();
+      poly.forEach((ring) => ring.forEach(([lon, lat], k) => { const x = (lon - X0) * R, y = (Y1 - mercY(Math.max(-85, Math.min(85, lat)))) * R; k ? g.lineTo(x, y) : g.moveTo(x, y); }));
+      g.fill("evenodd");
+    })));
+    let px;
+    try { px = g.getImageData(0, 0, w, h).data; } catch (e) { return () => true; }
+    return (x, y) => { const i = Math.floor((x - X0) * R), j = Math.floor((Y1 - y) * R); return i < 0 || j < 0 || i >= w || j >= h || px[(j * w + i) * 4 + 3] > 0; };
+  })();
   const placeW = new Map();
   const mKey = new Array(N), sKey = new Array(N);
   const M = new Float32Array(N * 2), S2 = new Float32Array(N * 2);
@@ -859,7 +878,17 @@ button.stop:hover b { color: var(--gold); }
         const sig = approx ? (yp[0].startsWith("ÇANAKKALE") ? 0.12 : 0.7) : 0;
         list.forEach((i, j) => {
           let x, y;
-          if (approx) { x = cx + gauss() * sig; y = cy + gauss() * sig; approxS[i] = 1; }
+          if (approx) {
+            // cephe merkezi çevresinde, 2σ ile sınırlı ve karada kalan bir nokta; bulunamazsa merkez
+            let ok = false;
+            for (let k = 0; k < 40 && !ok; k++) {
+              const gx = gauss(), gy = gauss();
+              if (gx * gx + gy * gy > 4) continue;
+              x = cx + gx * sig; y = cy + gy * sig; ok = landAt(x, y);
+            }
+            if (!ok) { x = cx; y = cy; }
+            approxS[i] = 1;
+          }
           else {
             const r = (isS ? SPACING_S : SPACING) * Math.sqrt(j + 0.5) * (0.9 + 0.2 * rnd());
             const a = j * 2.399963 + rnd() * 0.25;
@@ -939,6 +968,10 @@ button.stop:hover b { color: var(--gold); }
   geo.setAttribute("aS", new THREE.BufferAttribute(S2, 2));
   geo.setAttribute("aSeed", new THREE.BufferAttribute(seeds, 1));
   geo.setAttribute("aFlags", new THREE.BufferAttribute(flags, 3));
+  // memleketi yalnız il düzeyinde bilinen şehitler memlekette halka biçimli çizilir (il merkezi, kasabanın kendisi değildir)
+  const lvl = new Float32Array(N);
+  for (let i = 0; i < N; i++) lvl[i] = C.il[i] >= 0 && C.ilce[i] < 0 && C.koy[i] < 0 ? 1 : 0;
+  geo.setAttribute("aLvl", new THREE.BufferAttribute(lvl, 1));
   const visAttr = new THREE.BufferAttribute(aVis, 1), hiAttr = new THREE.BufferAttribute(aHi, 1);
   geo.setAttribute("aVis", visAttr);
   geo.setAttribute("aHi", hiAttr);
@@ -955,9 +988,9 @@ button.stop:hover b { color: var(--gold); }
     uniforms: U, transparent: true, depthTest: false, depthWrite: false,
     blending: THREE.CustomBlending, blendEquation: THREE.AddEquation, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor,
     vertexShader: `
-      attribute vec2 aM; attribute vec2 aS; attribute float aSeed; attribute vec3 aFlags; attribute float aVis; attribute float aHi;
+      attribute vec2 aM; attribute vec2 aS; attribute float aSeed; attribute vec3 aFlags; attribute float aVis; attribute float aHi; attribute float aLvl;
       uniform float uT, uTHi, uSel, uScale, uTime, uDpr, uApprox, uDirect; uniform vec3 uGold, uEmber, uAsh;
-      varying vec3 vCol; varying float vA; varying float vHalo;
+      varying vec3 vCol; varying float vA; varying float vHalo; varying float vRing;
       void main() {
         float hi = aHi * uSel;
         float T = hi > 0.5 ? uTHi : uT;
@@ -973,6 +1006,7 @@ button.stop:hover b { color: var(--gold); }
         float near = smoothstep(2.0, 8.0, spacingPx);
         vHalo = mix(0.35, 0.1, near);
         float approxMix = aFlags.z * e;
+        vRing = aLvl * (1.0 - e);
         float a = mix(aFlags.x, aFlags.y * mix(1.0, step(0.01, uApprox), aFlags.z), e) * aVis;
         a *= mix(1.0, 0.3 * uApprox, approxMix);
         // doğrudan çizimde (yedek yol) yoğun yerler doymasın diye uzakta sönükleştir
@@ -991,11 +1025,12 @@ button.stop:hover b { color: var(--gold); }
         if (a < 0.002) gl_PointSize = 0.0;
       }`,
     fragmentShader: `
-      varying vec3 vCol; varying float vA; varying float vHalo;
+      varying vec3 vCol; varying float vA; varying float vHalo; varying float vRing;
       void main() {
         float d = length(gl_PointCoord - 0.5) * 2.0;
         if (d > 1.0) discard;
         float w = (exp(-d * d * 14.0) + exp(-d * d * 3.0) * vHalo) * vA;
+        w *= mix(1.0, smoothstep(0.3, 0.55, d) * (1.0 - smoothstep(0.8, 1.0, d)) * 2.2, vRing);
         gl_FragColor = vec4(vCol * w, w);
       }`,
   });
@@ -1211,6 +1246,8 @@ button.stop:hover b { color: var(--gold); }
     return p[3] ? title(p[0]) : title(p[0].replace(/\s*\(yer belirsiz\)\s*$/i, "")) + " · yeri belirsiz";
   }
   const placeExact = (k) => k[0] !== "y" || !!D.yerPts[+k.slice(1)][3];
+  // adı belli ama konumu kaynakla doğrulanmamış yer (açık arama ya da kaynaksız sözlük girdisi): yerPts[3] = 2
+  const placeLow = (k) => k[0] === "y" && D.yerPts[+k.slice(1)][3] === 2;
   const AYK = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"];
   const batDateLong = (b) => { const y0 = Math.floor(b.b0 / 12), y1 = Math.floor(b.b1 / 12), a = AYLAR[b.b0 % 12], z = AYLAR[b.b1 % 12]; return b.b0 === b.b1 ? `${a} ${y0}` : y0 === y1 ? `${a}–${z} ${y1}` : `${a} ${y0} – ${z} ${y1}`; };
   const batDate = (b) => { const a = `${AYK[b.b0 % 12]} ${Math.floor(b.b0 / 12)}`, z = `${AYK[b.b1 % 12]} ${Math.floor(b.b1 / 12)}`; return a === z ? a : Math.floor(b.b0 / 12) === Math.floor(b.b1 / 12) ? `${AYK[b.b0 % 12]}–${z}` : `${a} – ${z}`; };
@@ -1913,7 +1950,7 @@ button.stop:hover b { color: var(--gold); }
       : `<button class="pill gold" data-fly>${flown ? "Şehadet yerine geri çağır" : "Memleketlerine uğurla"}</button>`;
     const unitsHere = S.view === "birlik" && !S.unit ? `<div class="sec">Burada şehit düşen ${LVL[S.unitLvl].toLocaleLowerCase("tr-TR")}lar</div>${unitButtons(unitCounts(recs, S.unitLvl), 10, true)}` : "";
     return `<div class="eyebrow">${outgoing ? "Memleket" : "Şehadet yeri"}${S.view === "birlik" && S.unit ? " · " + esc(unitName(S.unit)) : ""}</div>
-      <h2 class="ptitle">${esc(placeName(k))}${placeExact(k) ? "" : '<span class="approx-tag">yaklaşık</span>'}</h2>
+      <h2 class="ptitle">${esc(placeName(k))}${placeExact(k) ? (placeLow(k) ? '<span class="approx-tag" title="Bu yer adının konumu bir kaynakla doğrulanmamıştır">doğrulanmamış</span>' : "") : '<span class="approx-tag">yaklaşık</span>'}</h2>
       <div class="pmeta"><b>${fmt.format(recs.length)}</b> şehit</div>
       <div class="acts">${flyBtn}<button class="pill ghost" data-x="sel">Kapat</button></div>
       ${unitsHere}
@@ -2008,6 +2045,14 @@ button.stop:hover b { color: var(--gold); }
     else { updateHighlight(); if (d.plaque) openPlaque(); else closePlaque(); }
     flyTo(d.V, 1200);
   }
+  // haritadaki noktaların ne anlama geldiği: yer adının konumu, şehidin düştüğü tam yer değil
+  function cardNote(i) {
+    const n = [];
+    if (C.il[i] >= 0 && C.ilce[i] < 0 && C.koy[i] < 0) n.push("Memleketi yalnız il düzeyinde kayıtlıdır; haritada il merkezinde halka biçimli yıldızla gösterilir.");
+    if (C.yer[i] >= 0 && approxS[i]) n.push("Şehadet yeri tam belirlenemediği için cephe çevresinde yaklaşık gösterilir.");
+    else if (C.yer[i] >= 0) n.push("Haritadaki şehadet noktası kayıttaki yer adının konumudur; şehadet yerini tam olarak göstermez." + (D.yerPts[C.yer[i]][3] === 2 ? " Bu yer adının konumu bir kaynakla doğrulanmamıştır." : ""));
+    return n.length ? `<p class="cnote">${n.join(" ")}</p>` : "";
+  }
   function openCard(i) {
     if (dock) undockCard(false);
     const rutbe = [dict.rutbe[C.rutbe[i]], dict.sinif[C.sinif[i]]].filter(Boolean).map(title).join(" · ");
@@ -2029,6 +2074,7 @@ button.stop:hover b { color: var(--gold); }
         ${row("Şehadet tarihi", t ? `${esc(t)} ${mi ? `<small>${rumiMi(t) ? "Rumi · " : ""}${/^\d+ /.test(mi) ? "Miladi" : "≈"} ${mi}</small>` : ""}` : "")}
         ${row("Birlik", esc(birlik))}
       </dl>
+      ${cardNote(i)}
       <p class="epitaph">Aziz hatırası önünde saygıyla.</p>
       <div class="acts"><button class="pill dock-only" data-undock>Kartı aç</button>${hasM[i] ? `<button class="pill undock-hide" data-showhome="${i}">Memleketini göster</button>` : ""}${hasS[i] && !approxS[i] ? `<button class="pill undock-hide${hasM[i] ? " ghost" : ""}" data-showplace="${i}">Şehadet yerini göster</button>` : ""}${!hasM[i] && (!hasS[i] || approxS[i]) ? `<button class="pill undock-hide" data-show="${i}">Haritada göster</button>` : ""}<button class="pill ghost" data-share-rec="${i}">Paylaş</button></div>`;
     $("card").hidden = false;
